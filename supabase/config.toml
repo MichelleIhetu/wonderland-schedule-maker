@@ -1,1 +1,4 @@
 project_id = "erhkzptdlaiktbiolxng"
+
+[functions.generate-schedule]
+verify_jwt = false
