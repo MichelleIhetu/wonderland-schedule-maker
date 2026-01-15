@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
+import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 
 interface WizardInterfaceProps {
   settings: UserSettings;
@@ -17,9 +18,19 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [step, setStep] = useState<WizardStep>("greeting");
   const [breakFrequency, setBreakFrequency] = useState<"minimal" | "moderate" | "frequent">("moderate");
   const [tasks, setTasks] = useState("");
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [importedEvents, setImportedEvents] = useState<CalendarEvent[]>([]);
 
   const updateSetting = <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => {
     onSettingsChange({ ...settings, [key]: value });
+  };
+
+  const handleCalendarImport = (events: CalendarEvent[]) => {
+    setImportedEvents(events);
+  };
+
+  const removeImportedEvent = (id: string) => {
+    setImportedEvents(importedEvents.filter(e => e.id !== id));
   };
 
   const handleComplete = () => {
@@ -27,7 +38,14 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       : breakFrequency === "moderate" ? "Include regular 15-minute breaks every 2 hours"
       : "Include frequent breaks - 10 minutes every hour";
     
-    onComplete(`${tasks}\n\n${breakText}`);
+    // Format imported events as part of the task list
+    const eventsList = importedEvents.length > 0 
+      ? `\n\nExisting calendar events (work around these):\n${importedEvents.map(e => 
+          `- ${e.title} (${e.isAllDay ? 'All day' : `${e.startTime} - ${e.endTime}`})`
+        ).join('\n')}`
+      : '';
+    
+    onComplete(`${tasks}${eventsList}\n\n${breakText}`);
   };
 
   const steps: WizardStep[] = ["greeting", "mood", "stress", "sleep", "breaks", "tasks"];
@@ -256,11 +274,52 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
               exit={{ opacity: 0, x: -50 }}
               className="space-y-4"
             >
+              {/* Calendar Import Button */}
+              <Button
+                variant="outline"
+                onClick={() => setIsCalendarModalOpen(true)}
+                className="w-full border-primary/30 hover:bg-primary/10 gap-2"
+              >
+                <Calendar className="w-5 h-5" />
+                Import from Calendar
+                {importedEvents.length > 0 && (
+                  <span className="ml-2 px-2 py-0.5 bg-primary/20 rounded-full text-xs">
+                    {importedEvents.length} events
+                  </span>
+                )}
+              </Button>
+
+              {/* Imported Events Preview */}
+              {importedEvents.length > 0 && (
+                <div className="bg-muted/20 rounded-xl p-3 border border-primary/10">
+                  <p className="text-xs text-muted-foreground mb-2">Imported Events:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {importedEvents.map((event) => (
+                      <div
+                        key={event.id}
+                        className="flex items-center gap-1 px-2 py-1 bg-primary/10 rounded-lg text-xs text-foreground"
+                      >
+                        <span className="truncate max-w-[150px]">{event.title}</span>
+                        <span className="text-muted-foreground">
+                          {event.isAllDay ? '' : event.startTime}
+                        </span>
+                        <button
+                          onClick={() => removeImportedEvent(event.id)}
+                          className="ml-1 hover:text-red-400 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <textarea
                 value={tasks}
                 onChange={(e) => setTasks(e.target.value)}
                 placeholder="Tell me about your tasks for today...&#10;&#10;For example:&#10;- Study for math exam (2 hours)&#10;- Work on essay (1 hour)&#10;- Go to gym&#10;- Call mom"
-                className="w-full h-48 bg-background/50 border border-primary/20 rounded-xl p-4 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/50"
+                className="w-full h-40 bg-background/50 border border-primary/20 rounded-xl p-4 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/50"
               />
 
               <Button
@@ -280,6 +339,12 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                   </>
                 )}
               </Button>
+
+              <CalendarImportModal
+                isOpen={isCalendarModalOpen}
+                onClose={() => setIsCalendarModalOpen(false)}
+                onImport={handleCalendarImport}
+              />
             </motion.div>
           )}
         </AnimatePresence>
