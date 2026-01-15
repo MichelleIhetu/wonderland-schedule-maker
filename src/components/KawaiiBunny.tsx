@@ -8,9 +8,9 @@ interface CartoonBunnyProps {
 
 const CartoonBunny = ({ mood = "happy", size = "md", message }: CartoonBunnyProps) => {
   const sizeScale = {
-    sm: 0.6,
-    md: 0.8,
-    lg: 1,
+    sm: 0.5,
+    md: 0.7,
+    lg: 0.9,
   };
 
   const scale = sizeScale[size];
@@ -19,13 +19,13 @@ const CartoonBunny = ({ mood = "happy", size = "md", message }: CartoonBunnyProp
   const getExpression = () => {
     switch (mood) {
       case "celebrating":
-        return { eyeShape: "star", mouthOpen: true };
+        return { eyesClosed: true, smile: "big" };
       case "focused":
-        return { eyeShape: "determined", mouthOpen: false };
+        return { eyesClosed: false, smile: "small" };
       case "encouraging":
-        return { eyeShape: "wink", mouthOpen: true };
+        return { eyesClosed: false, smile: "gentle" };
       default:
-        return { eyeShape: "normal", mouthOpen: true };
+        return { eyesClosed: false, smile: "gentle" };
     }
   };
 
@@ -39,133 +39,124 @@ const CartoonBunny = ({ mood = "happy", size = "md", message }: CartoonBunnyProp
       transition={{ type: "spring", stiffness: 200 }}
     >
       <motion.div
-        animate={{ y: [0, -6, 0] }}
-        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+        animate={{ y: [0, -4, 0] }}
+        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
         style={{ transform: `scale(${scale})` }}
       >
-        <svg width="100" height="110" viewBox="0 0 100 110" className="drop-shadow-lg">
+        <svg width="100" height="120" viewBox="0 0 100 120" className="drop-shadow-md">
           {/* Ears */}
-          <motion.ellipse
-            cx="30"
-            cy="22"
-            rx="10"
-            ry="25"
-            fill="#f5f5f5"
-            stroke="#2d2d2d"
-            strokeWidth="2.5"
-            animate={{ rotate: [-8, 8, -8] }}
-            transition={{ repeat: Infinity, duration: 1.2 }}
-            style={{ transformOrigin: "30px 47px" }}
-          />
-          <ellipse cx="30" cy="22" rx="5" ry="16" fill="#ffb6c1" />
+          <motion.g
+            animate={{ rotate: [-2, 3, -2] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            style={{ transformOrigin: "35px 45px" }}
+          >
+            <ellipse cx="35" cy="22" rx="7" ry="22" fill="#faf8f5" stroke="#8b7355" strokeWidth="1.2" />
+            <ellipse cx="35" cy="22" rx="3.5" ry="15" fill="#e8b4b8" opacity="0.5" />
+          </motion.g>
           
-          <motion.ellipse
-            cx="70"
-            cy="22"
-            rx="10"
-            ry="25"
-            fill="#f5f5f5"
-            stroke="#2d2d2d"
-            strokeWidth="2.5"
-            animate={{ rotate: [8, -8, 8] }}
-            transition={{ repeat: Infinity, duration: 1.2, delay: 0.1 }}
-            style={{ transformOrigin: "70px 47px" }}
-          />
-          <ellipse cx="70" cy="22" rx="5" ry="16" fill="#ffb6c1" />
+          <motion.g
+            animate={{ rotate: [2, -3, 2] }}
+            transition={{ repeat: Infinity, duration: 2, delay: 0.15 }}
+            style={{ transformOrigin: "65px 45px" }}
+          >
+            <ellipse cx="65" cy="22" rx="7" ry="22" fill="#faf8f5" stroke="#8b7355" strokeWidth="1.2" />
+            <ellipse cx="65" cy="22" rx="3.5" ry="15" fill="#e8b4b8" opacity="0.5" />
+          </motion.g>
           
           {/* Head */}
-          <ellipse cx="50" cy="62" rx="35" ry="30" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="2.5" />
+          <ellipse cx="50" cy="58" rx="26" ry="22" fill="#faf8f5" stroke="#8b7355" strokeWidth="1.2" />
           
-          {/* Cheek puffs */}
-          <ellipse cx="22" cy="68" rx="10" ry="8" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="2" />
-          <ellipse cx="78" cy="68" rx="10" ry="8" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="2" />
+          {/* Cheek fluff */}
+          <path d="M28 60 Q22 64 26 68" fill="none" stroke="#d4c4b0" strokeWidth="0.8" opacity="0.4" />
+          <path d="M72 60 Q78 64 74 68" fill="none" stroke="#d4c4b0" strokeWidth="0.8" opacity="0.4" />
           
           {/* Eyes */}
-          {expression.eyeShape === "star" ? (
+          {expression.eyesClosed ? (
             <>
-              <text x="35" y="60" fontSize="16" fill="#fbbf24" stroke="#2d2d2d" strokeWidth="0.5">★</text>
-              <text x="55" y="60" fontSize="16" fill="#fbbf24" stroke="#2d2d2d" strokeWidth="0.5">★</text>
-            </>
-          ) : expression.eyeShape === "wink" ? (
-            <>
-              <ellipse cx="38" cy="55" rx="8" ry="10" fill="white" stroke="#2d2d2d" strokeWidth="2" />
-              <circle cx="40" cy="57" r="4" fill="#2d2d2d" />
-              <circle cx="42" cy="55" r="1.5" fill="white" />
-              <path d="M55 55 Q62 50 69 55" fill="none" stroke="#2d2d2d" strokeWidth="2.5" strokeLinecap="round" />
-            </>
-          ) : expression.eyeShape === "determined" ? (
-            <>
-              <ellipse cx="38" cy="55" rx="8" ry="8" fill="white" stroke="#2d2d2d" strokeWidth="2" />
-              <ellipse cx="62" cy="55" rx="8" ry="8" fill="white" stroke="#2d2d2d" strokeWidth="2" />
-              <circle cx="40" cy="56" r="4" fill="#2d2d2d" />
-              <circle cx="64" cy="56" r="4" fill="#2d2d2d" />
-              <path d="M30 48 L46 52" fill="none" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round" />
-              <path d="M70 48 L54 52" fill="none" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round" />
+              <path d="M38 54 Q43 50 48 54" fill="none" stroke="#6b4423" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M52 54 Q57 50 62 54" fill="none" stroke="#6b4423" strokeWidth="1.5" strokeLinecap="round" />
             </>
           ) : (
             <>
-              <ellipse cx="38" cy="55" rx="8" ry="10" fill="white" stroke="#2d2d2d" strokeWidth="2" />
-              <ellipse cx="62" cy="55" rx="8" ry="10" fill="white" stroke="#2d2d2d" strokeWidth="2" />
-              <motion.g
-                animate={{ x: [0, 2, 0, -2, 0] }}
-                transition={{ repeat: Infinity, duration: 3 }}
-              >
-                <circle cx="40" cy="57" r="4" fill="#2d2d2d" />
-                <circle cx="64" cy="57" r="4" fill="#2d2d2d" />
-                <circle cx="42" cy="55" r="1.5" fill="white" />
-                <circle cx="66" cy="55" r="1.5" fill="white" />
-              </motion.g>
+              <ellipse cx="42" cy="54" rx="5" ry="6" fill="white" stroke="#8b7355" strokeWidth="0.8" />
+              <ellipse cx="58" cy="54" rx="5" ry="6" fill="white" stroke="#8b7355" strokeWidth="0.8" />
+              <circle cx="43" cy="55" r="2.5" fill="#6b4423" />
+              <circle cx="59" cy="55" r="2.5" fill="#6b4423" />
+              <circle cx="42" cy="53" r="0.8" fill="white" opacity="0.8" />
+              <circle cx="58" cy="53" r="0.8" fill="white" opacity="0.8" />
             </>
           )}
+          
+          {/* Eyebrows */}
+          <path d="M36 47 Q42 45 48 48" fill="none" stroke="#a08060" strokeWidth="0.8" strokeLinecap="round" />
+          <path d="M52 48 Q58 45 64 47" fill="none" stroke="#a08060" strokeWidth="0.8" strokeLinecap="round" />
           
           {/* Nose */}
-          <ellipse cx="50" cy="72" rx="5" ry="3.5" fill="#ffb6c1" stroke="#2d2d2d" strokeWidth="1.5" />
+          <path d="M50 64 L47 68 L53 68 Z" fill="#e8a0a0" stroke="#c08080" strokeWidth="0.4" />
           
           {/* Mouth */}
-          {expression.mouthOpen ? (
-            <path d="M38 80 Q50 92 62 80" fill="none" stroke="#2d2d2d" strokeWidth="2.5" strokeLinecap="round" />
+          {expression.smile === "big" ? (
+            <path d="M42 72 Q50 80 58 72" fill="none" stroke="#a08060" strokeWidth="1" strokeLinecap="round" />
+          ) : expression.smile === "small" ? (
+            <path d="M46 72 Q50 74 54 72" fill="none" stroke="#a08060" strokeWidth="0.8" strokeLinecap="round" />
           ) : (
-            <path d="M42 80 Q50 85 58 80" fill="none" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round" />
+            <path d="M44 72 Q50 76 56 72" fill="none" stroke="#a08060" strokeWidth="0.8" strokeLinecap="round" />
           )}
           
-          {/* Buck teeth */}
-          <rect x="45" y="80" width="5" height="6" rx="1" fill="white" stroke="#2d2d2d" strokeWidth="1" />
-          <rect x="50" y="80" width="5" height="6" rx="1" fill="white" stroke="#2d2d2d" strokeWidth="1" />
+          {/* Whiskers */}
+          <line x1="30" y1="65" x2="40" y2="63" stroke="#c4b4a0" strokeWidth="0.4" opacity="0.5" />
+          <line x1="30" y1="68" x2="40" y2="67" stroke="#c4b4a0" strokeWidth="0.4" opacity="0.5" />
+          <line x1="60" y1="63" x2="70" y2="65" stroke="#c4b4a0" strokeWidth="0.4" opacity="0.5" />
+          <line x1="60" y1="67" x2="70" y2="68" stroke="#c4b4a0" strokeWidth="0.4" opacity="0.5" />
           
-          {/* Body hint */}
-          <ellipse cx="50" cy="100" rx="20" ry="12" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="2.5" />
+          {/* Body with waistcoat */}
+          <ellipse cx="50" cy="95" rx="18" ry="16" fill="#faf8f5" stroke="#8b7355" strokeWidth="1.2" />
+          
+          {/* Red waistcoat */}
+          <path d="M36 82 Q38 78 50 78 Q62 78 64 82 L62 108 Q50 112 38 108 Z" fill="#c94040" stroke="#8b2020" strokeWidth="0.8" />
+          
+          {/* Buttons */}
+          <circle cx="50" cy="88" r="1.5" fill="#ffd700" stroke="#b8860b" strokeWidth="0.4" />
+          <circle cx="50" cy="96" r="1.5" fill="#ffd700" stroke="#b8860b" strokeWidth="0.4" />
+          
+          {/* Collar */}
+          <path d="M40 80 Q45 83 50 81 Q55 83 60 80" fill="white" stroke="#d4c4b0" strokeWidth="0.4" />
+          
+          {/* Paws */}
+          <ellipse cx="34" cy="98" rx="5" ry="6" fill="#faf8f5" stroke="#8b7355" strokeWidth="0.8" />
+          <ellipse cx="66" cy="98" rx="5" ry="6" fill="#faf8f5" stroke="#8b7355" strokeWidth="0.8" />
         </svg>
 
-        {/* Sparkles for celebrating */}
+        {/* Gentle sparkles for celebrating */}
         {mood === "celebrating" && (
           <>
             <motion.span
-              className="absolute -top-2 -left-2 text-yellow-400 text-lg"
-              animate={{ scale: [0, 1, 0], rotate: [0, 180] }}
-              transition={{ repeat: Infinity, duration: 1, repeatDelay: 0.5 }}
+              className="absolute -top-1 left-0 text-yellow-400/70 text-sm"
+              animate={{ opacity: [0, 1, 0], y: [-5, -10] }}
+              transition={{ repeat: Infinity, duration: 1.5, repeatDelay: 0.5 }}
             >
-              ✦
+              ✧
             </motion.span>
             <motion.span
-              className="absolute -top-2 -right-2 text-pink-400 text-lg"
-              animate={{ scale: [0, 1, 0], rotate: [0, -180] }}
-              transition={{ repeat: Infinity, duration: 1, repeatDelay: 0.7 }}
+              className="absolute -top-1 right-0 text-yellow-400/70 text-sm"
+              animate={{ opacity: [0, 1, 0], y: [-5, -10] }}
+              transition={{ repeat: Infinity, duration: 1.5, repeatDelay: 0.8 }}
             >
-              ✦
+              ✧
             </motion.span>
           </>
         )}
       </motion.div>
 
-      {/* Speech bubble */}
+      {/* Speech bubble - styled like a storybook */}
       {message && (
         <motion.div
-          initial={{ opacity: 0, y: 10, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="relative bg-card border-2 border-foreground/20 rounded-2xl px-4 py-2 shadow-lg max-w-[200px]"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative bg-[#fffef8] border border-[#d4c4b0] rounded-xl px-4 py-2 shadow-sm max-w-[180px]"
         >
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-l-2 border-t-2 border-foreground/20 rotate-45" />
-          <p className="text-sm text-foreground text-center font-body">{message}</p>
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#fffef8] border-l border-t border-[#d4c4b0] rotate-45" />
+          <p className="text-sm text-[#6b4423] text-center font-body italic">{message}</p>
         </motion.div>
       )}
     </motion.div>

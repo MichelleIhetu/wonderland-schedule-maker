@@ -21,173 +21,172 @@ const BunnyClock = () => {
     <div className="relative flex flex-col items-center">
       <motion.div
         className="relative"
-        animate={{ y: [0, -4, 0] }}
-        transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+        animate={{ y: [0, -3, 0] }}
+        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
       >
-        {/* SVG Looney Tunes Style Bunny */}
-        <svg width="120" height="140" viewBox="0 0 120 140" className="drop-shadow-lg">
-          {/* Ears */}
-          <motion.ellipse
-            cx="35"
-            cy="25"
-            rx="12"
-            ry="30"
-            fill="#f5f5f5"
-            stroke="#2d2d2d"
-            strokeWidth="3"
-            animate={{ rotate: [-5, 5, -5] }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
-            style={{ transformOrigin: "35px 55px" }}
-          />
-          <ellipse cx="35" cy="25" rx="6" ry="20" fill="#ffb6c1" />
+        {/* Classic Alice in Wonderland White Rabbit SVG */}
+        <svg width="130" height="160" viewBox="0 0 130 160" className="drop-shadow-md">
+          {/* Ears - tall and elegant */}
+          <motion.g
+            animate={{ rotate: [-2, 2, -2] }}
+            transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+            style={{ transformOrigin: "45px 60px" }}
+          >
+            <ellipse cx="45" cy="30" rx="8" ry="28" fill="#faf8f5" stroke="#8b7355" strokeWidth="1.5" />
+            <ellipse cx="45" cy="30" rx="4" ry="20" fill="#e8b4b8" opacity="0.6" />
+          </motion.g>
           
-          <motion.ellipse
-            cx="85"
-            cy="25"
-            rx="12"
-            ry="30"
-            fill="#f5f5f5"
-            stroke="#2d2d2d"
-            strokeWidth="3"
-            animate={{ rotate: [5, -5, 5] }}
-            transition={{ repeat: Infinity, duration: 1.5, delay: 0.1 }}
-            style={{ transformOrigin: "85px 55px" }}
-          />
-          <ellipse cx="85" cy="25" rx="6" ry="20" fill="#ffb6c1" />
+          <motion.g
+            animate={{ rotate: [2, -2, 2] }}
+            transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut", delay: 0.2 }}
+            style={{ transformOrigin: "85px 60px" }}
+          >
+            <ellipse cx="85" cy="30" rx="8" ry="28" fill="#faf8f5" stroke="#8b7355" strokeWidth="1.5" />
+            <ellipse cx="85" cy="30" rx="4" ry="20" fill="#e8b4b8" opacity="0.6" />
+          </motion.g>
           
-          {/* Head */}
-          <ellipse cx="60" cy="75" rx="40" ry="35" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="3" />
+          {/* Head - soft oval */}
+          <ellipse cx="65" cy="72" rx="30" ry="26" fill="#faf8f5" stroke="#8b7355" strokeWidth="1.5" />
           
-          {/* Cheeks */}
-          <ellipse cx="30" cy="80" rx="12" ry="10" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="2" />
-          <ellipse cx="90" cy="80" rx="12" ry="10" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="2" />
+          {/* Gentle fur tufts on cheeks */}
+          <path d="M38 75 Q32 78 36 82" fill="none" stroke="#d4c4b0" strokeWidth="1" opacity="0.5" />
+          <path d="M92 75 Q98 78 94 82" fill="none" stroke="#d4c4b0" strokeWidth="1" opacity="0.5" />
           
-          {/* Eyes - Classic cartoon style */}
-          <ellipse cx="45" cy="68" rx="10" ry="12" fill="white" stroke="#2d2d2d" strokeWidth="2" />
-          <ellipse cx="75" cy="68" rx="10" ry="12" fill="white" stroke="#2d2d2d" strokeWidth="2" />
+          {/* Eyes - soft, slightly worried expression like the White Rabbit */}
+          <ellipse cx="55" cy="68" rx="6" ry="7" fill="white" stroke="#8b7355" strokeWidth="1" />
+          <ellipse cx="75" cy="68" rx="6" ry="7" fill="white" stroke="#8b7355" strokeWidth="1" />
+          
+          {/* Irises - warm brown */}
+          <circle cx="56" cy="69" r="3.5" fill="#6b4423" />
+          <circle cx="76" cy="69" r="3.5" fill="#6b4423" />
           
           {/* Pupils */}
-          <motion.g
-            animate={{ x: [0, 2, 0, -2, 0] }}
-            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-          >
-            <circle cx="47" cy="70" r="5" fill="#2d2d2d" />
-            <circle cx="77" cy="70" r="5" fill="#2d2d2d" />
-            {/* Eye shine */}
-            <circle cx="49" cy="68" r="2" fill="white" />
-            <circle cx="79" cy="68" r="2" fill="white" />
-          </motion.g>
+          <circle cx="56.5" cy="69.5" r="1.5" fill="#2d1810" />
+          <circle cx="76.5" cy="69.5" r="1.5" fill="#2d1810" />
           
-          {/* Eyebrows */}
-          <path d="M35 55 Q45 50 55 55" fill="none" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round" />
-          <path d="M65 55 Q75 50 85 55" fill="none" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round" />
+          {/* Eye highlights */}
+          <circle cx="54.5" cy="67.5" r="1" fill="white" opacity="0.8" />
+          <circle cx="74.5" cy="67.5" r="1" fill="white" opacity="0.8" />
           
-          {/* Nose */}
-          <ellipse cx="60" cy="85" rx="6" ry="4" fill="#ffb6c1" stroke="#2d2d2d" strokeWidth="2" />
+          {/* Eyebrows - slightly worried/hurried expression */}
+          <path d="M48 60 Q55 58 62 61" fill="none" stroke="#a08060" strokeWidth="1" strokeLinecap="round" />
+          <path d="M68 61 Q75 58 82 60" fill="none" stroke="#a08060" strokeWidth="1" strokeLinecap="round" />
           
-          {/* Mouth - Big cartoon smile */}
-          <path d="M45 92 Q60 105 75 92" fill="none" stroke="#2d2d2d" strokeWidth="2.5" strokeLinecap="round" />
+          {/* Nose - small pink triangle */}
+          <path d="M65 78 L62 83 L68 83 Z" fill="#e8a0a0" stroke="#c08080" strokeWidth="0.5" />
           
-          {/* Buck teeth */}
-          <rect x="54" y="92" width="6" height="8" rx="1" fill="white" stroke="#2d2d2d" strokeWidth="1.5" />
-          <rect x="60" y="92" width="6" height="8" rx="1" fill="white" stroke="#2d2d2d" strokeWidth="1.5" />
+          {/* Mouth - gentle curve */}
+          <path d="M58 86 Q65 90 72 86" fill="none" stroke="#a08060" strokeWidth="1" strokeLinecap="round" />
           
-          {/* Body */}
-          <ellipse cx="60" cy="120" rx="25" ry="18" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="3" />
+          {/* Whiskers - delicate */}
+          <line x1="40" y1="80" x2="52" y2="78" stroke="#c4b4a0" strokeWidth="0.5" opacity="0.6" />
+          <line x1="40" y1="83" x2="52" y2="82" stroke="#c4b4a0" strokeWidth="0.5" opacity="0.6" />
+          <line x1="78" y1="78" x2="90" y2="80" stroke="#c4b4a0" strokeWidth="0.5" opacity="0.6" />
+          <line x1="78" y1="82" x2="90" y2="83" stroke="#c4b4a0" strokeWidth="0.5" opacity="0.6" />
           
-          {/* Arms with white gloves */}
-          <motion.g
-            animate={{ rotate: [-5, 5, -5] }}
-            transition={{ repeat: Infinity, duration: 1 }}
-            style={{ transformOrigin: "35px 115px" }}
-          >
-            <path d="M35 115 Q20 120 15 130" fill="none" stroke="#2d2d2d" strokeWidth="6" strokeLinecap="round" />
-            <circle cx="15" cy="132" r="8" fill="white" stroke="#2d2d2d" strokeWidth="2" />
-          </motion.g>
+          {/* Body with waistcoat */}
+          <ellipse cx="65" cy="115" rx="22" ry="20" fill="#faf8f5" stroke="#8b7355" strokeWidth="1.5" />
           
-          <motion.g
-            animate={{ rotate: [5, -5, 5] }}
-            transition={{ repeat: Infinity, duration: 1 }}
-            style={{ transformOrigin: "85px 115px" }}
-          >
-            <path d="M85 115 Q100 120 105 130" fill="none" stroke="#2d2d2d" strokeWidth="6" strokeLinecap="round" />
-            <circle cx="105" cy="132" r="8" fill="white" stroke="#2d2d2d" strokeWidth="2" />
-          </motion.g>
+          {/* Red waistcoat */}
+          <path d="M48 100 Q50 95 65 95 Q80 95 82 100 L80 130 Q65 135 50 130 Z" fill="#c94040" stroke="#8b2020" strokeWidth="1" />
+          
+          {/* Waistcoat buttons */}
+          <circle cx="65" cy="108" r="2" fill="#ffd700" stroke="#b8860b" strokeWidth="0.5" />
+          <circle cx="65" cy="118" r="2" fill="#ffd700" stroke="#b8860b" strokeWidth="0.5" />
+          
+          {/* White collar */}
+          <path d="M52 98 Q58 102 65 100 Q72 102 78 98" fill="white" stroke="#d4c4b0" strokeWidth="0.5" />
+          
+          {/* Arms/Paws */}
+          <ellipse cx="42" cy="120" rx="6" ry="8" fill="#faf8f5" stroke="#8b7355" strokeWidth="1" />
+          <ellipse cx="88" cy="120" rx="6" ry="8" fill="#faf8f5" stroke="#8b7355" strokeWidth="1" />
         </svg>
 
-        {/* Pocket watch held by bunny */}
+        {/* Pocket watch */}
         <motion.div 
-          className="absolute -bottom-16 left-1/2 -translate-x-1/2"
-          animate={{ rotate: [-8, 8, -8] }}
-          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="absolute bottom-0 left-1/2 -translate-x-1/2"
+          animate={{ rotate: [-5, 5, -5] }}
+          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
           style={{ transformOrigin: "top center" }}
         >
-          {/* Chain */}
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-5 bg-yellow-500 rounded-full" />
-          
-          {/* Watch face */}
-          <div className="w-16 h-16 rounded-full border-4 border-yellow-500 bg-card shadow-lg relative">
-            <div className="absolute inset-1 rounded-full border-2 border-primary/30" />
+          {/* Gold chain */}
+          <svg width="60" height="70" viewBox="0 0 60 70" className="drop-shadow-sm">
+            {/* Chain */}
+            <path d="M30 0 Q25 10 30 15" fill="none" stroke="#d4a84b" strokeWidth="2" />
+            
+            {/* Watch case */}
+            <circle cx="30" cy="42" r="24" fill="#f4e4bc" stroke="#d4a84b" strokeWidth="3" />
+            <circle cx="30" cy="42" r="20" fill="#fffef8" stroke="#e8d4a8" strokeWidth="1" />
             
             {/* Hour markers */}
             {[...Array(12)].map((_, i) => (
-              <div
+              <line
                 key={i}
-                className="absolute w-0.5 h-1.5 bg-yellow-600 rounded-full"
-                style={{
-                  left: "50%",
-                  top: "4px",
-                  transform: `translateX(-50%) rotate(${i * 30}deg)`,
-                  transformOrigin: "50% 28px",
-                }}
+                x1="30"
+                y1="25"
+                x2="30"
+                y2={i % 3 === 0 ? "28" : "26"}
+                stroke="#8b7355"
+                strokeWidth={i % 3 === 0 ? "1.5" : "1"}
+                transform={`rotate(${i * 30} 30 42)`}
               />
             ))}
-
+            
+            {/* Roman numerals for 12, 3, 6, 9 */}
+            <text x="30" y="30" textAnchor="middle" fontSize="5" fill="#6b4423" fontFamily="serif">XII</text>
+            <text x="46" y="44" textAnchor="middle" fontSize="5" fill="#6b4423" fontFamily="serif">III</text>
+            <text x="30" y="58" textAnchor="middle" fontSize="5" fill="#6b4423" fontFamily="serif">VI</text>
+            <text x="14" y="44" textAnchor="middle" fontSize="5" fill="#6b4423" fontFamily="serif">IX</text>
+            
             {/* Hour hand */}
-            <div
-              className="absolute w-1 h-4 bg-primary rounded-full origin-bottom"
-              style={{
-                left: "50%",
-                bottom: "50%",
-                transform: `translateX(-50%) rotate(${hourDeg}deg)`,
-              }}
+            <line
+              x1="30"
+              y1="42"
+              x2="30"
+              y2="32"
+              stroke="#4a3520"
+              strokeWidth="2"
+              strokeLinecap="round"
+              transform={`rotate(${hourDeg} 30 42)`}
             />
-
+            
             {/* Minute hand */}
-            <div
-              className="absolute w-0.5 h-5 bg-foreground rounded-full origin-bottom"
-              style={{
-                left: "50%",
-                bottom: "50%",
-                transform: `translateX(-50%) rotate(${minuteDeg}deg)`,
-              }}
+            <line
+              x1="30"
+              y1="42"
+              x2="30"
+              y2="28"
+              stroke="#6b4423"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              transform={`rotate(${minuteDeg} 30 42)`}
             />
-
+            
             {/* Second hand */}
-            <div
-              className="absolute bg-red-500 rounded-full origin-bottom"
-              style={{
-                left: "50%",
-                bottom: "50%",
-                width: "1px",
-                height: "24px",
-                transform: `translateX(-50%) rotate(${secondDeg}deg)`,
-              }}
+            <line
+              x1="30"
+              y1="42"
+              x2="30"
+              y2="26"
+              stroke="#c94040"
+              strokeWidth="0.75"
+              strokeLinecap="round"
+              transform={`rotate(${secondDeg} 30 42)`}
             />
-
-            {/* Center dot */}
-            <div className="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-500" />
-          </div>
+            
+            {/* Center pin */}
+            <circle cx="30" cy="42" r="2" fill="#d4a84b" />
+          </svg>
         </motion.div>
       </motion.div>
       
       {/* Time display */}
-      <div className="mt-20 text-center">
+      <div className="mt-4 text-center">
         <p className="font-display text-lg text-primary">
           {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
-        <p className="text-xs text-muted-foreground italic">
-          "What's up, Doc? Don't be late!"
+        <p className="text-xs text-muted-foreground italic font-body">
+          "Oh my ears and whiskers, how late it's getting!"
         </p>
       </div>
     </div>
