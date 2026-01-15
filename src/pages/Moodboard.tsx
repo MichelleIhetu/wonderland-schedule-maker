@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Heart, Bookmark, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, Heart, Bookmark, Search, Sparkles, ExternalLink, Link2, X, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import ThemeBackground from "@/components/ThemeBackground";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 
@@ -112,6 +113,9 @@ const Moodboard = () => {
   const [selectedAesthetic, setSelectedAesthetic] = useState<Aesthetic | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set());
+  const [pinterestModalOpen, setPinterestModalOpen] = useState(false);
+  const [pinterestConnected, setPinterestConnected] = useState(false);
+  const [pinterestBoards, setPinterestBoards] = useState<string[]>([]);
 
   const filteredAesthetics = aesthetics.filter(
     (a) =>
@@ -129,6 +133,27 @@ const Moodboard = () => {
       }
       return next;
     });
+  };
+
+  // Pinterest connection handler - ready for API integration
+  const handlePinterestConnect = () => {
+    // TODO: Replace with actual Pinterest OAuth flow
+    // This is where you'll integrate the Pinterest Business API
+    // Example flow:
+    // 1. Redirect to Pinterest OAuth: https://api.pinterest.com/oauth/
+    // 2. Handle callback with auth code
+    // 3. Exchange for access token
+    // 4. Fetch user's boards
+    
+    // For now, simulate a successful connection
+    setPinterestConnected(true);
+    setPinterestBoards(["Study Inspiration", "Desk Goals", "Academic Aesthetic", "Cozy Vibes"]);
+    setPinterestModalOpen(false);
+  };
+
+  const handlePinterestDisconnect = () => {
+    setPinterestConnected(false);
+    setPinterestBoards([]);
   };
 
   const heightClasses = {
@@ -160,17 +185,102 @@ const Moodboard = () => {
             </div>
           </div>
 
-          {/* Search */}
-          <div className="relative w-64 hidden md:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search aesthetics..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+          {/* Pinterest & Search */}
+          <div className="flex items-center gap-3">
+            {/* Pinterest Connect Button */}
+            <Button
+              variant={pinterestConnected ? "outline" : "default"}
+              size="sm"
+              onClick={() => pinterestConnected ? handlePinterestDisconnect() : setPinterestModalOpen(true)}
+              className="gap-2 hidden sm:flex"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+              </svg>
+              {pinterestConnected ? (
+                <>
+                  <Check className="w-3 h-3" />
+                  Connected
+                </>
+              ) : (
+                "Connect Pinterest"
+              )}
+            </Button>
+
+            {/* Search */}
+            <div className="relative w-64 hidden md:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search aesthetics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
           </div>
         </header>
+
+        {/* Pinterest Connected Banner */}
+        {pinterestConnected && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-card/80 backdrop-blur-sm rounded-xl border border-primary/30"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#E60023] flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-display text-sm text-foreground">Pinterest Connected</p>
+                  <p className="text-xs text-muted-foreground">{pinterestBoards.length} boards synced</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" className="text-xs gap-1">
+                  <ExternalLink className="w-3 h-3" />
+                  View Boards
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handlePinterestDisconnect}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            
+            {/* Pinterest Boards Preview */}
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
+              {pinterestBoards.map((board) => (
+                <button
+                  key={board}
+                  className="flex-shrink-0 px-3 py-1.5 bg-background/50 border border-border rounded-full text-xs font-body hover:border-primary/50 transition-colors"
+                >
+                  {board}
+                </button>
+              ))}
+              <button className="flex-shrink-0 px-3 py-1.5 bg-primary/10 border border-primary/30 rounded-full text-xs font-body text-primary hover:bg-primary/20 transition-colors">
+                + Import Board
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Mobile Pinterest Button */}
+        <div className="flex gap-2 mb-4 sm:hidden">
+          <Button
+            variant={pinterestConnected ? "outline" : "default"}
+            size="sm"
+            onClick={() => pinterestConnected ? handlePinterestDisconnect() : setPinterestModalOpen(true)}
+            className="gap-2 flex-1"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+            </svg>
+            {pinterestConnected ? "Connected" : "Connect Pinterest"}
+          </Button>
+        </div>
 
         {/* Mobile Search */}
         <div className="relative mb-6 md:hidden">
@@ -332,7 +442,68 @@ const Moodboard = () => {
             <Heart className="w-4 h-4 fill-current" />
             <span className="font-body text-sm">{savedItems.size} saved</span>
           </motion.div>
-        )}
+         )}
+
+        {/* Pinterest Connection Modal */}
+        <Dialog open={pinterestModalOpen} onOpenChange={setPinterestModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3 font-display">
+                <div className="w-10 h-10 rounded-full bg-[#E60023] flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+                  </svg>
+                </div>
+                Connect to Pinterest
+              </DialogTitle>
+              <DialogDescription className="font-body">
+                Import your Pinterest boards to find inspiration for your study aesthetic.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              {/* Features */}
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                  <Link2 className="w-5 h-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Sync Your Boards</p>
+                    <p className="text-xs text-muted-foreground">Import pins from your existing Pinterest boards</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                  <Bookmark className="w-5 h-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Save to Pinterest</p>
+                    <p className="text-xs text-muted-foreground">Pin your favorite images directly to your boards</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                  <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Discover More</p>
+                    <p className="text-xs text-muted-foreground">Get personalized aesthetic recommendations</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Connect Button */}
+              <Button 
+                onClick={handlePinterestConnect}
+                className="w-full gap-2 bg-[#E60023] hover:bg-[#c7001f] text-white"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+                </svg>
+                Continue with Pinterest
+              </Button>
+
+              <p className="text-xs text-center text-muted-foreground">
+                You'll be redirected to Pinterest to authorize access
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
