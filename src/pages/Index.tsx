@@ -1,17 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
+import ThemeBackground from "@/components/ThemeBackground";
 import BunnyClock from "@/components/BunnyClock";
 import WizardInterface from "@/components/WizardInterface";
 import ScheduleDisplay from "@/components/ScheduleDisplay";
 import PomodoroTimer from "@/components/PomodoroTimer";
+import ThemeSelector from "@/components/ThemeSelector";
 import { useChat } from "@/hooks/useChat";
-import { UserSettings, themeColors } from "@/types/schedule";
+import { UserSettings, themeColors, backgroundThemes } from "@/types/schedule";
 
 const defaultSettings: UserSettings = {
   energyLevel: "motivated",
   stressLevel: "medium",
   theme: "hearts",
+  backgroundTheme: "gothic",
   wakeTime: "07:00",
   bedTime: "23:00",
 };
@@ -29,7 +32,16 @@ const Index = () => {
     setGeneratedSchedule 
   } = useChat(settings);
 
-  const themeColor = themeColors[settings.theme];
+  // Apply theme class to document
+  useEffect(() => {
+    const root = document.documentElement;
+    // Remove all theme classes
+    root.classList.remove("theme-peppy-pink", "theme-ocean-calm", "theme-sunset-warm", "theme-forest-zen");
+    // Add current theme class (gothic uses default, so no class needed)
+    if (settings.backgroundTheme !== "gothic") {
+      root.classList.add(`theme-${settings.backgroundTheme}`);
+    }
+  }, [settings.backgroundTheme]);
 
   const handleWizardComplete = (tasks: string) => {
     sendMessage(tasks);
@@ -54,13 +66,27 @@ const Index = () => {
     setViewMode("schedule");
   }
 
+  const currentBgTheme = backgroundThemes[settings.backgroundTheme];
+
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Spider web background */}
-      <SpiderWebBackground />
+      {/* Background based on theme */}
+      {settings.backgroundTheme === "gothic" ? (
+        <SpiderWebBackground />
+      ) : (
+        <ThemeBackground theme={settings.backgroundTheme} />
+      )}
 
       {/* Main content */}
       <div className="container max-w-4xl mx-auto px-4 py-6 relative z-10 min-h-screen flex flex-col">
+        {/* Theme Selector - always visible at top */}
+        <div className="mb-4 flex-shrink-0">
+          <ThemeSelector 
+            currentTheme={settings.backgroundTheme}
+            onChange={(theme) => setSettings({ ...settings, backgroundTheme: theme })}
+          />
+        </div>
+
         {/* Header with Bunny Clock - hide during pomodoro */}
         {viewMode !== "pomodoro" && (
           <header className="text-center mb-6 flex-shrink-0">
@@ -70,11 +96,10 @@ const Index = () => {
               
               <div className="flex flex-col items-center">
                 <div 
-                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-body mb-3 border border-primary/30 backdrop-blur-sm"
-                  style={{ backgroundColor: 'hsl(270 40% 15% / 0.8)' }}
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-body mb-3 border border-primary/30 backdrop-blur-sm bg-card/80"
                 >
                   <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="text-foreground">{themeColors[settings.theme].name}</span>
+                  <span className="text-foreground">{currentBgTheme.emoji} {currentBgTheme.name}</span>
                 </div>
                 <h1 className="font-display text-3xl md:text-4xl text-foreground mb-2 drop-shadow-lg">
                   Wonderland Scheduler
