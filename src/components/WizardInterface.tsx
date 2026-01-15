@@ -203,11 +203,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                     <span className="font-display text-foreground">Wake Up Time</span>
                   </div>
                   <input
-                    type="time"
+                    type="text"
                     value={settings.wakeTime}
                     onChange={(e) => updateSetting("wakeTime", e.target.value)}
-                    className="w-full bg-background/50 border border-primary/20 rounded-lg p-3 text-foreground text-center text-xl"
+                    placeholder="e.g. 7:00 AM or 07:00"
+                    className="w-full bg-background/50 border border-primary/20 rounded-lg p-3 text-foreground text-center text-xl placeholder:text-muted-foreground/50 placeholder:text-base focus:outline-none focus:border-primary/50"
                   />
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    Enter time like "7:00 AM" or "7:30"
+                  </p>
                 </div>
 
                 <div className="bg-card/50 rounded-xl p-6 border border-primary/20">
@@ -216,11 +220,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                     <span className="font-display text-foreground">Bed Time</span>
                   </div>
                   <input
-                    type="time"
+                    type="text"
                     value={settings.bedTime}
                     onChange={(e) => updateSetting("bedTime", e.target.value)}
-                    className="w-full bg-background/50 border border-primary/20 rounded-lg p-3 text-foreground text-center text-xl"
+                    placeholder="e.g. 11:00 PM or 23:00"
+                    className="w-full bg-background/50 border border-primary/20 rounded-lg p-3 text-foreground text-center text-xl placeholder:text-muted-foreground/50 placeholder:text-base focus:outline-none focus:border-primary/50"
                   />
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    Enter time like "11:00 PM" or "23:00"
+                  </p>
                 </div>
               </div>
 
