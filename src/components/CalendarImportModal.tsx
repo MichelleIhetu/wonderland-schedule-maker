@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Upload, Calendar, FileText, X, Check, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
 
 export interface CalendarEvent {
   id: string;
@@ -31,6 +33,117 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
   const [error, setError] = useState<string | null>(null);
   const [parsedEvents, setParsedEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
+  
+  // Google auth state
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleEvents, setGoogleEvents] = useState<CalendarEvent[]>([]);
+  const [selectedGoogleEvents, setSelectedGoogleEvents] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setIsGoogleLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          scopes: 'https://www.googleapis.com/auth/calendar.readonly',
+          redirectTo: window.location.origin,
+        },
+      });
+      
+      if (error) {
+        console.error('Google sign in error:', error);
+        setError(error.message);
+      }
+    } catch (err) {
+      console.error('Error signing in with Google:', err);
+      setError('Failed to sign in with Google');
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleSignOut = async () => {
+    await supabase.auth.signOut();
+    setGoogleEvents([]);
+    setSelectedGoogleEvents(new Set());
+  };
+
+  const fetchGoogleCalendarEvents = async () => {
+    if (!session) {
+      setError('Please sign in with Google first');
+      return;
+    }
+
+    setIsGoogleLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('google-calendar', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error fetching calendar:', error);
+        setError('Failed to fetch calendar events');
+        return;
+      }
+
+      if (data.error) {
+        console.error('Calendar API error:', data.error);
+        setError(data.error);
+        return;
+      }
+
+      const events = data.events || [];
+      setGoogleEvents(events);
+      setSelectedGoogleEvents(new Set(events.map((e: CalendarEvent) => e.id)));
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Failed to fetch calendar events');
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const toggleGoogleEvent = (id: string) => {
+    const newSelected = new Set(selectedGoogleEvents);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedGoogleEvents(newSelected);
+  };
+
+  const handleGoogleImport = () => {
+    const eventsToImport = googleEvents.filter(e => selectedGoogleEvents.has(e.id));
+    onImport(eventsToImport);
+    onClose();
+  };
 
   const parseICSFile = async (file: File): Promise<CalendarEvent[]> => {
     const text = await file.text();
@@ -298,26 +411,151 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
           </TabsContent>
 
           <TabsContent value="google" className="mt-4">
-            <div className="text-center py-6">
-              <div className="w-16 h-16 rounded-full bg-muted/30 mx-auto mb-4 flex items-center justify-center">
-                <Calendar className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="font-display text-lg text-foreground mb-2">
-                Google Calendar
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Connect your Google account to import events directly
-              </p>
-              <p className="text-xs text-muted-foreground bg-muted/20 rounded-lg p-3">
-                To enable Google Calendar sync, you'll need to configure Google OAuth in your backend settings. For now, you can export your Google Calendar as an ICS file and import it using the "ICS File" tab.
-              </p>
-              
-              <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
-                <p className="text-xs text-foreground">
-                  <strong>Quick tip:</strong> In Google Calendar, click the ⚙️ Settings → Import & Export → Export to download your calendar as an ICS file
+            {!user ? (
+              <div className="text-center py-6">
+                <div className="w-16 h-16 rounded-full bg-muted/30 mx-auto mb-4 flex items-center justify-center">
+                  <Calendar className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-display text-lg text-foreground mb-2">
+                  Google Calendar
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Connect your Google account to import today's events
                 </p>
+                
+                <Button
+                  onClick={handleGoogleSignIn}
+                  disabled={isGoogleLoading}
+                  className="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 gap-2"
+                >
+                  {isGoogleLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                  )}
+                  Sign in with Google
+                </Button>
+
+                {error && (
+                  <div className="mt-4 flex items-center justify-center gap-2 text-red-400 text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    {error}
+                  </div>
+                )}
+
+                <div className="mt-4 p-3 bg-muted/20 rounded-lg">
+                  <p className="text-xs text-muted-foreground">
+                    Works with Google Calendar, and any calendar synced to Google (PowerPlanner, etc.)
+                  </p>
+                </div>
               </div>
-            </div>
+            ) : googleEvents.length === 0 ? (
+              <div className="text-center py-6">
+                <div className="w-16 h-16 rounded-full bg-green-500/20 mx-auto mb-4 flex items-center justify-center">
+                  <Check className="w-8 h-8 text-green-400" />
+                </div>
+                <h3 className="font-display text-lg text-foreground mb-2">
+                  Connected as {user.email}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Fetch your events for today
+                </p>
+                
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={fetchGoogleCalendarEvents}
+                    disabled={isGoogleLoading}
+                    className="w-full bg-primary hover:bg-primary/90 gap-2"
+                  >
+                    {isGoogleLoading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Fetching events...
+                      </>
+                    ) : (
+                      <>
+                        <Calendar className="w-5 h-5" />
+                        Fetch Today's Events
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button
+                    variant="ghost"
+                    onClick={handleGoogleSignOut}
+                    className="text-muted-foreground"
+                  >
+                    Sign out
+                  </Button>
+                </div>
+
+                {error && (
+                  <div className="mt-4 flex items-center justify-center gap-2 text-red-400 text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    {error}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Found {googleEvents.length} events for today
+                  </p>
+                  <Button variant="ghost" size="sm" onClick={() => setGoogleEvents([])}>
+                    <X className="w-4 h-4 mr-1" />
+                    Clear
+                  </Button>
+                </div>
+                
+                <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
+                  {googleEvents.map((event) => (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                        selectedGoogleEvents.has(event.id)
+                          ? "border-primary bg-primary/10"
+                          : "border-primary/20 bg-card/50 opacity-50"
+                      }`}
+                      onClick={() => toggleGoogleEvent(event.id)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                          selectedGoogleEvents.has(event.id)
+                            ? "border-primary bg-primary"
+                            : "border-primary/30"
+                        }`}>
+                          {selectedGoogleEvents.has(event.id) && (
+                            <Check className="w-3 h-3 text-primary-foreground" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-foreground truncate">{event.title}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {event.isAllDay ? "All day" : `${event.startTime} - ${event.endTime}`}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+                
+                <Button
+                  onClick={handleGoogleImport}
+                  disabled={selectedGoogleEvents.size === 0}
+                  className="w-full bg-primary hover:bg-primary/90"
+                >
+                  Import {selectedGoogleEvents.size} Event{selectedGoogleEvents.size !== 1 ? 's' : ''}
+                </Button>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </DialogContent>
