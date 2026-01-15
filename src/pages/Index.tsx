@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, ImageIcon } from "lucide-react";
+import { Sparkles, ImageIcon, Clock } from "lucide-react";
+import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
 import BunnyClock from "@/components/BunnyClock";
@@ -9,8 +10,11 @@ import ScheduleDisplay from "@/components/ScheduleDisplay";
 import PomodoroTimer from "@/components/PomodoroTimer";
 import ThemeSelector from "@/components/ThemeSelector";
 import ThemeCustomizer, { CustomColors, defaultThemeColors } from "@/components/ThemeCustomizer";
+import CheckInModal, { CheckInData } from "@/components/CheckInModal";
+import { useHourlyCheckIn } from "@/hooks/useHourlyCheckIn";
 import { useChat } from "@/hooks/useChat";
 import { UserSettings, backgroundThemes } from "@/types/schedule";
+import { Button } from "@/components/ui/button";
 
 const defaultSettings: UserSettings = {
   energyLevel: "motivated",
@@ -56,6 +60,7 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("wizard");
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const [customColors, setCustomColors] = useState<CustomColors>(defaultThemeColors.gothic);
+  const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   
   const { 
     isLoading, 
@@ -63,6 +68,23 @@ const Index = () => {
     generatedSchedule,
     setGeneratedSchedule 
   } = useChat(settings);
+
+  // Hourly check-in hook - enabled when in pomodoro mode or has schedule
+  const {
+    isCheckInDue,
+    minutesUntilNextCheckIn,
+    completeCheckIn,
+    skipCheckIn,
+    triggerCheckIn,
+    checkInHistory,
+  } = useHourlyCheckIn({
+    enabled: viewMode === "pomodoro" || generatedSchedule.length > 0,
+    intervalMinutes: 60, // Check in every hour
+    onCheckInDue: () => setIsCheckInModalOpen(true),
+  });
+
+  // Get current task for check-in context
+  const currentTask = generatedSchedule[0]?.title;
 
   // Update custom colors when theme changes
   useEffect(() => {
@@ -114,6 +136,36 @@ const Index = () => {
     setCustomColors(defaultThemeColors[settings.backgroundTheme]);
   };
 
+  const handleCheckInSubmit = (data: CheckInData) => {
+    completeCheckIn(data);
+    
+    // Show feedback based on mood
+    if (data.mood === "struggling") {
+      toast("Hang in there! Consider taking a longer break.", {
+        description: "It's okay to adjust your pace.",
+        icon: "💪",
+      });
+    } else if (data.mood === "great") {
+      toast("Amazing! Keep up the great work!", {
+        description: "You're doing wonderfully!",
+        icon: "🌟",
+      });
+    } else {
+      toast("Check-in complete!", {
+        description: "Keep going, you've got this!",
+        icon: "✨",
+      });
+    }
+
+    // If they need a break and are in pomodoro mode
+    if (data.needBreak && viewMode === "pomodoro") {
+      toast("Taking a longer break", {
+        description: "Enjoy your rest time!",
+        icon: "☕",
+      });
+    }
+  };
+
   // Auto-switch to schedule view when schedule is generated
   if (generatedSchedule.length > 0 && viewMode === "wizard") {
     setViewMode("schedule");
@@ -140,15 +192,44 @@ const Index = () => {
         onReset={handleResetColors}
       />
 
+      {/* Check-In Modal */}
+      <CheckInModal
+        isOpen={isCheckInModalOpen}
+        onClose={() => {
+          setIsCheckInModalOpen(false);
+          skipCheckIn();
+        }}
+        onSubmit={handleCheckInSubmit}
+        currentTask={currentTask}
+      />
+
       {/* Main content */}
       <div className="container max-w-4xl mx-auto px-4 py-6 relative z-10 min-h-screen flex flex-col">
-        {/* Theme Selector - always visible at top */}
-        <div className="mb-4 flex-shrink-0">
+        {/* Theme Selector and Check-In Button */}
+        <div className="mb-4 flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3">
           <ThemeSelector 
             currentTheme={settings.backgroundTheme}
             onChange={(theme) => setSettings({ ...settings, backgroundTheme: theme })}
             onOpenCustomizer={() => setIsCustomizerOpen(true)}
           />
+          
+          {/* Check-In Button - show when schedule is active */}
+          {(viewMode === "pomodoro" || generatedSchedule.length > 0) && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsCheckInModalOpen(true)}
+              className="gap-2"
+            >
+              <Clock className="w-4 h-4" />
+              <span className="hidden sm:inline">Check In</span>
+              {minutesUntilNextCheckIn < 60 && (
+                <span className="text-xs text-muted-foreground">
+                  ({minutesUntilNextCheckIn}m)
+                </span>
+              )}
+            </Button>
+          )}
         </div>
 
         {/* Header with Bunny Clock - hide during pomodoro */}
