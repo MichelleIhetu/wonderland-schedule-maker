@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import BunnyClock from "@/components/BunnyClock";
-import SettingsPanel from "@/components/SettingsPanel";
-import ChatInterface from "@/components/ChatInterface";
+import WizardInterface from "@/components/WizardInterface";
 import ScheduleDisplay from "@/components/ScheduleDisplay";
 import { useChat } from "@/hooks/useChat";
 import { UserSettings, themeColors } from "@/types/schedule";
@@ -18,41 +17,32 @@ const defaultSettings: UserSettings = {
 
 const Index = () => {
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   const { 
-    messages, 
     isLoading, 
     sendMessage, 
-    clearChat, 
     generatedSchedule,
     setGeneratedSchedule 
   } = useChat(settings);
 
   const themeColor = themeColors[settings.theme];
 
+  const handleWizardComplete = (tasks: string) => {
+    sendMessage(tasks);
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Spider web background */}
       <SpiderWebBackground />
 
-      {/* Settings Panel */}
-      <SettingsPanel
-        settings={settings}
-        onSettingsChange={setSettings}
-        isOpen={isSettingsOpen}
-        onToggle={() => setIsSettingsOpen(!isSettingsOpen)}
-      />
-
       {/* Main content */}
-      <div className="container max-w-6xl mx-auto px-4 py-6 relative z-10 h-screen flex flex-col">
+      <div className="container max-w-4xl mx-auto px-4 py-6 relative z-10 min-h-screen flex flex-col">
         {/* Header with Bunny Clock */}
         <header className="text-center mb-6 flex-shrink-0">
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-8 mb-4">
+          <div className="flex flex-col items-center gap-4 mb-4">
             {/* Bunny with Clock */}
-            <div className="hidden md:block">
-              <BunnyClock />
-            </div>
+            <BunnyClock />
             
             <div className="flex flex-col items-center">
               <div 
@@ -66,51 +56,28 @@ const Index = () => {
                 Wonderland Scheduler
               </h1>
               <p className="text-sm text-muted-foreground font-body">
-                Tell me your tasks, and I'll craft the perfect schedule for you
+                Let the White Rabbit guide you through your perfect day
               </p>
-            </div>
-
-            {/* Mobile clock */}
-            <div className="md:hidden scale-75">
-              <BunnyClock />
             </div>
           </div>
         </header>
 
-        {/* Main Grid */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 mt-8 lg:mt-0">
-          {/* Chat Section */}
-          <div className="bg-card/80 backdrop-blur-md rounded-2xl border border-primary/20 shadow-glow overflow-hidden flex flex-col min-h-[500px]">
-            <ChatInterface
-              messages={messages}
-              isLoading={isLoading}
-              onSendMessage={sendMessage}
-              onClearChat={clearChat}
-              settings={settings}
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col gap-6">
+          {generatedSchedule.length > 0 ? (
+            <ScheduleDisplay
+              schedule={generatedSchedule}
+              onClear={() => setGeneratedSchedule([])}
+              theme={settings.theme}
             />
-          </div>
-
-          {/* Schedule Section */}
-          <div className={`min-h-[500px] ${generatedSchedule.length === 0 ? "hidden lg:flex lg:items-center lg:justify-center" : ""}`}>
-            {generatedSchedule.length > 0 ? (
-              <ScheduleDisplay
-                schedule={generatedSchedule}
-                onClear={() => setGeneratedSchedule([])}
-                theme={settings.theme}
-              />
-            ) : (
-              <div className="text-center p-8 bg-card/50 backdrop-blur-sm rounded-2xl border border-primary/10">
-                <div 
-                  className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center bg-muted/50 border border-primary/20"
-                >
-                  <span className="text-3xl">🕸️</span>
-                </div>
-                <p className="font-body text-muted-foreground">
-                  Your schedule will appear here once generated
-                </p>
-              </div>
-            )}
-          </div>
+          ) : (
+            <WizardInterface
+              settings={settings}
+              onSettingsChange={setSettings}
+              onComplete={handleWizardComplete}
+              isLoading={isLoading}
+            />
+          )}
         </div>
 
         {/* Footer */}
