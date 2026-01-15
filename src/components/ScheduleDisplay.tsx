@@ -1,11 +1,13 @@
 import { ScheduleItem, Suit, themeColors } from "@/types/schedule";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Heart, Diamond, Club, Spade, Calendar, X } from "lucide-react";
+import { Clock, Heart, Diamond, Club, Spade, Calendar, X, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import KawaiiBunny from "./KawaiiBunny";
 
 interface ScheduleDisplayProps {
   schedule: ScheduleItem[];
   onClear: () => void;
+  onStartPomodoro: () => void;
   theme: Suit;
 }
 
@@ -16,7 +18,7 @@ const suitIcons: Record<Suit, React.ReactNode> = {
   spades: <Spade className="w-4 h-4" />,
 };
 
-export default function ScheduleDisplay({ schedule, onClear, theme }: ScheduleDisplayProps) {
+export default function ScheduleDisplay({ schedule, onClear, onStartPomodoro, theme }: ScheduleDisplayProps) {
   if (schedule.length === 0) return null;
 
   const sortedSchedule = [...schedule].sort((a, b) => a.time.localeCompare(b.time));
@@ -42,6 +44,11 @@ export default function ScheduleDisplay({ schedule, onClear, theme }: ScheduleDi
         <Button variant="ghost" size="icon" onClick={onClear}>
           <X className="w-4 h-4" />
         </Button>
+      </div>
+
+      {/* Kawaii bunny encouragement */}
+      <div className="p-4 flex justify-center border-b border-border/50">
+        <KawaiiBunny mood="celebrating" size="sm" message="Your schedule is ready! ♡" />
       </div>
 
       {/* Schedule Items */}
@@ -86,9 +93,16 @@ export default function ScheduleDisplay({ schedule, onClear, theme }: ScheduleDi
         </AnimatePresence>
       </div>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-border text-center">
-        <p className="text-xs text-muted-foreground font-body italic">
+      {/* Footer with Start Pomodoro */}
+      <div className="p-4 border-t border-border space-y-3">
+        <Button 
+          onClick={onStartPomodoro}
+          className="w-full gap-2 bg-gradient-to-r from-primary to-pink-500 hover:from-primary/90 hover:to-pink-500/90"
+        >
+          <Play className="w-4 h-4" />
+          Start Focus Session
+        </Button>
+        <p className="text-xs text-muted-foreground font-body italic text-center">
           "Begin at the beginning... and go on till you come to the end."
         </p>
       </div>
