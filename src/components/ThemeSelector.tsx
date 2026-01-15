@@ -1,16 +1,19 @@
 import { motion } from "framer-motion";
+import { Palette } from "lucide-react";
 import { BackgroundTheme, backgroundThemes } from "@/types/schedule";
+import { Button } from "@/components/ui/button";
 
 interface ThemeSelectorProps {
   currentTheme: BackgroundTheme;
   onChange: (theme: BackgroundTheme) => void;
+  onOpenCustomizer: () => void;
 }
 
-const ThemeSelector = ({ currentTheme, onChange }: ThemeSelectorProps) => {
+const ThemeSelector = ({ currentTheme, onChange, onOpenCustomizer }: ThemeSelectorProps) => {
   const themes = Object.entries(backgroundThemes) as [BackgroundTheme, typeof backgroundThemes[BackgroundTheme]][];
 
   return (
-    <div className="flex flex-wrap gap-2 justify-center">
+    <div className="flex flex-wrap gap-2 justify-center items-center">
       {themes.map(([key, theme]) => (
         <motion.button
           key={key}
@@ -30,6 +33,17 @@ const ThemeSelector = ({ currentTheme, onChange }: ThemeSelectorProps) => {
           <span className="hidden sm:inline">{theme.name}</span>
         </motion.button>
       ))}
+      
+      {/* Customize button */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onOpenCustomizer}
+        className="gap-1 ml-2"
+      >
+        <Palette className="w-4 h-4" />
+        <span className="hidden sm:inline">Customize</span>
+      </Button>
     </div>
   );
 };
