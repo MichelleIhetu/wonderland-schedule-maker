@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Sparkles, ImageIcon } from "lucide-react";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
 import BunnyClock from "@/components/BunnyClock";
@@ -201,7 +202,17 @@ const Index = () => {
 
         {/* Footer - hide during pomodoro */}
         {viewMode !== "pomodoro" && (
-          <footer className="mt-6 text-center flex-shrink-0">
+          <footer className="mt-6 text-center flex-shrink-0 space-y-3">
+            {/* Moodboard Link */}
+            <Link
+              to="/moodboard"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 border border-border hover:border-primary/50 transition-colors text-sm font-body text-foreground hover:text-primary"
+            >
+              <ImageIcon className="w-4 h-4" />
+              <span>Browse Moodboard for Inspiration</span>
+              <span className="text-muted-foreground">✨</span>
+            </Link>
+            
             <p className="text-xs text-muted-foreground/60 font-body italic">
               "I'm late! I'm late! For a very important date!" — White Rabbit
             </p>
