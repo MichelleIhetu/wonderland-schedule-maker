@@ -2,7 +2,7 @@ import { ScheduleItem, Suit, themeColors } from "@/types/schedule";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Heart, Diamond, Club, Spade, Calendar, X, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import KawaiiBunny from "./KawaiiBunny";
+import CartoonBunny from "./KawaiiBunny";
 
 interface ScheduleDisplayProps {
   schedule: ScheduleItem[];
@@ -48,7 +48,7 @@ export default function ScheduleDisplay({ schedule, onClear, onStartPomodoro, th
 
       {/* Kawaii bunny encouragement */}
       <div className="p-4 flex justify-center border-b border-border/50">
-        <KawaiiBunny mood="celebrating" size="sm" message="Your schedule is ready! ♡" />
+        <CartoonBunny mood="celebrating" size="sm" message="Your schedule is ready!" />
       </div>
 
       {/* Schedule Items */}
