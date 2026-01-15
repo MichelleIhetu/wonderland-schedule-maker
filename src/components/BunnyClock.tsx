@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 const BunnyClock = () => {
   const [time, setTime] = useState(new Date());
@@ -18,126 +19,149 @@ const BunnyClock = () => {
 
   return (
     <div className="relative flex flex-col items-center">
-      {/* Bunny */}
-      <div className="relative animate-bunny-hop">
-        {/* Bunny ears */}
-        <div className="flex gap-4 justify-center -mb-2">
-          <div className="w-6 h-16 bg-gradient-to-t from-muted to-foreground/90 rounded-full transform -rotate-12 shadow-lg">
-            <div className="w-3 h-10 bg-primary/30 rounded-full mx-auto mt-3" />
-          </div>
-          <div className="w-6 h-16 bg-gradient-to-t from-muted to-foreground/90 rounded-full transform rotate-12 shadow-lg">
-            <div className="w-3 h-10 bg-primary/30 rounded-full mx-auto mt-3" />
-          </div>
+      <motion.div
+        className="relative"
+        animate={{ y: [0, -3, 0] }}
+        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+      >
+        {/* Kawaii Bunny ears */}
+        <div className="flex gap-1 justify-center -mb-2 relative z-10">
+          <motion.div 
+            className="w-5 h-12 bg-gradient-to-t from-pink-100 to-white rounded-full shadow-md border-2 border-pink-200"
+            animate={{ rotate: [-3, 5, -3] }}
+            transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+          >
+            <div className="w-2.5 h-6 bg-pink-200 rounded-full mx-auto mt-2" />
+          </motion.div>
+          <motion.div 
+            className="w-5 h-12 bg-gradient-to-t from-pink-100 to-white rounded-full shadow-md border-2 border-pink-200"
+            animate={{ rotate: [3, -5, 3] }}
+            transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut", delay: 0.15 }}
+          >
+            <div className="w-2.5 h-6 bg-pink-200 rounded-full mx-auto mt-2" />
+          </motion.div>
         </div>
         
-        {/* Bunny head */}
-        <div className="relative w-24 h-20 bg-gradient-to-b from-foreground/95 to-muted rounded-full shadow-glow">
-          {/* Eyes */}
-          <div className="absolute top-6 left-4 w-4 h-5 bg-background rounded-full">
-            <div className="w-2 h-2 bg-primary rounded-full mt-1 ml-1 animate-shimmer" />
-          </div>
-          <div className="absolute top-6 right-4 w-4 h-5 bg-background rounded-full">
-            <div className="w-2 h-2 bg-primary rounded-full mt-1 ml-1 animate-shimmer" />
+        {/* Kawaii Bunny head */}
+        <div className="relative w-20 h-16 bg-gradient-to-b from-white to-pink-50 rounded-full shadow-lg border-2 border-pink-200">
+          {/* Big kawaii eyes */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-3">
+            <motion.div 
+              className="relative"
+              animate={{ scaleY: [1, 0.1, 1] }}
+              transition={{ repeat: Infinity, duration: 3, repeatDelay: 2.5 }}
+            >
+              <div className="w-3.5 h-4 bg-gray-900 rounded-full">
+                <div className="w-1 h-1 bg-white rounded-full absolute top-0.5 left-0.5" />
+              </div>
+            </motion.div>
+            <motion.div 
+              className="relative"
+              animate={{ scaleY: [1, 0.1, 1] }}
+              transition={{ repeat: Infinity, duration: 3, repeatDelay: 2.5 }}
+            >
+              <div className="w-3.5 h-4 bg-gray-900 rounded-full">
+                <div className="w-1 h-1 bg-white rounded-full absolute top-0.5 left-0.5" />
+              </div>
+            </motion.div>
           </div>
           
-          {/* Nose */}
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-3 h-2 bg-primary/60 rounded-full" />
+          {/* Blush marks */}
+          <div className="absolute top-7 left-1.5 w-2.5 h-1.5 rounded-full opacity-60" style={{ backgroundColor: '#fda4af' }} />
+          <div className="absolute top-7 right-1.5 w-2.5 h-1.5 rounded-full opacity-60" style={{ backgroundColor: '#fda4af' }} />
           
-          {/* Whiskers */}
-          <div className="absolute bottom-4 left-2 w-6 h-px bg-foreground/40 -rotate-12" />
-          <div className="absolute bottom-5 left-1 w-5 h-px bg-foreground/40" />
-          <div className="absolute bottom-4 right-2 w-6 h-px bg-foreground/40 rotate-12" />
-          <div className="absolute bottom-5 right-1 w-5 h-px bg-foreground/40" />
+          {/* Cute nose */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-2 h-1.5 bg-pink-400 rounded-full" />
+          
+          {/* Cute mouth */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-pink-500 text-[10px] font-bold">ω</div>
         </div>
         
-        {/* Bunny body (partial, holding clock) */}
-        <div className="relative -mt-2 flex justify-center">
-          <div className="w-20 h-12 bg-gradient-to-b from-muted to-secondary rounded-t-full" />
-        </div>
-        
-        {/* Bunny paws holding clock */}
-        <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex items-start">
-          {/* Left paw */}
-          <div className="w-5 h-8 bg-foreground/90 rounded-full transform rotate-12 -mr-1 z-10" />
+        {/* Bunny body holding clock */}
+        <div className="relative -mt-1 flex flex-col items-center">
+          <div className="w-16 h-10 bg-gradient-to-b from-pink-50 to-white rounded-b-full border-2 border-t-0 border-pink-200" />
           
-          {/* Clock */}
-          <div className="relative w-20 h-20 animate-clock-swing origin-top">
-            {/* Clock chain */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-1 h-5 bg-gradient-to-b from-wonderland-gold to-wonderland-gold/60 rounded-full" />
+          {/* Paws holding clock */}
+          <div className="absolute top-2 flex items-start">
+            <div className="w-4 h-6 bg-white rounded-full border border-pink-200 transform rotate-12 -mr-1 z-10" />
             
-            {/* Clock face */}
-            <div className="w-20 h-20 rounded-full border-4 border-wonderland-gold bg-card shadow-glow">
-              {/* Decorative inner ring */}
-              <div className="absolute inset-2 rounded-full border-2 border-primary/30" />
+            {/* Pocket watch */}
+            <motion.div 
+              className="relative w-14 h-14"
+              animate={{ rotate: [-5, 5, -5] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              style={{ transformOrigin: "top center" }}
+            >
+              {/* Chain */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0.5 h-4 bg-gradient-to-b from-yellow-400 to-yellow-500 rounded-full" />
               
-              {/* Hour markers */}
-              {[...Array(12)].map((_, i) => (
+              {/* Clock face */}
+              <div className="w-14 h-14 rounded-full border-3 border-yellow-400 bg-card shadow-lg">
+                <div className="absolute inset-1 rounded-full border border-primary/20" />
+                
+                {/* Hour markers */}
+                {[...Array(12)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-0.5 h-1.5 bg-yellow-500 rounded-full"
+                    style={{
+                      left: "50%",
+                      top: "3px",
+                      transform: `translateX(-50%) rotate(${i * 30}deg)`,
+                      transformOrigin: "50% 24px",
+                    }}
+                  />
+                ))}
+
+                {/* Hour hand */}
                 <div
-                  key={i}
-                  className="absolute w-0.5 h-2 bg-wonderland-gold rounded-full"
+                  className="absolute w-0.5 h-3.5 bg-primary rounded-full origin-bottom"
                   style={{
                     left: "50%",
-                    top: "4px",
-                    transform: `translateX(-50%) rotate(${i * 30}deg)`,
-                    transformOrigin: "50% 36px",
+                    bottom: "50%",
+                    transform: `translateX(-50%) rotate(${hourDeg}deg)`,
                   }}
                 />
-              ))}
 
-              {/* Roman numerals */}
-              <span className="absolute top-2 left-1/2 -translate-x-1/2 font-display text-[8px] text-foreground">XII</span>
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 font-display text-[8px] text-foreground">III</span>
-              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 font-display text-[8px] text-foreground">VI</span>
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 font-display text-[8px] text-foreground">IX</span>
+                {/* Minute hand */}
+                <div
+                  className="absolute w-0.5 h-5 bg-foreground rounded-full origin-bottom"
+                  style={{
+                    left: "50%",
+                    bottom: "50%",
+                    transform: `translateX(-50%) rotate(${minuteDeg}deg)`,
+                  }}
+                />
 
-              {/* Hour hand */}
-              <div
-                className="absolute w-1 h-5 bg-wonderland-teal rounded-full origin-bottom transition-transform"
-                style={{
-                  left: "50%",
-                  bottom: "50%",
-                  transform: `translateX(-50%) rotate(${hourDeg}deg)`,
-                }}
-              />
+                {/* Second hand */}
+                <div
+                  className="absolute bg-pink-400 rounded-full origin-bottom"
+                  style={{
+                    left: "50%",
+                    bottom: "50%",
+                    width: "1px",
+                    height: "22px",
+                    transform: `translateX(-50%) rotate(${secondDeg}deg)`,
+                  }}
+                />
 
-              {/* Minute hand */}
-              <div
-                className="absolute w-0.5 h-7 bg-foreground rounded-full origin-bottom transition-transform"
-                style={{
-                  left: "50%",
-                  bottom: "50%",
-                  transform: `translateX(-50%) rotate(${minuteDeg}deg)`,
-                }}
-              />
-
-              {/* Second hand */}
-              <div
-                className="absolute w-px bg-primary rounded-full origin-bottom"
-                style={{
-                  left: "50%",
-                  bottom: "50%",
-                  height: "32px",
-                  transform: `translateX(-50%) rotate(${secondDeg}deg)`,
-                }}
-              />
-
-              {/* Center dot */}
-              <div className="absolute top-1/2 left-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-wonderland-gold shadow-glow" />
-            </div>
+                {/* Center dot */}
+                <div className="absolute top-1/2 left-1/2 w-1.5 h-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-400" />
+              </div>
+            </motion.div>
+            
+            <div className="w-4 h-6 bg-white rounded-full border border-pink-200 transform -rotate-12 -ml-1 z-10" />
           </div>
-          
-          {/* Right paw */}
-          <div className="w-5 h-8 bg-foreground/90 rounded-full transform -rotate-12 -ml-1 z-10" />
         </div>
-      </div>
+      </motion.div>
       
       {/* Time display */}
-      <div className="mt-24 text-center">
+      <div className="mt-16 text-center">
         <p className="font-display text-lg text-primary">
           {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
         <p className="text-xs text-muted-foreground italic">
-          "I'm late! I'm late!"
+          "Don't be late~! ♡"
         </p>
       </div>
     </div>
