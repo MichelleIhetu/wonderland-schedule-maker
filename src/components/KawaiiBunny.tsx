@@ -1,158 +1,175 @@
 import { motion } from "framer-motion";
 
-interface KawaiiBunnyProps {
+interface CartoonBunnyProps {
   mood?: "happy" | "encouraging" | "celebrating" | "focused";
   size?: "sm" | "md" | "lg";
   message?: string;
 }
 
-const KawaiiBunny = ({ mood = "happy", size = "md", message }: KawaiiBunnyProps) => {
-  const sizeClasses = {
-    sm: "w-16 h-16",
-    md: "w-24 h-24", 
-    lg: "w-32 h-32",
+const CartoonBunny = ({ mood = "happy", size = "md", message }: CartoonBunnyProps) => {
+  const sizeScale = {
+    sm: 0.6,
+    md: 0.8,
+    lg: 1,
   };
 
-  const eyeExpressions = {
-    happy: "◕‿◕",
-    encouraging: "◕ω◕",
-    celebrating: "★‿★",
-    focused: "◕_◕",
+  const scale = sizeScale[size];
+
+  // Different expressions based on mood
+  const getExpression = () => {
+    switch (mood) {
+      case "celebrating":
+        return { eyeShape: "star", mouthOpen: true };
+      case "focused":
+        return { eyeShape: "determined", mouthOpen: false };
+      case "encouraging":
+        return { eyeShape: "wink", mouthOpen: true };
+      default:
+        return { eyeShape: "normal", mouthOpen: true };
+    }
   };
 
-  const blushColors = {
-    happy: "bg-pink-300",
-    encouraging: "bg-pink-400",
-    celebrating: "bg-yellow-300",
-    focused: "bg-pink-200",
-  };
+  const expression = getExpression();
 
   return (
     <motion.div 
-      className="flex flex-col items-center gap-2"
+      className="flex flex-col items-center gap-3"
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ type: "spring", stiffness: 200 }}
     >
       <motion.div
-        className="relative"
-        animate={{ 
-          y: [0, -5, 0],
-        }}
-        transition={{ 
-          repeat: Infinity, 
-          duration: 2,
-          ease: "easeInOut"
-        }}
+        animate={{ y: [0, -6, 0] }}
+        transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+        style={{ transform: `scale(${scale})` }}
       >
-        {/* Bunny ears */}
-        <div className="flex gap-1 justify-center -mb-3 relative z-10">
-          <motion.div 
-            className="w-6 h-14 bg-gradient-to-t from-pink-100 to-white rounded-full shadow-md border-2 border-pink-200"
-            animate={{ rotate: [-5, 5, -5] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          >
-            <div className="w-3 h-8 bg-pink-200 rounded-full mx-auto mt-3" />
-          </motion.div>
-          <motion.div 
-            className="w-6 h-14 bg-gradient-to-t from-pink-100 to-white rounded-full shadow-md border-2 border-pink-200"
-            animate={{ rotate: [5, -5, 5] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut", delay: 0.2 }}
-          >
-            <div className="w-3 h-8 bg-pink-200 rounded-full mx-auto mt-3" />
-          </motion.div>
-        </div>
-        
-        {/* Bunny head/body - kawaii round shape */}
-        <div className={`${sizeClasses[size]} relative bg-gradient-to-b from-white to-pink-50 rounded-full shadow-lg border-2 border-pink-200`}>
-          {/* Eyes - big kawaii style */}
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 flex gap-4">
-            <motion.div 
-              className="relative"
-              animate={mood === "happy" ? { scaleY: [1, 0.1, 1] } : {}}
-              transition={{ repeat: Infinity, duration: 3, repeatDelay: 2 }}
-            >
-              <div className="w-4 h-5 bg-gray-900 rounded-full">
-                <div className="w-1.5 h-1.5 bg-white rounded-full absolute top-1 left-0.5" />
-              </div>
-            </motion.div>
-            <motion.div 
-              className="relative"
-              animate={mood === "happy" ? { scaleY: [1, 0.1, 1] } : {}}
-              transition={{ repeat: Infinity, duration: 3, repeatDelay: 2 }}
-            >
-              <div className="w-4 h-5 bg-gray-900 rounded-full">
-                <div className="w-1.5 h-1.5 bg-white rounded-full absolute top-1 left-0.5" />
-              </div>
-            </motion.div>
-          </div>
+        <svg width="100" height="110" viewBox="0 0 100 110" className="drop-shadow-lg">
+          {/* Ears */}
+          <motion.ellipse
+            cx="30"
+            cy="22"
+            rx="10"
+            ry="25"
+            fill="#f5f5f5"
+            stroke="#2d2d2d"
+            strokeWidth="2.5"
+            animate={{ rotate: [-8, 8, -8] }}
+            transition={{ repeat: Infinity, duration: 1.2 }}
+            style={{ transformOrigin: "30px 47px" }}
+          />
+          <ellipse cx="30" cy="22" rx="5" ry="16" fill="#ffb6c1" />
           
-          {/* Blush marks */}
-          <div className="absolute top-1/2 left-2 w-3 h-2 rounded-full opacity-60" style={{ backgroundColor: '#fda4af' }} />
-          <div className="absolute top-1/2 right-2 w-3 h-2 rounded-full opacity-60" style={{ backgroundColor: '#fda4af' }} />
+          <motion.ellipse
+            cx="70"
+            cy="22"
+            rx="10"
+            ry="25"
+            fill="#f5f5f5"
+            stroke="#2d2d2d"
+            strokeWidth="2.5"
+            animate={{ rotate: [8, -8, 8] }}
+            transition={{ repeat: Infinity, duration: 1.2, delay: 0.1 }}
+            style={{ transformOrigin: "70px 47px" }}
+          />
+          <ellipse cx="70" cy="22" rx="5" ry="16" fill="#ffb6c1" />
           
-          {/* Cute nose */}
-          <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2">
-            <div className="w-2.5 h-2 bg-pink-400 rounded-full" />
-          </div>
+          {/* Head */}
+          <ellipse cx="50" cy="62" rx="35" ry="30" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="2.5" />
+          
+          {/* Cheek puffs */}
+          <ellipse cx="22" cy="68" rx="10" ry="8" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="2" />
+          <ellipse cx="78" cy="68" rx="10" ry="8" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="2" />
+          
+          {/* Eyes */}
+          {expression.eyeShape === "star" ? (
+            <>
+              <text x="35" y="60" fontSize="16" fill="#fbbf24" stroke="#2d2d2d" strokeWidth="0.5">★</text>
+              <text x="55" y="60" fontSize="16" fill="#fbbf24" stroke="#2d2d2d" strokeWidth="0.5">★</text>
+            </>
+          ) : expression.eyeShape === "wink" ? (
+            <>
+              <ellipse cx="38" cy="55" rx="8" ry="10" fill="white" stroke="#2d2d2d" strokeWidth="2" />
+              <circle cx="40" cy="57" r="4" fill="#2d2d2d" />
+              <circle cx="42" cy="55" r="1.5" fill="white" />
+              <path d="M55 55 Q62 50 69 55" fill="none" stroke="#2d2d2d" strokeWidth="2.5" strokeLinecap="round" />
+            </>
+          ) : expression.eyeShape === "determined" ? (
+            <>
+              <ellipse cx="38" cy="55" rx="8" ry="8" fill="white" stroke="#2d2d2d" strokeWidth="2" />
+              <ellipse cx="62" cy="55" rx="8" ry="8" fill="white" stroke="#2d2d2d" strokeWidth="2" />
+              <circle cx="40" cy="56" r="4" fill="#2d2d2d" />
+              <circle cx="64" cy="56" r="4" fill="#2d2d2d" />
+              <path d="M30 48 L46 52" fill="none" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round" />
+              <path d="M70 48 L54 52" fill="none" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round" />
+            </>
+          ) : (
+            <>
+              <ellipse cx="38" cy="55" rx="8" ry="10" fill="white" stroke="#2d2d2d" strokeWidth="2" />
+              <ellipse cx="62" cy="55" rx="8" ry="10" fill="white" stroke="#2d2d2d" strokeWidth="2" />
+              <motion.g
+                animate={{ x: [0, 2, 0, -2, 0] }}
+                transition={{ repeat: Infinity, duration: 3 }}
+              >
+                <circle cx="40" cy="57" r="4" fill="#2d2d2d" />
+                <circle cx="64" cy="57" r="4" fill="#2d2d2d" />
+                <circle cx="42" cy="55" r="1.5" fill="white" />
+                <circle cx="66" cy="55" r="1.5" fill="white" />
+              </motion.g>
+            </>
+          )}
+          
+          {/* Nose */}
+          <ellipse cx="50" cy="72" rx="5" ry="3.5" fill="#ffb6c1" stroke="#2d2d2d" strokeWidth="1.5" />
           
           {/* Mouth */}
-          <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2">
-            {mood === "happy" || mood === "celebrating" ? (
-              <div className="text-pink-500 text-xs font-bold">ω</div>
-            ) : (
-              <div className="w-3 h-1.5 border-b-2 border-pink-400 rounded-b-full" />
-            )}
-          </div>
+          {expression.mouthOpen ? (
+            <path d="M38 80 Q50 92 62 80" fill="none" stroke="#2d2d2d" strokeWidth="2.5" strokeLinecap="round" />
+          ) : (
+            <path d="M42 80 Q50 85 58 80" fill="none" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round" />
+          )}
+          
+          {/* Buck teeth */}
+          <rect x="45" y="80" width="5" height="6" rx="1" fill="white" stroke="#2d2d2d" strokeWidth="1" />
+          <rect x="50" y="80" width="5" height="6" rx="1" fill="white" stroke="#2d2d2d" strokeWidth="1" />
+          
+          {/* Body hint */}
+          <ellipse cx="50" cy="100" rx="20" ry="12" fill="#f5f5f5" stroke="#2d2d2d" strokeWidth="2.5" />
+        </svg>
 
-          {/* Little paws at bottom */}
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex gap-2">
-            <div className="w-4 h-3 bg-white rounded-full border border-pink-200 shadow-sm" />
-            <div className="w-4 h-3 bg-white rounded-full border border-pink-200 shadow-sm" />
-          </div>
-        </div>
-
-        {/* Sparkles for celebrating mood */}
+        {/* Sparkles for celebrating */}
         {mood === "celebrating" && (
           <>
-            <motion.div
-              className="absolute -top-2 -left-2 text-yellow-400"
+            <motion.span
+              className="absolute -top-2 -left-2 text-yellow-400 text-lg"
               animate={{ scale: [0, 1, 0], rotate: [0, 180] }}
               transition={{ repeat: Infinity, duration: 1, repeatDelay: 0.5 }}
             >
               ✦
-            </motion.div>
-            <motion.div
-              className="absolute -top-2 -right-2 text-pink-400"
+            </motion.span>
+            <motion.span
+              className="absolute -top-2 -right-2 text-pink-400 text-lg"
               animate={{ scale: [0, 1, 0], rotate: [0, -180] }}
               transition={{ repeat: Infinity, duration: 1, repeatDelay: 0.7 }}
             >
               ✦
-            </motion.div>
-            <motion.div
-              className="absolute top-1/2 -right-4 text-primary"
-              animate={{ scale: [0, 1, 0] }}
-              transition={{ repeat: Infinity, duration: 1.2, repeatDelay: 0.3 }}
-            >
-              ♡
-            </motion.div>
+            </motion.span>
           </>
         )}
       </motion.div>
 
-      {/* Speech bubble with message */}
+      {/* Speech bubble */}
       {message && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative bg-white border-2 border-pink-200 rounded-2xl px-4 py-2 shadow-md max-w-[200px]"
+          initial={{ opacity: 0, y: 10, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          className="relative bg-card border-2 border-foreground/20 rounded-2xl px-4 py-2 shadow-lg max-w-[200px]"
         >
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l-2 border-t-2 border-pink-200 rotate-45" />
-          <p className="text-sm text-gray-700 text-center font-body">{message}</p>
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-l-2 border-t-2 border-foreground/20 rotate-45" />
+          <p className="text-sm text-foreground text-center font-body">{message}</p>
         </motion.div>
       )}
     </motion.div>
   );
 };
 
-export default KawaiiBunny;
+export default CartoonBunny;

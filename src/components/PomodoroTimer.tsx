@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import KawaiiBunny from "./KawaiiBunny";
+import CartoonBunny from "./KawaiiBunny";
 import { ScheduleItem } from "@/types/schedule";
 
 interface PomodoroTimerProps {
@@ -169,8 +169,8 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
         )}
       </AnimatePresence>
 
-      {/* Kawaii Bunny */}
-      <KawaiiBunny mood={bunnyMood} size="lg" message={bunnyMessage} />
+      {/* Cartoon Bunny */}
+      <CartoonBunny mood={bunnyMood} size="lg" message={bunnyMessage} />
 
       {/* Mode selector */}
       <div className="flex gap-2">
