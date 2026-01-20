@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft } from "lucide-react";
+import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import CartoonBunny from "./KawaiiBunny";
 import { ScheduleItem } from "@/types/schedule";
 
@@ -9,6 +10,9 @@ interface PomodoroTimerProps {
   schedule: ScheduleItem[];
   onBack: () => void;
 }
+
+// Free lofi music streams - using a lofi YouTube embed or audio source
+const LOFI_STREAM_URL = "https://streams.ilovemusic.de/iloveradio17.mp3";
 
 type TimerMode = "work" | "shortBreak" | "longBreak";
 
@@ -70,6 +74,43 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const [sessionsCompleted, setSessions] = useState(0);
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [bunnyMessage, setBunnyMessage] = useState(motivationalMessages.work[0]);
+  
+  // Lofi music state
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.3);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio element
+  useEffect(() => {
+    audioRef.current = new Audio(LOFI_STREAM_URL);
+    audioRef.current.loop = true;
+    audioRef.current.volume = volume;
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  // Handle volume changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    
+    if (isMusicPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(console.error);
+    }
+    setIsMusicPlaying(!isMusicPlaying);
+  };
 
   const currentTask = schedule[currentTaskIndex];
 
@@ -157,12 +198,36 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col items-center gap-6 p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-primary/20 shadow-card"
     >
-      {/* Back button */}
-      <div className="w-full flex justify-start">
+      {/* Header with back button and music controls */}
+      <div className="w-full flex justify-between items-center">
         <Button variant="ghost" size="sm" onClick={onBack} className="gap-1">
           <ChevronLeft className="w-4 h-4" />
           Back to Schedule
         </Button>
+        
+        {/* Lofi Music Controls */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleMusic}
+            className={`gap-1 ${isMusicPlaying ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            {isMusicPlaying ? <Music className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            <span className="text-xs">{isMusicPlaying ? 'Lofi On' : 'Lofi Off'}</span>
+          </Button>
+          {isMusicPlaying && (
+            <div className="w-20">
+              <Slider
+                value={[volume * 100]}
+                onValueChange={(value) => setVolume(value[0] / 100)}
+                max={100}
+                step={1}
+                className="cursor-pointer"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Current Task */}
