@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX } from "lucide-react";
+import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX, Image, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import CartoonBunny from "./KawaiiBunny";
 import { ScheduleItem } from "@/types/schedule";
+import FloatingMoodboardBackground from "./FloatingMoodboardBackground";
 
 interface PomodoroTimerProps {
   schedule: ScheduleItem[];
@@ -79,6 +80,10 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [volume, setVolume] = useState(0.3);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Floating moodboard background state
+  const [showMoodboard, setShowMoodboard] = useState(false);
+  const [moodboardOpacity, setMoodboardOpacity] = useState(0.15);
 
   // Initialize audio element
   useEffect(() => {
@@ -196,37 +201,67 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center gap-6 p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-primary/20 shadow-card"
+      className="relative flex flex-col items-center gap-6 p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-primary/20 shadow-card overflow-hidden"
     >
-      {/* Header with back button and music controls */}
-      <div className="w-full flex justify-between items-center">
+      {/* Floating Moodboard Background */}
+      <FloatingMoodboardBackground enabled={showMoodboard} opacity={moodboardOpacity} />
+      {/* Header with back button and controls */}
+      <div className="w-full flex justify-between items-center z-10">
         <Button variant="ghost" size="sm" onClick={onBack} className="gap-1">
           <ChevronLeft className="w-4 h-4" />
           Back to Schedule
         </Button>
         
-        {/* Lofi Music Controls */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleMusic}
-            className={`gap-1 ${isMusicPlaying ? 'text-primary' : 'text-muted-foreground'}`}
-          >
-            {isMusicPlaying ? <Music className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            <span className="text-xs">{isMusicPlaying ? 'Lofi On' : 'Lofi Off'}</span>
-          </Button>
-          {isMusicPlaying && (
-            <div className="w-20">
-              <Slider
-                value={[volume * 100]}
-                onValueChange={(value) => setVolume(value[0] / 100)}
-                max={100}
-                step={1}
-                className="cursor-pointer"
-              />
-            </div>
-          )}
+        {/* Ambient Controls */}
+        <div className="flex items-center gap-3">
+          {/* Moodboard Toggle */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowMoodboard(!showMoodboard)}
+              className={`gap-1 ${showMoodboard ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              {showMoodboard ? <Image className="w-4 h-4" /> : <ImageOff className="w-4 h-4" />}
+              <span className="text-xs hidden sm:inline">{showMoodboard ? 'Ambient On' : 'Ambient Off'}</span>
+            </Button>
+            {showMoodboard && (
+              <div className="w-16">
+                <Slider
+                  value={[moodboardOpacity * 100]}
+                  onValueChange={(value) => setMoodboardOpacity(value[0] / 100)}
+                  max={40}
+                  min={5}
+                  step={5}
+                  className="cursor-pointer"
+                />
+              </div>
+            )}
+          </div>
+          
+          {/* Lofi Music Controls */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleMusic}
+              className={`gap-1 ${isMusicPlaying ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              {isMusicPlaying ? <Music className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              <span className="text-xs hidden sm:inline">{isMusicPlaying ? 'Lofi On' : 'Lofi Off'}</span>
+            </Button>
+            {isMusicPlaying && (
+              <div className="w-16">
+                <Slider
+                  value={[volume * 100]}
+                  onValueChange={(value) => setVolume(value[0] / 100)}
+                  max={100}
+                  step={1}
+                  className="cursor-pointer"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -372,7 +407,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
         </div>
         <div className="h-2 bg-muted/20 rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-gradient-to-r from-primary to-pink-400 rounded-full"
+            className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
             initial={{ width: 0 }}
             animate={{ width: `${((currentTaskIndex + 1) / schedule.length) * 100}%` }}
           />
