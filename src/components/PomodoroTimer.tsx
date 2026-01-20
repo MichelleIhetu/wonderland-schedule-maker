@@ -214,30 +214,6 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
         
         {/* Ambient Controls */}
         <div className="flex items-center gap-3">
-          {/* Moodboard Toggle */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowMoodboard(!showMoodboard)}
-              className={`gap-1 ${showMoodboard ? 'text-primary' : 'text-muted-foreground'}`}
-            >
-              {showMoodboard ? <Image className="w-4 h-4" /> : <ImageOff className="w-4 h-4" />}
-              <span className="text-xs hidden sm:inline">{showMoodboard ? 'Ambient On' : 'Ambient Off'}</span>
-            </Button>
-            {showMoodboard && (
-              <div className="w-16">
-                <Slider
-                  value={[moodboardOpacity * 100]}
-                  onValueChange={(value) => setMoodboardOpacity(value[0] / 100)}
-                  max={40}
-                  min={5}
-                  step={5}
-                  className="cursor-pointer"
-                />
-              </div>
-            )}
-          </div>
           
           {/* Lofi Music Controls */}
           <div className="flex items-center gap-2">
@@ -288,7 +264,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
       <CartoonBunny mood={bunnyMood} size="lg" message={bunnyMessage} />
 
       {/* Mode selector */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap items-center justify-center gap-2">
         <Button
           variant={mode === "work" ? "default" : "outline"}
           size="sm"
@@ -298,6 +274,27 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
           <Brain className="w-4 h-4" />
           Work
         </Button>
+        <Button
+          variant={showMoodboard ? "default" : "outline"}
+          size="sm"
+          onClick={() => setShowMoodboard(!showMoodboard)}
+          className="gap-1"
+        >
+          {showMoodboard ? <Image className="w-4 h-4" /> : <ImageOff className="w-4 h-4" />}
+          Ambient
+        </Button>
+        {showMoodboard && (
+          <div className="w-16">
+            <Slider
+              value={[moodboardOpacity * 100]}
+              onValueChange={(value) => setMoodboardOpacity(value[0] / 100)}
+              max={40}
+              min={5}
+              step={5}
+              className="cursor-pointer"
+            />
+          </div>
+        )}
         <Button
           variant={mode === "shortBreak" ? "default" : "outline"}
           size="sm"
