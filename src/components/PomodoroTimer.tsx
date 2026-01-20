@@ -26,6 +26,16 @@ const motivationalMessages = {
     "Stay strong, friend!",
     "You're a superstar! ✧",
     "Keep going, I believe in you!",
+    "One step at a time~",
+    "You've got the magic! ✨",
+    "Brilliant work! Keep at it~",
+    "Making progress! ♡",
+    "Your effort inspires me! ★",
+    "Almost there, keep pushing!",
+    "Deep breaths, you're doing great!",
+    "I'm cheering for you! ✧",
+    "Stay curious, stay focused~",
+    "You make hard work look easy!",
   ],
   shortBreak: [
     "Great work! Take a breather~",
@@ -33,6 +43,8 @@ const motivationalMessages = {
     "Stretch those legs! ★",
     "Grab some water! 💧",
     "Deep breaths, friend~",
+    "Rest your eyes a moment~",
+    "You earned this break! ✧",
   ],
   longBreak: [
     "Amazing session! Rest well~",
@@ -40,11 +52,14 @@ const motivationalMessages = {
     "Recharge your energy! ★",
     "Come back refreshed!",
     "So proud of you! ✧",
+    "Take your time, friend~",
+    "Wonderful progress today!",
   ],
   completed: [
     "Session complete! ★",
     "You did it! So proud! ♡",
     "Amazing work today! ✧",
+    "Champion energy! 🏆",
   ],
 };
 
@@ -99,7 +114,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
 
     const messageInterval = setInterval(() => {
       setBunnyMessage(getRandomMessage("work"));
-    }, 30000); // Every 30 seconds
+    }, 15000); // Every 15 seconds for more encouragement
 
     return () => clearInterval(messageInterval);
   }, [isRunning, mode, getRandomMessage]);
