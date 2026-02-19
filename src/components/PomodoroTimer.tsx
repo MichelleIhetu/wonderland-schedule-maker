@@ -68,13 +68,36 @@ const motivationalMessages = {
   ],
 };
 
+// Find the index of the task that matches the current real time
+const getCurrentTaskIndexByTime = (items: ScheduleItem[]): number => {
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const sorted = [...items].sort((a, b) => a.time.localeCompare(b.time));
+
+  let best = 0;
+  for (let i = 0; i < sorted.length; i++) {
+    const [h, m] = sorted[i].time.split(":").map(Number);
+    const taskMinutes = h * 60 + m;
+    if (taskMinutes <= currentMinutes) best = i;
+    else break;
+  }
+  // Map back to original schedule index
+  const bestItem = sorted[best];
+  const originalIndex = items.findIndex((it) => it.id === bestItem.id);
+  return originalIndex >= 0 ? originalIndex : 0;
+};
+
 const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const [mode, setMode] = useState<TimerMode>("work");
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATIONS.work);
   const [isRunning, setIsRunning] = useState(false);
   const [sessionsCompleted, setSessions] = useState(0);
-  const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
+  const [currentTaskIndex, setCurrentTaskIndex] = useState(() =>
+    schedule.length > 0 ? getCurrentTaskIndexByTime(schedule) : 0
+  );
   const [bunnyMessage, setBunnyMessage] = useState(motivationalMessages.work[0]);
+  const [currentTime, setCurrentTime] = useState(new Date());
   
   // Lofi music state
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
@@ -84,6 +107,12 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   // Floating moodboard background state
   const [showMoodboard, setShowMoodboard] = useState(false);
   const [moodboardOpacity, setMoodboardOpacity] = useState(0.15);
+
+  // Live clock tick
+  useEffect(() => {
+    const tick = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(tick);
+  }, []);
 
   // Initialize audio element
   useEffect(() => {
@@ -251,8 +280,14 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
             exit={{ opacity: 0, x: -20 }}
             className="text-center"
           >
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Current Task</p>
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Current Task</p>
+              <span className="text-xs font-display text-primary/80 tabular-nums">
+                {currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+              </span>
+            </div>
             <h2 className="font-display text-xl text-foreground">{currentTask.title}</h2>
+            <p className="text-xs text-muted-foreground/60 mt-0.5">Scheduled at {currentTask.time}</p>
             {currentTask.description && (
               <p className="text-sm text-muted-foreground mt-1">{currentTask.description}</p>
             )}
