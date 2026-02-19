@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
@@ -21,6 +21,13 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [importedEvents, setImportedEvents] = useState<CalendarEvent[]>([]);
 
+  // Current start time — defaults to now, user can override
+  const nowStr = (() => {
+    const n = new Date();
+    return `${n.getHours().toString().padStart(2, "0")}:${n.getMinutes().toString().padStart(2, "0")}`;
+  })();
+  const [startTime, setStartTime] = useState(nowStr);
+
   const updateSetting = <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => {
     onSettingsChange({ ...settings, [key]: value });
   };
@@ -38,14 +45,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       : breakFrequency === "moderate" ? "Include regular 15-minute breaks every 2 hours"
       : "Include frequent breaks - 10 minutes every hour";
     
-    // Format imported events as part of the task list
     const eventsList = importedEvents.length > 0 
       ? `\n\nExisting calendar events (work around these):\n${importedEvents.map(e => 
           `- ${e.title} (${e.isAllDay ? 'All day' : `${e.startTime} - ${e.endTime}`})`
         ).join('\n')}`
       : '';
+
+    const startNote = `\n\nSchedule starts NOW at ${startTime} (current real time). Only schedule tasks from this time onwards, not from wake time.`;
     
-    onComplete(`${tasks}${eventsList}\n\n${breakText}`);
+    onComplete(`${tasks}${eventsList}${startNote}\n\n${breakText}`);
   };
 
   const steps: WizardStep[] = ["greeting", "mood", "stress", "sleep", "breaks", "tasks"];
@@ -230,6 +238,24 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                     Enter time like "11:00 PM" or "23:00"
                   </p>
                 </div>
+              </div>
+
+              {/* Current time subsection */}
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <PlayCircle className="w-5 h-5 text-primary" />
+                  <span className="font-display text-foreground text-sm">Starting From (Now)</span>
+                  <span className="text-xs text-muted-foreground ml-auto">auto-detected ✨</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Your schedule will be built from this time, not your wake time. Adjust if needed.
+                </p>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full bg-background/50 border border-primary/20 rounded-lg p-3 text-foreground text-center text-xl focus:outline-none focus:border-primary/50"
+                />
               </div>
 
               <Button
