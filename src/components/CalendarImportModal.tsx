@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { User, Session } from "@supabase/supabase-js";
 
 export interface CalendarEvent {
@@ -72,51 +73,30 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
     setIsGoogleLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          scopes: 'https://www.googleapis.com/auth/calendar.readonly',
-          redirectTo: window.location.origin,
-          skipBrowserRedirect: true,
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+        extraParams: {
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
         },
       });
       
-      if (error) {
-        console.error('Google sign in error:', error);
-        setError(error.message);
+      if (result.error) {
+        console.error('Google sign in error:', result.error);
+        setError(result.error.message || 'Failed to sign in with Google');
         setIsGoogleLoading(false);
         return;
       }
 
-      if (data?.url) {
-        // Use popup to avoid iframe cookie restrictions
-        const popup = window.open(data.url, 'google-oauth', 'width=500,height=600,left=100,top=100');
-        
-        if (!popup) {
-          // Popup blocked — fall back to opening in new tab
-          setError('Popup was blocked. Please allow popups or open the app in a new tab to sign in.');
-          setIsGoogleLoading(false);
-          return;
-        }
-
-        // Poll for session after popup closes
-        const pollInterval = setInterval(async () => {
-          if (popup.closed) {
-            clearInterval(pollInterval);
-            const { data: { session: newSession } } = await supabase.auth.getSession();
-            if (newSession) {
-              setSession(newSession);
-              setUser(newSession.user);
-            } else {
-              setError('Sign-in was not completed. Please try again.');
-            }
-            setIsGoogleLoading(false);
-          }
-        }, 500);
+      // After successful sign-in, refresh session state
+      const { data: { session: newSession } } = await supabase.auth.getSession();
+      if (newSession) {
+        setSession(newSession);
+        setUser(newSession.user);
       }
     } catch (err) {
       console.error('Error signing in with Google:', err);
       setError('Failed to sign in with Google');
+    } finally {
       setIsGoogleLoading(false);
     }
   };
