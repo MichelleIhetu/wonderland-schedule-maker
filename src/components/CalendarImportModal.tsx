@@ -117,11 +117,16 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
     setError(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('google-calendar', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${session.access_token}`,
+      };
+
+      // Pass the Google provider token if available (required for Calendar API)
+      if (session.provider_token) {
+        headers['x-provider-token'] = session.provider_token;
+      }
+
+      const { data, error } = await supabase.functions.invoke('google-calendar', { headers });
 
       if (error) {
         console.error('Error fetching calendar:', error);
@@ -131,7 +136,12 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
 
       if (data.error) {
         console.error('Calendar API error:', data.error);
-        setError(data.error);
+        // If missing provider token, guide user to sign in again via direct OAuth
+        if (data.error.includes('provider token')) {
+          setError('Calendar access requires re-signing in. Please sign out and sign back in with Google.');
+        } else {
+          setError(data.error);
+        }
         return;
       }
 
@@ -145,6 +155,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
       setIsGoogleLoading(false);
     }
   };
+
 
   const toggleGoogleEvent = (id: string) => {
     const newSelected = new Set(selectedGoogleEvents);
