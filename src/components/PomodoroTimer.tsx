@@ -154,7 +154,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   }, []);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isRunning && timeLeft > 0) {
       interval = setInterval(() => {
