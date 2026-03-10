@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
+
+interface TaskEntry {
+  id: string;
+  title: string;
+  duration: string;
+  deadline: string;
+  priority: "high" | "medium" | "low";
+}
 
 interface WizardInterfaceProps {
   settings: UserSettings;
@@ -17,7 +25,9 @@ type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: WizardInterfaceProps) => {
   const [step, setStep] = useState<WizardStep>("greeting");
   const [breakFrequency, setBreakFrequency] = useState<"minimal" | "moderate" | "frequent">("moderate");
-  const [tasks, setTasks] = useState("");
+  const [taskEntries, setTaskEntries] = useState<TaskEntry[]>([
+    { id: "1", title: "", duration: "", deadline: "", priority: "medium" },
+  ]);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [importedEvents, setImportedEvents] = useState<CalendarEvent[]>([]);
 
@@ -40,11 +50,46 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
     setImportedEvents(importedEvents.filter(e => e.id !== id));
   };
 
+  const addTask = () => {
+    setTaskEntries(prev => [...prev, {
+      id: Date.now().toString(),
+      title: "",
+      duration: "",
+      deadline: "",
+      priority: "medium",
+    }]);
+  };
+
+  const updateTask = (id: string, field: keyof TaskEntry, value: string) => {
+    setTaskEntries(prev => prev.map(t => t.id === id ? { ...t, [field]: value } : t));
+  };
+
+  const removeTask = (id: string) => {
+    if (taskEntries.length > 1) {
+      setTaskEntries(prev => prev.filter(t => t.id !== id));
+    }
+  };
+
   const handleComplete = () => {
     const breakText = breakFrequency === "minimal" ? "Include minimal short breaks" 
       : breakFrequency === "moderate" ? "Include regular 15-minute breaks every 2 hours"
       : "Include frequent breaks - 10 minutes every hour";
     
+    const validTasks = taskEntries.filter(t => t.title.trim());
+    const tasksText = validTasks.map(t => {
+      let line = `- ${t.title}`;
+      if (t.duration) line += ` (estimated: ${t.duration})`;
+      if (t.deadline) line += ` ⏰ DEADLINE: ${t.deadline}`;
+      if (t.priority === "high") line += ` 🔴 HIGH PRIORITY`;
+      else if (t.priority === "low") line += ` 🟢 LOW PRIORITY`;
+      return line;
+    }).join('\n');
+
+    const deadlineTasks = validTasks.filter(t => t.deadline);
+    const deadlineWarning = deadlineTasks.length > 0
+      ? `\n\n🚨 DEADLINE ALERT: ${deadlineTasks.length} task(s) have deadlines. These MUST be completed before their deadline times. Schedule them with enough buffer time to finish. If a deadline is tight, WARN me.`
+      : '';
+
     const eventsList = importedEvents.length > 0 
       ? `\n\n⚠️ FIXED CALENDAR EVENTS — These are immutable time blocks. Schedule everything else AROUND them:\n${importedEvents.map(e => 
           `- [FIXED] ${e.title} (${e.isAllDay ? 'All day' : `${e.startTime} - ${e.endTime}`})${e.description ? ` — ${e.description}` : ''}`
@@ -53,8 +98,10 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
     const startNote = `\n\nSchedule starts NOW at ${startTime} (current real time). Only schedule tasks from this time onwards, not from wake time.`;
     
-    onComplete(`${tasks}${eventsList}${startNote}\n\n${breakText}`);
+    onComplete(`My tasks:\n${tasksText}${deadlineWarning}${eventsList}${startNote}\n\n${breakText}`);
   };
+
+  const hasValidTasks = taskEntries.some(t => t.title.trim());
 
   const steps: WizardStep[] = ["greeting", "mood", "stress", "sleep", "breaks", "tasks"];
   const currentIndex = steps.indexOf(step);
@@ -349,16 +396,69 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                 </div>
               )}
 
-              <textarea
-                value={tasks}
-                onChange={(e) => setTasks(e.target.value)}
-                placeholder="Tell me about your tasks for today...&#10;&#10;For example:&#10;- Study for math exam (2 hours)&#10;- Work on essay (1 hour)&#10;- Go to gym&#10;- Call mom"
-                className="w-full h-40 bg-background/50 border border-primary/20 rounded-xl p-4 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/50"
-              />
+              {/* Structured Task Entries */}
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                {taskEntries.map((task, index) => (
+                  <div key={task.id} className="bg-background/50 border border-primary/20 rounded-xl p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground font-display w-5">{index + 1}.</span>
+                      <input
+                        type="text"
+                        value={task.title}
+                        onChange={(e) => updateTask(task.id, "title", e.target.value)}
+                        placeholder="Task name (e.g., Study for math exam)"
+                        className="flex-1 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none"
+                      />
+                      {taskEntries.length > 1 && (
+                        <button onClick={() => removeTask(task.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2 pl-7">
+                      <input
+                        type="text"
+                        value={task.duration}
+                        onChange={(e) => updateTask(task.id, "duration", e.target.value)}
+                        placeholder="Duration (e.g., 2h)"
+                        className="w-28 bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30"
+                      />
+                      <div className="relative flex items-center">
+                        <AlertTriangle className="w-3 h-3 text-muted-foreground absolute left-2" />
+                        <input
+                          type="text"
+                          value={task.deadline}
+                          onChange={(e) => updateTask(task.id, "deadline", e.target.value)}
+                          placeholder="Deadline (e.g., 5 PM today)"
+                          className="w-40 bg-muted/20 border border-primary/10 rounded-lg pl-6 pr-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30"
+                        />
+                      </div>
+                      <select
+                        value={task.priority}
+                        onChange={(e) => updateTask(task.id, "priority", e.target.value)}
+                        className="bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground focus:outline-none focus:border-primary/30"
+                      >
+                        <option value="high">🔴 High</option>
+                        <option value="medium">🟡 Medium</option>
+                        <option value="low">🟢 Low</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={addTask}
+                className="w-full border-dashed border-primary/30 hover:bg-primary/10 gap-2 text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Add Another Task
+              </Button>
 
               <Button
                 onClick={handleComplete}
-                disabled={!tasks.trim() || isLoading}
+                disabled={!hasValidTasks || isLoading}
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
               >
                 {isLoading ? (
