@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
+
+interface TaskEntry {
+  id: string;
+  title: string;
+  duration: string;
+  deadline: string;
+  priority: "high" | "medium" | "low";
+}
 
 interface WizardInterfaceProps {
   settings: UserSettings;
@@ -17,7 +25,9 @@ type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: WizardInterfaceProps) => {
   const [step, setStep] = useState<WizardStep>("greeting");
   const [breakFrequency, setBreakFrequency] = useState<"minimal" | "moderate" | "frequent">("moderate");
-  const [tasks, setTasks] = useState("");
+  const [taskEntries, setTaskEntries] = useState<TaskEntry[]>([
+    { id: "1", title: "", duration: "", deadline: "", priority: "medium" },
+  ]);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [importedEvents, setImportedEvents] = useState<CalendarEvent[]>([]);
 
