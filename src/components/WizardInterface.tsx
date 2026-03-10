@@ -46,9 +46,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       : "Include frequent breaks - 10 minutes every hour";
     
     const eventsList = importedEvents.length > 0 
-      ? `\n\nExisting calendar events (work around these):\n${importedEvents.map(e => 
-          `- ${e.title} (${e.isAllDay ? 'All day' : `${e.startTime} - ${e.endTime}`})`
-        ).join('\n')}`
+      ? `\n\n⚠️ FIXED CALENDAR EVENTS — These are immutable time blocks. Schedule everything else AROUND them:\n${importedEvents.map(e => 
+          `- [FIXED] ${e.title} (${e.isAllDay ? 'All day' : `${e.startTime} - ${e.endTime}`})${e.description ? ` — ${e.description}` : ''}`
+        ).join('\n')}\n\nPlease include these fixed events in the final schedule output and fill the gaps between them with my tasks.`
       : '';
 
     const startNote = `\n\nSchedule starts NOW at ${startTime} (current real time). Only schedule tasks from this time onwards, not from wake time.`;
