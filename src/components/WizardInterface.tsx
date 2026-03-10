@@ -396,16 +396,69 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                 </div>
               )}
 
-              <textarea
-                value={tasks}
-                onChange={(e) => setTasks(e.target.value)}
-                placeholder="Tell me about your tasks for today...&#10;&#10;For example:&#10;- Study for math exam (2 hours)&#10;- Work on essay (1 hour)&#10;- Go to gym&#10;- Call mom"
-                className="w-full h-40 bg-background/50 border border-primary/20 rounded-xl p-4 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/50"
-              />
+              {/* Structured Task Entries */}
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                {taskEntries.map((task, index) => (
+                  <div key={task.id} className="bg-background/50 border border-primary/20 rounded-xl p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground font-display w-5">{index + 1}.</span>
+                      <input
+                        type="text"
+                        value={task.title}
+                        onChange={(e) => updateTask(task.id, "title", e.target.value)}
+                        placeholder="Task name (e.g., Study for math exam)"
+                        className="flex-1 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none"
+                      />
+                      {taskEntries.length > 1 && (
+                        <button onClick={() => removeTask(task.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2 pl-7">
+                      <input
+                        type="text"
+                        value={task.duration}
+                        onChange={(e) => updateTask(task.id, "duration", e.target.value)}
+                        placeholder="Duration (e.g., 2h)"
+                        className="w-28 bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30"
+                      />
+                      <div className="relative flex items-center">
+                        <AlertTriangle className="w-3 h-3 text-muted-foreground absolute left-2" />
+                        <input
+                          type="text"
+                          value={task.deadline}
+                          onChange={(e) => updateTask(task.id, "deadline", e.target.value)}
+                          placeholder="Deadline (e.g., 5 PM today)"
+                          className="w-40 bg-muted/20 border border-primary/10 rounded-lg pl-6 pr-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30"
+                        />
+                      </div>
+                      <select
+                        value={task.priority}
+                        onChange={(e) => updateTask(task.id, "priority", e.target.value)}
+                        className="bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground focus:outline-none focus:border-primary/30"
+                      >
+                        <option value="high">🔴 High</option>
+                        <option value="medium">🟡 Medium</option>
+                        <option value="low">🟢 Low</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={addTask}
+                className="w-full border-dashed border-primary/30 hover:bg-primary/10 gap-2 text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Add Another Task
+              </Button>
 
               <Button
                 onClick={handleComplete}
-                disabled={!tasks.trim() || isLoading}
+                disabled={!hasValidTasks || isLoading}
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
               >
                 {isLoading ? (
