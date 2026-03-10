@@ -50,11 +50,46 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
     setImportedEvents(importedEvents.filter(e => e.id !== id));
   };
 
+  const addTask = () => {
+    setTaskEntries(prev => [...prev, {
+      id: Date.now().toString(),
+      title: "",
+      duration: "",
+      deadline: "",
+      priority: "medium",
+    }]);
+  };
+
+  const updateTask = (id: string, field: keyof TaskEntry, value: string) => {
+    setTaskEntries(prev => prev.map(t => t.id === id ? { ...t, [field]: value } : t));
+  };
+
+  const removeTask = (id: string) => {
+    if (taskEntries.length > 1) {
+      setTaskEntries(prev => prev.filter(t => t.id !== id));
+    }
+  };
+
   const handleComplete = () => {
     const breakText = breakFrequency === "minimal" ? "Include minimal short breaks" 
       : breakFrequency === "moderate" ? "Include regular 15-minute breaks every 2 hours"
       : "Include frequent breaks - 10 minutes every hour";
     
+    const validTasks = taskEntries.filter(t => t.title.trim());
+    const tasksText = validTasks.map(t => {
+      let line = `- ${t.title}`;
+      if (t.duration) line += ` (estimated: ${t.duration})`;
+      if (t.deadline) line += ` ⏰ DEADLINE: ${t.deadline}`;
+      if (t.priority === "high") line += ` 🔴 HIGH PRIORITY`;
+      else if (t.priority === "low") line += ` 🟢 LOW PRIORITY`;
+      return line;
+    }).join('\n');
+
+    const deadlineTasks = validTasks.filter(t => t.deadline);
+    const deadlineWarning = deadlineTasks.length > 0
+      ? `\n\n🚨 DEADLINE ALERT: ${deadlineTasks.length} task(s) have deadlines. These MUST be completed before their deadline times. Schedule them with enough buffer time to finish. If a deadline is tight, WARN me.`
+      : '';
+
     const eventsList = importedEvents.length > 0 
       ? `\n\n⚠️ FIXED CALENDAR EVENTS — These are immutable time blocks. Schedule everything else AROUND them:\n${importedEvents.map(e => 
           `- [FIXED] ${e.title} (${e.isAllDay ? 'All day' : `${e.startTime} - ${e.endTime}`})${e.description ? ` — ${e.description}` : ''}`
@@ -63,8 +98,10 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
     const startNote = `\n\nSchedule starts NOW at ${startTime} (current real time). Only schedule tasks from this time onwards, not from wake time.`;
     
-    onComplete(`${tasks}${eventsList}${startNote}\n\n${breakText}`);
+    onComplete(`My tasks:\n${tasksText}${deadlineWarning}${eventsList}${startNote}\n\n${breakText}`);
   };
+
+  const hasValidTasks = taskEntries.some(t => t.title.trim());
 
   const steps: WizardStep[] = ["greeting", "mood", "stress", "sleep", "breaks", "tasks"];
   const currentIndex = steps.indexOf(step);
