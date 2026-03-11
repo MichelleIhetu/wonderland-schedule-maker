@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Sparkles, ImageIcon, Clock } from "lucide-react";
 import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
@@ -56,6 +56,8 @@ const hexToHsl = (hex: string): string => {
 };
 
 const Index = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [viewMode, setViewMode] = useState<ViewMode>("wizard");
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -79,12 +81,51 @@ const Index = () => {
     checkInHistory,
   } = useHourlyCheckIn({
     enabled: viewMode === "pomodoro" || generatedSchedule.length > 0,
-    intervalMinutes: 60, // Check in every hour
-    onCheckInDue: () => setIsCheckInModalOpen(true),
+    intervalMinutes: 60,
+    onCheckInDue: () => {
+      navigate("/vibe-check", { state: { backgroundTheme: settings.backgroundTheme } });
+    },
   });
 
   // Get current task for check-in context
   const currentTask = generatedSchedule[0]?.title;
+
+  // Handle vibe check result when returning from /vibe-check
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.vibeCheckResult) {
+      const result = state.vibeCheckResult;
+      completeCheckIn({
+        mood: result.mood,
+        energy: result.energy,
+        taskUpdate: result.notes,
+        needBreak: result.needBreak,
+      });
+
+      if (result.mood === "struggling") {
+        toast("Hang in there! We've noted your vibe.", { icon: "💪" });
+      } else if (result.mood === "great") {
+        toast("You're killing it! Keep going!", { icon: "🔥" });
+      } else {
+        toast("Vibe check complete!", { icon: "✨" });
+      }
+
+      if (result.adjustSchedule === "lighten" && generatedSchedule.length > 0) {
+        toast("Lightening your load — non-urgent tasks pushed back", { icon: "📋" });
+      } else if (result.adjustSchedule === "reschedule") {
+        toast("Let's rebuild your schedule from here", { icon: "🔄" });
+        setGeneratedSchedule([]);
+        setViewMode("wizard");
+      }
+
+      if (result.needBreak && viewMode === "pomodoro") {
+        toast("Adding a break for you — take it easy!", { icon: "☕" });
+      }
+
+      // Clear the state so it doesn't re-trigger
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Update custom colors when theme changes
   useEffect(() => {
@@ -218,11 +259,11 @@ const Index = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsCheckInModalOpen(true)}
+              onClick={() => navigate("/vibe-check", { state: { backgroundTheme: settings.backgroundTheme } })}
               className="gap-2"
             >
               <Clock className="w-4 h-4" />
-              <span className="hidden sm:inline">Check In</span>
+              <span className="hidden sm:inline">Vibe Check</span>
               {minutesUntilNextCheckIn < 60 && (
                 <span className="text-xs text-muted-foreground">
                   ({minutesUntilNextCheckIn}m)
