@@ -81,8 +81,10 @@ const Index = () => {
     checkInHistory,
   } = useHourlyCheckIn({
     enabled: viewMode === "pomodoro" || generatedSchedule.length > 0,
-    intervalMinutes: 60, // Check in every hour
-    onCheckInDue: () => setIsCheckInModalOpen(true),
+    intervalMinutes: 60,
+    onCheckInDue: () => {
+      navigate("/vibe-check", { state: { backgroundTheme: settings.backgroundTheme } });
+    },
   });
 
   // Get current task for check-in context
