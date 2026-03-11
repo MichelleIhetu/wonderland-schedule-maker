@@ -259,7 +259,7 @@ const Index = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setIsCheckInModalOpen(true)}
+              onClick={() => navigate("/vibe-check", { state: { backgroundTheme: settings.backgroundTheme } })}
               className="gap-2"
             >
               <Clock className="w-4 h-4" />
