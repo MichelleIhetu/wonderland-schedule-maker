@@ -90,6 +90,43 @@ const Index = () => {
   // Get current task for check-in context
   const currentTask = generatedSchedule[0]?.title;
 
+  // Handle vibe check result when returning from /vibe-check
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.vibeCheckResult) {
+      const result = state.vibeCheckResult;
+      completeCheckIn({
+        mood: result.mood,
+        energy: result.energy,
+        taskUpdate: result.notes,
+        needBreak: result.needBreak,
+      });
+
+      if (result.mood === "struggling") {
+        toast("Hang in there! We've noted your vibe.", { icon: "💪" });
+      } else if (result.mood === "great") {
+        toast("You're killing it! Keep going!", { icon: "🔥" });
+      } else {
+        toast("Vibe check complete!", { icon: "✨" });
+      }
+
+      if (result.adjustSchedule === "lighten" && generatedSchedule.length > 0) {
+        toast("Lightening your load — non-urgent tasks pushed back", { icon: "📋" });
+      } else if (result.adjustSchedule === "reschedule") {
+        toast("Let's rebuild your schedule from here", { icon: "🔄" });
+        setGeneratedSchedule([]);
+        setViewMode("wizard");
+      }
+
+      if (result.needBreak && viewMode === "pomodoro") {
+        toast("Adding a break for you — take it easy!", { icon: "☕" });
+      }
+
+      // Clear the state so it doesn't re-trigger
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   // Update custom colors when theme changes
   useEffect(() => {
     setCustomColors(defaultThemeColors[settings.backgroundTheme]);
