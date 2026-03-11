@@ -263,7 +263,7 @@ const Index = () => {
               className="gap-2"
             >
               <Clock className="w-4 h-4" />
-              <span className="hidden sm:inline">Check In</span>
+              <span className="hidden sm:inline">Vibe Check</span>
               {minutesUntilNextCheckIn < 60 && (
                 <span className="text-xs text-muted-foreground">
                   ({minutesUntilNextCheckIn}m)
