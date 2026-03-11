@@ -56,6 +56,8 @@ const hexToHsl = (hex: string): string => {
 };
 
 const Index = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [viewMode, setViewMode] = useState<ViewMode>("wizard");
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
