@@ -42,7 +42,51 @@ const getGridCols = (count: number) => {
   return "grid-cols-4";
 };
 
-const WallGallery = ({ enabled, imageCount }: WallGalleryProps) => {
+const frameStyles: Record<FrameStyle, {
+  outer: string;
+  inner: string;
+  mat: string;
+  highlight: string;
+  nail: string;
+}> = {
+  wood: {
+    outer: "linear-gradient(145deg, hsl(30 30% 35%), hsl(25 25% 22%))",
+    inner: "linear-gradient(145deg, hsl(30 20% 28%), hsl(25 20% 18%))",
+    mat: "hsl(40 20% 95%)",
+    highlight: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.1) 100%)",
+    nail: "bg-muted-foreground/40",
+  },
+  black: {
+    outer: "linear-gradient(145deg, hsl(0 0% 15%), hsl(0 0% 5%))",
+    inner: "linear-gradient(145deg, hsl(0 0% 10%), hsl(0 0% 3%))",
+    mat: "hsl(0 0% 96%)",
+    highlight: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.15) 100%)",
+    nail: "bg-muted-foreground/30",
+  },
+  gold: {
+    outer: "linear-gradient(145deg, hsl(43 70% 55%), hsl(38 60% 35%))",
+    inner: "linear-gradient(145deg, hsl(40 65% 48%), hsl(35 55% 30%))",
+    mat: "hsl(45 30% 95%)",
+    highlight: "linear-gradient(135deg, rgba(255,235,180,0.25) 0%, transparent 35%, transparent 55%, rgba(120,80,0,0.12) 100%)",
+    nail: "bg-yellow-700/50",
+  },
+  white: {
+    outer: "linear-gradient(145deg, hsl(0 0% 95%), hsl(0 0% 85%))",
+    inner: "linear-gradient(145deg, hsl(0 0% 90%), hsl(0 0% 82%))",
+    mat: "hsl(0 0% 98%)",
+    highlight: "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.04) 100%)",
+    nail: "bg-muted-foreground/25",
+  },
+  rustic: {
+    outer: "linear-gradient(145deg, hsl(20 40% 30%), hsl(15 35% 18%))",
+    inner: "linear-gradient(145deg, hsl(18 30% 25%), hsl(12 25% 15%))",
+    mat: "hsl(35 25% 90%)",
+    highlight: "linear-gradient(135deg, rgba(255,220,180,0.08) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.12) 100%)",
+    nail: "bg-amber-900/40",
+  },
+};
+
+const WallGallery = ({ enabled, imageCount, frameStyle = "wood" }: WallGalleryProps) => {
   const { user } = useAuth();
   const [images, setImages] = useState<GalleryImage[]>([]);
 
