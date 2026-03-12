@@ -153,10 +153,10 @@ const CartoonBunny = ({ mood = "happy", size = "md", message }: CartoonBunnyProp
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative bg-[#fffef8] border border-[#d4c4b0] rounded-xl px-4 py-2 shadow-sm max-w-[180px]"
+          className="relative bg-background/90 backdrop-blur-md border border-border rounded-xl px-5 py-3 shadow-lg max-w-[220px] ring-1 ring-border/20"
         >
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#fffef8] border-l border-t border-[#d4c4b0] rotate-45" />
-          <p className="text-sm text-[#6b4423] text-center font-body italic">{message}</p>
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-background/90 border-l border-t border-border rotate-45" />
+          <p className="text-sm text-foreground text-center font-body italic font-semibold drop-shadow-sm">{message}</p>
         </motion.div>
       )}
     </motion.div>
