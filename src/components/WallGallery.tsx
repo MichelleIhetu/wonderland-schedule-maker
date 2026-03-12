@@ -1,20 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export type FrameStyle = "wood" | "black" | "gold" | "white" | "rustic";
 
+export interface GalleryImage {
+  id: string;
+  imageUrl: string;
+  title: string;
+}
+
 interface WallGalleryProps {
   enabled: boolean;
   imageCount: 4 | 6 | 8 | 12;
   frameStyle?: FrameStyle;
-}
-
-interface GalleryImage {
-  id: string;
-  imageUrl: string;
-  title: string;
+  customImages?: GalleryImage[];
+  rotateInterval?: number; // minutes: 0 = no rotation
 }
 
 const defaultImages: GalleryImage[] = [
@@ -32,7 +34,6 @@ const defaultImages: GalleryImage[] = [
   { id: "w12", imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400", title: "Night Coding" },
 ];
 
-// Slight random tilt for each frame to look like hung pictures
 const frameTilts = [-3, 2, -1, 3, -2, 1, -3, 2, 1, -2, 3, -1];
 
 const getGridCols = (count: number) => {
@@ -86,24 +87,29 @@ const frameStyles: Record<FrameStyle, {
   },
 };
 
-const WallGallery = ({ enabled, imageCount, frameStyle = "wood" }: WallGalleryProps) => {
+const WallGallery = ({ enabled, imageCount, frameStyle = "wood", customImages, rotateInterval = 0 }: WallGalleryProps) => {
   const { user } = useAuth();
-  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [allImages, setAllImages] = useState<GalleryImage[]>([]);
+  const [rotationOffset, setRotationOffset] = useState(0);
 
+  // Load images from custom source, saved boards, or defaults
   useEffect(() => {
     if (!enabled) return;
 
+    if (customImages && customImages.length > 0) {
+      setAllImages(customImages);
+      return;
+    }
+
     const loadImages = async () => {
       if (user) {
-        // Try loading from saved moodboard items
         const { data } = await supabase
           .from("moodboard_items")
           .select("*")
-          .order("created_at", { ascending: false })
-          .limit(imageCount);
+          .order("created_at", { ascending: false });
 
         if (data && data.length > 0) {
-          setImages(
+          setAllImages(
             data.map((item: any) => ({
               id: item.id,
               imageUrl: item.image_url,
@@ -113,36 +119,53 @@ const WallGallery = ({ enabled, imageCount, frameStyle = "wood" }: WallGalleryPr
           return;
         }
       }
-      // Fallback to defaults
-      const shuffled = [...defaultImages].sort(() => Math.random() - 0.5);
-      setImages(shuffled.slice(0, imageCount));
+      setAllImages([...defaultImages].sort(() => Math.random() - 0.5));
     };
 
     loadImages();
-  }, [enabled, imageCount, user]);
+  }, [enabled, customImages, user]);
 
-  if (!enabled || images.length === 0) return null;
+  // Rotation timer
+  useEffect(() => {
+    if (!enabled || rotateInterval <= 0 || allImages.length <= imageCount) return;
 
-  const displayImages = images.slice(0, imageCount);
+    const interval = setInterval(() => {
+      setRotationOffset((prev) => (prev + imageCount) % allImages.length);
+    }, rotateInterval * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [enabled, rotateInterval, allImages.length, imageCount]);
+
+  if (!enabled || allImages.length === 0) return null;
+
+  // Get current window of images based on rotation offset
+  const displayImages: GalleryImage[] = [];
+  for (let i = 0; i < imageCount; i++) {
+    const idx = (rotationOffset + i) % allImages.length;
+    displayImages.push(allImages[idx]);
+  }
+
   const frame = frameStyles[frameStyle];
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       <motion.div
+        key={rotationOffset}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
+        transition={{ duration: 0.8 }}
         className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
       >
         {/* Wall texture overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/60" />
 
         {/* Picture frames grid */}
-        <div className={`absolute inset-0 flex items-center justify-center p-8`}>
+        <div className="absolute inset-0 flex items-center justify-center p-8">
           <div className={`grid ${getGridCols(imageCount)} gap-4 md:gap-6 max-w-full`}>
             {displayImages.map((img, i) => (
               <motion.div
-                key={img.id}
+                key={`${img.id}-${rotationOffset}`}
                 initial={{ opacity: 0, y: -20, rotate: 0 }}
                 animate={{
                   opacity: 0.7,
@@ -179,10 +202,7 @@ const WallGallery = ({ enabled, imageCount, frameStyle = "wood" }: WallGalleryPr
                     }}
                   >
                     {/* Mat / passepartout */}
-                    <div
-                      className="p-1.5 md:p-2 rounded-[1px]"
-                      style={{ background: frame.mat }}
-                    >
+                    <div className="p-1.5 md:p-2 rounded-[1px]" style={{ background: frame.mat }}>
                       <div className="relative overflow-hidden">
                         <img
                           src={img.imageUrl}
