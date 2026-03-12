@@ -158,28 +158,31 @@ const WallGallery = ({ enabled, imageCount, frameStyle = "wood" }: WallGalleryPr
                 className="relative group"
               >
                 {/* Nail on wall */}
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-muted-foreground/40 shadow-sm z-10" />
+                <div className={`absolute -top-3 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full ${frame.nail} shadow-sm z-10`} />
                 {/* Wire/string */}
                 <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-px h-3 bg-muted-foreground/25" />
 
-                {/* Wooden frame */}
+                {/* Frame */}
                 <div
-                  className="relative rounded-[3px] shadow-[0_4px_20px_rgba(0,0,0,0.25),0_2px_6px_rgba(0,0,0,0.15)]"
+                  className={`relative shadow-[0_4px_20px_rgba(0,0,0,0.25),0_2px_6px_rgba(0,0,0,0.15)] ${frameStyle === "gold" ? "rounded-[4px]" : "rounded-[3px]"}`}
                   style={{
-                    background: "linear-gradient(145deg, hsl(30 30% 35%), hsl(25 25% 22%))",
-                    padding: "6px",
+                    background: frame.outer,
+                    padding: frameStyle === "gold" ? "7px" : "6px",
                   }}
                 >
                   {/* Inner frame bevel */}
                   <div
-                    className="rounded-[2px]"
+                    className={`${frameStyle === "gold" ? "rounded-[3px]" : "rounded-[2px]"}`}
                     style={{
-                      background: "linear-gradient(145deg, hsl(30 20% 28%), hsl(25 20% 18%))",
+                      background: frame.inner,
                       padding: "2px",
                     }}
                   >
-                    {/* White mat / passepartout */}
-                    <div className="bg-[hsl(40_20%_95%)] p-1.5 md:p-2 rounded-[1px]">
+                    {/* Mat / passepartout */}
+                    <div
+                      className="p-1.5 md:p-2 rounded-[1px]"
+                      style={{ background: frame.mat }}
+                    >
                       <div className="relative overflow-hidden">
                         <img
                           src={img.imageUrl}
@@ -194,11 +197,20 @@ const WallGallery = ({ enabled, imageCount, frameStyle = "wood" }: WallGalleryPr
                   </div>
 
                   {/* Frame highlights */}
-                  <div className="absolute inset-0 rounded-[3px] pointer-events-none"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.1) 100%)",
-                    }}
+                  <div
+                    className={`absolute inset-0 ${frameStyle === "gold" ? "rounded-[4px]" : "rounded-[3px]"} pointer-events-none`}
+                    style={{ background: frame.highlight }}
                   />
+
+                  {/* Gold ornate corner accents */}
+                  {frameStyle === "gold" && (
+                    <>
+                      <div className="absolute top-0.5 left-0.5 w-2.5 h-2.5 border-t-2 border-l-2 border-yellow-300/30 rounded-tl-[3px]" />
+                      <div className="absolute top-0.5 right-0.5 w-2.5 h-2.5 border-t-2 border-r-2 border-yellow-300/30 rounded-tr-[3px]" />
+                      <div className="absolute bottom-0.5 left-0.5 w-2.5 h-2.5 border-b-2 border-l-2 border-yellow-300/30 rounded-bl-[3px]" />
+                      <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 border-b-2 border-r-2 border-yellow-300/30 rounded-br-[3px]" />
+                    </>
+                  )}
                 </div>
 
                 {/* Wall shadow behind frame */}
