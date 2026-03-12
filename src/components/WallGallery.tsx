@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
+export type FrameStyle = "wood" | "black" | "gold" | "white" | "rustic";
+
 interface WallGalleryProps {
   enabled: boolean;
   imageCount: 4 | 6 | 8 | 12;
+  frameStyle?: FrameStyle;
 }
 
 interface GalleryImage {
