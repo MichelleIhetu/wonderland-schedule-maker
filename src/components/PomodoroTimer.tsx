@@ -21,7 +21,7 @@ interface PomodoroTimerProps {
   onBack: () => void;
 }
 
-const LOFI_STREAM_URL = "https://streams.ilovemusic.de/iloveradio14.mp3";
+const LOFI_STREAM_URL = "https://c4.radioboss.fm/stream/158"; // Chillhop Radio - free ambient study music
 
 type TimerMode = "work" | "shortBreak" | "longBreak";
 
