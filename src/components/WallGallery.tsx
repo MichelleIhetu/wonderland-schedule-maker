@@ -34,7 +34,7 @@ const defaultImages: GalleryImage[] = [
   { id: "w12", imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400", title: "Night Coding" },
 ];
 
-const frameTilts = [-3, 2, -1, 3, -2, 1, -3, 2, 1, -2, 3, -1];
+const frameTilts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 const getGridCols = (count: number) => {
   if (count <= 4) return "grid-cols-2";
