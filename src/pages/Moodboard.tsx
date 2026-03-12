@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Heart, Bookmark, Search, Sparkles, ExternalLink, Link2, X, Check } from "lucide-react";
+import { ArrowLeft, Heart, Bookmark, Search, Sparkles, ExternalLink, Link2, X, Check, Loader2, Plus, Trash2, FolderHeart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ThemeBackground from "@/components/ThemeBackground";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
+import { pinterestApi, type PinterestImage } from "@/lib/api/pinterest";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface MoodboardItem {
   id: string;
@@ -22,6 +27,15 @@ interface Aesthetic {
   description: string;
   color: string;
   items: MoodboardItem[];
+}
+
+interface SavedItem {
+  id: string;
+  board_name: string;
+  image_url: string;
+  title: string;
+  source_url: string;
+  created_at: string;
 }
 
 const aesthetics: Aesthetic[] = [
@@ -110,12 +124,25 @@ const aesthetics: Aesthetic[] = [
 ];
 
 const Moodboard = () => {
+  const { user } = useAuth();
   const [selectedAesthetic, setSelectedAesthetic] = useState<Aesthetic | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [savedItems, setSavedItems] = useState<Set<string>>(new Set());
-  const [pinterestModalOpen, setPinterestModalOpen] = useState(false);
-  const [pinterestConnected, setPinterestConnected] = useState(false);
-  const [pinterestBoards, setPinterestBoards] = useState<string[]>([]);
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const [activeTab, setActiveTab] = useState("browse");
+
+  // Pinterest search state
+  const [pinterestQuery, setPinterestQuery] = useState("");
+  const [pinterestResults, setPinterestResults] = useState<PinterestImage[]>([]);
+  const [pinterestLoading, setPinterestLoading] = useState(false);
+
+  // Board import state
+  const [boardUrl, setBoardUrl] = useState("");
+  const [boardImportLoading, setBoardImportLoading] = useState(false);
+  const [boardResults, setBoardResults] = useState<PinterestImage[]>([]);
+
+  // Board management
+  const [newBoardName, setNewBoardName] = useState("");
+  const [selectedBoard, setSelectedBoard] = useState("My Board");
 
   const filteredAesthetics = aesthetics.filter(
     (a) =>
@@ -123,44 +150,151 @@ const Moodboard = () => {
       a.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const toggleSave = (itemId: string) => {
-    setSavedItems((prev) => {
-      const next = new Set(prev);
-      if (next.has(itemId)) {
-        next.delete(itemId);
-      } else {
-        next.add(itemId);
-      }
-      return next;
+  // Load saved items
+  useEffect(() => {
+    if (user) {
+      loadSavedItems();
+    }
+  }, [user]);
+
+  const loadSavedItems = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("moodboard_items")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data && !error) {
+      setSavedItems(data as SavedItem[]);
+    }
+  };
+
+  const saveImage = async (imageUrl: string, title: string, sourceUrl: string, boardName?: string) => {
+    if (!user) {
+      toast.error("Sign in to save images to your boards");
+      return;
+    }
+    const { error } = await supabase.from("moodboard_items").insert({
+      user_id: user.id,
+      image_url: imageUrl,
+      title: title || "Untitled",
+      source_url: sourceUrl || "",
+      board_name: boardName || selectedBoard,
     });
+    if (error) {
+      toast.error("Failed to save image");
+      console.error(error);
+    } else {
+      toast.success("Saved to " + (boardName || selectedBoard) + " ✨");
+      loadSavedItems();
+    }
   };
 
-  // Pinterest connection handler - ready for API integration
-  const handlePinterestConnect = () => {
-    // TODO: Replace with actual Pinterest OAuth flow
-    // This is where you'll integrate the Pinterest Business API
-    // Example flow:
-    // 1. Redirect to Pinterest OAuth: https://api.pinterest.com/oauth/
-    // 2. Handle callback with auth code
-    // 3. Exchange for access token
-    // 4. Fetch user's boards
-    
-    // For now, simulate a successful connection
-    setPinterestConnected(true);
-    setPinterestBoards(["Study Inspiration", "Desk Goals", "Academic Aesthetic", "Cozy Vibes"]);
-    setPinterestModalOpen(false);
+  const removeSavedItem = async (id: string) => {
+    const { error } = await supabase.from("moodboard_items").delete().eq("id", id);
+    if (!error) {
+      setSavedItems((prev) => prev.filter((i) => i.id !== id));
+      toast.success("Removed from board");
+    }
   };
 
-  const handlePinterestDisconnect = () => {
-    setPinterestConnected(false);
-    setPinterestBoards([]);
+  const handlePinterestSearch = async () => {
+    if (!pinterestQuery.trim()) return;
+    setPinterestLoading(true);
+    setPinterestResults([]);
+    try {
+      const result = await pinterestApi.searchAesthetic(pinterestQuery);
+      if (result.success && result.images.length > 0) {
+        setPinterestResults(result.images);
+      } else {
+        toast.error(result.error || "No images found. Try a different search term.");
+      }
+    } catch (err) {
+      toast.error("Search failed. Please try again.");
+    } finally {
+      setPinterestLoading(false);
+    }
   };
+
+  const handleBoardImport = async () => {
+    if (!boardUrl.trim()) return;
+    setBoardImportLoading(true);
+    setBoardResults([]);
+    try {
+      const result = await pinterestApi.importBoard(boardUrl);
+      if (result.success && result.images.length > 0) {
+        setBoardResults(result.images);
+        toast.success(`Found ${result.images.length} images!`);
+      } else {
+        toast.error(result.error || "Couldn't extract images from that URL");
+      }
+    } catch (err) {
+      toast.error("Import failed. Please check the URL.");
+    } finally {
+      setBoardImportLoading(false);
+    }
+  };
+
+  const boards = [...new Set(savedItems.map((i) => i.board_name))];
 
   const heightClasses = {
     short: "h-40",
     medium: "h-56",
     tall: "h-72",
   };
+
+  const ImageCard = ({ imageUrl, title, sourceUrl, onSave, onRemove, isSaved }: {
+    imageUrl: string; title: string; sourceUrl?: string;
+    onSave?: () => void; onRemove?: () => void; isSaved?: boolean;
+  }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="break-inside-avoid group relative rounded-xl overflow-hidden shadow-card mb-4"
+    >
+      <img
+        src={imageUrl}
+        alt={title}
+        className="w-full object-cover min-h-[160px] max-h-[320px] transition-transform duration-300 group-hover:scale-105"
+        loading="lazy"
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute bottom-0 left-0 right-0 p-3">
+          <p className="text-white text-sm font-body line-clamp-2">{title}</p>
+        </div>
+        <div className="absolute top-2 right-2 flex gap-2">
+          {onSave && (
+            <button
+              onClick={onSave}
+              className="p-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/80 transition-colors"
+              title="Save to board"
+            >
+              <Bookmark className="w-4 h-4" />
+            </button>
+          )}
+          {onRemove && (
+            <button
+              onClick={onRemove}
+              className="p-2 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-colors"
+              title="Remove"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {sourceUrl && (
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute top-2 left-2 p-2 rounded-full bg-white/90 text-gray-700 hover:bg-white transition-colors"
+          >
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        )}
+      </div>
+    </motion.div>
+  );
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -184,326 +318,315 @@ const Moodboard = () => {
               </p>
             </div>
           </div>
+        </header>
 
-          {/* Pinterest & Search */}
-          <div className="flex items-center gap-3">
-            {/* Pinterest Connect Button */}
-            <Button
-              variant={pinterestConnected ? "outline" : "default"}
-              size="sm"
-              onClick={() => pinterestConnected ? handlePinterestDisconnect() : setPinterestModalOpen(true)}
-              className="gap-2 hidden sm:flex"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
-              </svg>
-              {pinterestConnected ? (
-                <>
-                  <Check className="w-3 h-3" />
-                  Connected
-                </>
-              ) : (
-                "Connect Pinterest"
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="grid w-full grid-cols-4 max-w-lg">
+            <TabsTrigger value="browse" className="gap-1 text-xs sm:text-sm">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Browse</span>
+            </TabsTrigger>
+            <TabsTrigger value="search" className="gap-1 text-xs sm:text-sm">
+              <Search className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Search</span>
+            </TabsTrigger>
+            <TabsTrigger value="import" className="gap-1 text-xs sm:text-sm">
+              <Link2 className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Import</span>
+            </TabsTrigger>
+            <TabsTrigger value="saved" className="gap-1 text-xs sm:text-sm">
+              <FolderHeart className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">My Boards</span>
+              {savedItems.length > 0 && (
+                <span className="ml-1 text-xs bg-primary/20 text-primary px-1.5 rounded-full">
+                  {savedItems.length}
+                </span>
               )}
-            </Button>
+            </TabsTrigger>
+          </TabsList>
 
-            {/* Search */}
-            <div className="relative w-64 hidden md:block">
+          {/* Browse Tab */}
+          <TabsContent value="browse" className="mt-6">
+            {/* Search filter */}
+            <div className="relative mb-6 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search aesthetics..."
+                placeholder="Filter aesthetics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
-          </div>
-        </header>
 
-        {/* Pinterest Connected Banner */}
-        {pinterestConnected && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-4 bg-card/80 backdrop-blur-sm rounded-xl border border-primary/30"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#E60023] flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-display text-sm text-foreground">Pinterest Connected</p>
-                  <p className="text-xs text-muted-foreground">{pinterestBoards.length} boards synced</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="text-xs gap-1">
-                  <ExternalLink className="w-3 h-3" />
-                  View Boards
-                </Button>
-                <Button variant="ghost" size="icon" onClick={handlePinterestDisconnect}>
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-            
-            {/* Pinterest Boards Preview */}
-            <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-              {pinterestBoards.map((board) => (
-                <button
-                  key={board}
-                  className="flex-shrink-0 px-3 py-1.5 bg-background/50 border border-border rounded-full text-xs font-body hover:border-primary/50 transition-colors"
+            <AnimatePresence mode="wait">
+              {selectedAesthetic ? (
+                <motion.div
+                  key="detail"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
                 >
-                  {board}
-                </button>
-              ))}
-              <button className="flex-shrink-0 px-3 py-1.5 bg-primary/10 border border-primary/30 rounded-full text-xs font-body text-primary hover:bg-primary/20 transition-colors">
-                + Import Board
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Mobile Pinterest Button */}
-        <div className="flex gap-2 mb-4 sm:hidden">
-          <Button
-            variant={pinterestConnected ? "outline" : "default"}
-            size="sm"
-            onClick={() => pinterestConnected ? handlePinterestDisconnect() : setPinterestModalOpen(true)}
-            className="gap-2 flex-1"
-          >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
-            </svg>
-            {pinterestConnected ? "Connected" : "Connect Pinterest"}
-          </Button>
-        </div>
-
-        {/* Mobile Search */}
-        <div className="relative mb-6 md:hidden">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search aesthetics..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-
-        <AnimatePresence mode="wait">
-          {selectedAesthetic ? (
-            /* Aesthetic Detail View */
-            <motion.div
-              key="detail"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              {/* Back button and title */}
-              <div className="flex items-center gap-4 mb-6">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedAesthetic(null)}
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
-                <div>
-                  <h2 className="font-display text-xl flex items-center gap-2">
-                    {selectedAesthetic.emoji} {selectedAesthetic.name}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedAesthetic.description}
-                  </p>
-                </div>
-              </div>
-
-              {/* Masonry Grid */}
-              <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-                {selectedAesthetic.items.map((item, index) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="break-inside-avoid group relative rounded-xl overflow-hidden shadow-card"
-                  >
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className={`w-full object-cover ${heightClasses[item.height]} transition-transform duration-300 group-hover:scale-105`}
-                    />
-                    {/* Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <p className="text-white text-sm font-body">{item.title}</p>
-                      </div>
-                      <div className="absolute top-2 right-2 flex gap-2">
-                        <button
-                          onClick={() => toggleSave(item.id)}
-                          className={`p-2 rounded-full transition-colors ${
-                            savedItems.has(item.id)
-                              ? "bg-primary text-white"
-                              : "bg-white/90 text-gray-700 hover:bg-white"
-                          }`}
-                        >
-                          <Bookmark className="w-4 h-4" />
-                        </button>
-                      </div>
+                  <div className="flex items-center gap-4 mb-6">
+                    <Button variant="outline" size="sm" onClick={() => setSelectedAesthetic(null)}>
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back
+                    </Button>
+                    <div>
+                      <h2 className="font-display text-xl flex items-center gap-2">
+                        {selectedAesthetic.emoji} {selectedAesthetic.name}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">{selectedAesthetic.description}</p>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
+                  </div>
 
-              {/* Inspiration tip */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="mt-8 p-4 bg-card/80 backdrop-blur-sm rounded-xl border border-border text-center"
-              >
-                <Sparkles className="w-5 h-5 text-primary mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground font-body">
-                  Save images that inspire you and use them to design your perfect study space!
-                </p>
-              </motion.div>
-            </motion.div>
-          ) : (
-            /* Aesthetic Categories Grid */
-            <motion.div
-              key="categories"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredAesthetics.map((aesthetic, index) => (
-                  <motion.button
-                    key={aesthetic.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    onClick={() => setSelectedAesthetic(aesthetic)}
-                    className="group relative overflow-hidden rounded-2xl border border-border bg-card/80 backdrop-blur-sm shadow-card hover:shadow-float transition-all duration-300 text-left"
-                  >
-                    {/* Preview images grid */}
-                    <div className="grid grid-cols-3 gap-0.5 h-32 overflow-hidden">
-                      {aesthetic.items.slice(0, 3).map((item) => (
-                        <img
-                          key={item.id}
-                          src={item.imageUrl}
-                          alt=""
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
+                    {selectedAesthetic.items.map((item) => (
+                      <div key={item.id} className="break-inside-avoid mb-4">
+                        <ImageCard
+                          imageUrl={item.imageUrl}
+                          title={item.title}
+                          onSave={() => saveImage(item.imageUrl, item.title, item.imageUrl)}
                         />
-                      ))}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="categories"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredAesthetics.map((aesthetic, index) => (
+                      <motion.button
+                        key={aesthetic.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => setSelectedAesthetic(aesthetic)}
+                        className="group relative overflow-hidden rounded-2xl border border-border bg-card/80 backdrop-blur-sm shadow-card hover:shadow-float transition-all duration-300 text-left"
+                      >
+                        <div className="grid grid-cols-3 gap-0.5 h-32 overflow-hidden">
+                          {aesthetic.items.slice(0, 3).map((item) => (
+                            <img
+                              key={item.id}
+                              src={item.imageUrl}
+                              alt=""
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                            />
+                          ))}
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xl">{aesthetic.emoji}</span>
+                            <h3 className="font-display text-lg text-foreground">{aesthetic.name}</h3>
+                          </div>
+                          <p className="text-sm text-muted-foreground font-body">{aesthetic.description}</p>
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            {aesthetic.items.length} images
+                          </div>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+                  {filteredAesthetics.length === 0 && (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground font-body">No aesthetics found for "{searchQuery}"</p>
                     </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </TabsContent>
 
-                    {/* Info */}
-                    <div className="p-4">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xl">{aesthetic.emoji}</span>
-                        <h3 className="font-display text-lg text-foreground">
-                          {aesthetic.name}
-                        </h3>
-                      </div>
-                      <p className="text-sm text-muted-foreground font-body">
-                        {aesthetic.description}
-                      </p>
-                      <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>{aesthetic.items.length} images</span>
-                      </div>
-                    </div>
-                  </motion.button>
+          {/* Search Tab - Pinterest Search */}
+          <TabsContent value="search" className="mt-6">
+            <div className="max-w-xl mx-auto mb-8">
+              <h2 className="font-display text-lg text-foreground mb-2 text-center">🔍 Search Aesthetic Inspiration</h2>
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                Search for any aesthetic, study vibe, or mood
+              </p>
+              <form
+                onSubmit={(e) => { e.preventDefault(); handlePinterestSearch(); }}
+                className="flex gap-2"
+              >
+                <Input
+                  placeholder="e.g. dark academia, cottagecore study, neon desk setup..."
+                  value={pinterestQuery}
+                  onChange={(e) => setPinterestQuery(e.target.value)}
+                  className="flex-1"
+                />
+                <Button type="submit" disabled={pinterestLoading || !pinterestQuery.trim()}>
+                  {pinterestLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                </Button>
+              </form>
+
+              {/* Quick search tags */}
+              <div className="flex flex-wrap gap-2 mt-3">
+                {["Dark Academia", "Cottagecore Study", "Minimalist Desk", "Neon Gaming Setup", "Library Aesthetic"].map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => { setPinterestQuery(tag); }}
+                    className="px-3 py-1 text-xs bg-muted hover:bg-muted/80 rounded-full font-body transition-colors"
+                  >
+                    {tag}
+                  </button>
                 ))}
               </div>
-
-              {filteredAesthetics.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground font-body">
-                    No aesthetics found for "{searchQuery}"
-                  </p>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Saved items indicator */}
-        {savedItems.size > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="fixed bottom-6 right-6 bg-primary text-primary-foreground px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
-          >
-            <Heart className="w-4 h-4 fill-current" />
-            <span className="font-body text-sm">{savedItems.size} saved</span>
-          </motion.div>
-         )}
-
-        {/* Pinterest Connection Modal */}
-        <Dialog open={pinterestModalOpen} onOpenChange={setPinterestModalOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-3 font-display">
-                <div className="w-10 h-10 rounded-full bg-[#E60023] flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
-                  </svg>
-                </div>
-                Connect to Pinterest
-              </DialogTitle>
-              <DialogDescription className="font-body">
-                Import your Pinterest boards to find inspiration for your study aesthetic.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 py-4">
-              {/* Features */}
-              <div className="space-y-3">
-                <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                  <Link2 className="w-5 h-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Sync Your Boards</p>
-                    <p className="text-xs text-muted-foreground">Import pins from your existing Pinterest boards</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                  <Bookmark className="w-5 h-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Save to Pinterest</p>
-                    <p className="text-xs text-muted-foreground">Pin your favorite images directly to your boards</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                  <Sparkles className="w-5 h-5 text-primary mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Discover More</p>
-                    <p className="text-xs text-muted-foreground">Get personalized aesthetic recommendations</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Connect Button */}
-              <Button 
-                onClick={handlePinterestConnect}
-                className="w-full gap-2 bg-[#E60023] hover:bg-[#c7001f] text-white"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
-                </svg>
-                Continue with Pinterest
-              </Button>
-
-              <p className="text-xs text-center text-muted-foreground">
-                You'll be redirected to Pinterest to authorize access
-              </p>
             </div>
-          </DialogContent>
-        </Dialog>
+
+            {pinterestLoading && (
+              <div className="text-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">Searching for inspiration...</p>
+              </div>
+            )}
+
+            {pinterestResults.length > 0 && (
+              <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
+                {pinterestResults.map((img, i) => (
+                  <ImageCard
+                    key={`pin-${i}`}
+                    imageUrl={img.imageUrl}
+                    title={img.title}
+                    sourceUrl={img.sourceUrl}
+                    onSave={() => saveImage(img.imageUrl, img.title, img.sourceUrl)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {!pinterestLoading && pinterestResults.length === 0 && pinterestQuery && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Search className="w-8 h-8 mx-auto mb-3 opacity-50" />
+                <p className="font-body">Search for an aesthetic to see results</p>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Import Tab - Pinterest Board URL */}
+          <TabsContent value="import" className="mt-6">
+            <div className="max-w-xl mx-auto mb-8">
+              <h2 className="font-display text-lg text-foreground mb-2 text-center">📌 Import Pinterest Board</h2>
+              <p className="text-sm text-muted-foreground text-center mb-4">
+                Paste a Pinterest board URL to import images
+              </p>
+              <form
+                onSubmit={(e) => { e.preventDefault(); handleBoardImport(); }}
+                className="flex gap-2"
+              >
+                <Input
+                  placeholder="https://pinterest.com/username/board-name"
+                  value={boardUrl}
+                  onChange={(e) => setBoardUrl(e.target.value)}
+                  className="flex-1"
+                />
+                <Button type="submit" disabled={boardImportLoading || !boardUrl.trim()}>
+                  {boardImportLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Import"}
+                </Button>
+              </form>
+            </div>
+
+            {boardImportLoading && (
+              <div className="text-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">Importing board...</p>
+              </div>
+            )}
+
+            {boardResults.length > 0 && (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm text-muted-foreground">{boardResults.length} images found</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      boardResults.forEach((img) => saveImage(img.imageUrl, img.title, img.sourceUrl));
+                    }}
+                  >
+                    <Bookmark className="w-4 h-4 mr-1" />
+                    Save All
+                  </Button>
+                </div>
+                <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
+                  {boardResults.map((img, i) => (
+                    <ImageCard
+                      key={`board-${i}`}
+                      imageUrl={img.imageUrl}
+                      title={img.title}
+                      sourceUrl={img.sourceUrl}
+                      onSave={() => saveImage(img.imageUrl, img.title, img.sourceUrl)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </TabsContent>
+
+          {/* Saved Boards Tab */}
+          <TabsContent value="saved" className="mt-6">
+            {savedItems.length === 0 ? (
+              <div className="text-center py-16">
+                <FolderHeart className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
+                <h3 className="font-display text-lg text-foreground mb-2">No saved images yet</h3>
+                <p className="text-sm text-muted-foreground font-body mb-4">
+                  Browse, search, or import images and save them to your boards
+                </p>
+                <Button variant="outline" onClick={() => setActiveTab("browse")}>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Start Exploring
+                </Button>
+              </div>
+            ) : (
+              <>
+                {/* Board selector */}
+                <div className="flex gap-2 overflow-x-auto pb-3 mb-6">
+                  <button
+                    onClick={() => setSelectedBoard("all")}
+                    className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-body transition-colors ${
+                      selectedBoard === "all"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted hover:bg-muted/80"
+                    }`}
+                  >
+                    All ({savedItems.length})
+                  </button>
+                  {boards.map((board) => (
+                    <button
+                      key={board}
+                      onClick={() => setSelectedBoard(board)}
+                      className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-body transition-colors ${
+                        selectedBoard === board
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted hover:bg-muted/80"
+                      }`}
+                    >
+                      {board} ({savedItems.filter((i) => i.board_name === board).length})
+                    </button>
+                  ))}
+                </div>
+
+                <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
+                  {savedItems
+                    .filter((i) => selectedBoard === "all" || i.board_name === selectedBoard)
+                    .map((item) => (
+                      <ImageCard
+                        key={item.id}
+                        imageUrl={item.image_url}
+                        title={item.title || "Untitled"}
+                        sourceUrl={item.source_url}
+                        onRemove={() => removeSavedItem(item.id)}
+                      />
+                    ))}
+                </div>
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
