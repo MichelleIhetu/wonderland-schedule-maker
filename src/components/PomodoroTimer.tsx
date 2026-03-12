@@ -195,7 +195,12 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
     >
       {/* Main Timer Panel */}
       <div className="relative flex-1 flex flex-col items-center gap-5 p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-primary/20 shadow-card overflow-hidden">
-        <FloatingMoodboardBackground enabled={showMoodboard} opacity={moodboardOpacity} />
+        {showMoodboard && moodboardMode === "floating" && (
+          <FloatingMoodboardBackground enabled={true} opacity={moodboardOpacity} />
+        )}
+        {showMoodboard && moodboardMode === "wall" && (
+          <WallGallery enabled={true} imageCount={wallImageCount} />
+        )}
 
         {/* Header */}
         <div className="w-full flex justify-between items-center z-10">
