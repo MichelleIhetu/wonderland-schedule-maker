@@ -436,7 +436,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
           {schedule[currentTaskIndex] && (
             <div className="mb-3">
               <span className="text-xs text-muted-foreground uppercase tracking-wider">Current Task</span>
-              <p className="text-base font-body font-semibold text-foreground truncate">{schedule[currentTaskIndex].task}</p>
+              <p className="text-base font-body font-semibold text-foreground truncate">{schedule[currentTaskIndex].title}</p>
               <span className="text-xs text-muted-foreground">{schedule[currentTaskIndex].time}</span>
             </div>
           )}
