@@ -39,10 +39,10 @@ const Auth = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast.success("Check your email to verify your account! ✉️");
+        toast.success("Account created! Welcome! 🐰");
+        navigate("/");
       }
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
