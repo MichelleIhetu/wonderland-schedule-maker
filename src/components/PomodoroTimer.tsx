@@ -21,7 +21,7 @@ interface PomodoroTimerProps {
   onBack: () => void;
 }
 
-const LOFI_STREAM_URL = "https://c4.radioboss.fm/stream/158"; // Chillhop Radio - free ambient study music
+const LOFI_STREAM_URL = "https://live.musopen.org:8004/stream"; // Musopen - free classical instrumental music
 
 type TimerMode = "work" | "shortBreak" | "longBreak";
 
