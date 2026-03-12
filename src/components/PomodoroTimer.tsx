@@ -255,11 +255,37 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
             <Brain className="w-4 h-4" /> Work
           </Button>
           <Button variant={showMoodboard ? "default" : "outline"} size="sm" onClick={() => setShowMoodboard(!showMoodboard)} className="gap-1">
-            {showMoodboard ? <Image className="w-4 h-4" /> : <ImageOff className="w-4 h-4" />} Ambient
+            {showMoodboard ? <Frame className="w-4 h-4" /> : <ImageOff className="w-4 h-4" />} Moodboard
           </Button>
           {showMoodboard && (
-            <div className="w-16">
-              <Slider value={[moodboardOpacity * 100]} onValueChange={(v) => setMoodboardOpacity(v[0] / 100)} max={40} min={5} step={5} className="cursor-pointer" />
+            <div className="flex items-center gap-2">
+              {/* Mode toggle */}
+              <Select value={moodboardMode} onValueChange={(v) => setMoodboardMode(v as "floating" | "wall")}>
+                <SelectTrigger className="h-8 w-24 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wall">🖼️ Wall</SelectItem>
+                  <SelectItem value="floating">✨ Float</SelectItem>
+                </SelectContent>
+              </Select>
+              {moodboardMode === "wall" ? (
+                <Select value={String(wallImageCount)} onValueChange={(v) => setWallImageCount(Number(v) as 4 | 6 | 8 | 12)}>
+                  <SelectTrigger className="h-8 w-20 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="4">4 pics</SelectItem>
+                    <SelectItem value="6">6 pics</SelectItem>
+                    <SelectItem value="8">8 pics</SelectItem>
+                    <SelectItem value="12">12 pics</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="w-16">
+                  <Slider value={[moodboardOpacity * 100]} onValueChange={(v) => setMoodboardOpacity(v[0] / 100)} max={40} min={5} step={5} className="cursor-pointer" />
+                </div>
+              )}
             </div>
           )}
           <Button variant={mode === "shortBreak" ? "default" : "outline"} size="sm" onClick={() => switchMode("shortBreak")} className="gap-1">
