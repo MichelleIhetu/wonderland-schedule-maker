@@ -212,7 +212,7 @@ const WallGallery = ({ enabled, imageCount, frameStyle = "wood", customImages, r
                   >
                     {/* Mat / passepartout */}
                     <div className="p-1.5 md:p-2 rounded-[1px]" style={{ background: frame.mat }}>
-                    <div className="relative overflow-hidden aspect-[4/3]">
+                    <div className={`relative overflow-hidden ${i % 2 === 0 ? 'aspect-[4/3]' : 'aspect-[3/4]'}`}>
                         <img
                           src={getProxiedUrl(img.imageUrl)}
                           alt={img.title}
