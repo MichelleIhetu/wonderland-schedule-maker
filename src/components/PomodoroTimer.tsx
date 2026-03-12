@@ -391,7 +391,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
         </div>
 
         {/* Timer display */}
-        <div className="relative">
+        <div className="relative p-4 rounded-2xl bg-background/80 backdrop-blur-md shadow-lg ring-1 ring-border/30">
           <svg className="w-48 h-48 -rotate-90">
             <circle cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="8" fill="none" className="text-muted/20" />
             <motion.circle cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="8" fill="none" strokeLinecap="round"
@@ -400,10 +400,10 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
               initial={false} animate={{ strokeDashoffset: 553 - (553 * progress) / 100 }} transition={{ duration: 0.5 }} />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <motion.span className="font-display text-5xl text-foreground" key={timeLeft} initial={{ scale: 1.1 }} animate={{ scale: 1 }}>
+            <motion.span className="font-display text-5xl text-foreground drop-shadow-md" key={timeLeft} initial={{ scale: 1.1 }} animate={{ scale: 1 }}>
               {formatTime(timeLeft)}
             </motion.span>
-            <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1 font-semibold">
               {mode === "work" ? "Focus Time" : mode === "shortBreak" ? "Short Break" : "Long Break"}
             </span>
           </div>
