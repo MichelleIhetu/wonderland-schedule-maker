@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import CartoonBunny from "./KawaiiBunny";
 import { ScheduleItem } from "@/types/schedule";
 import FloatingMoodboardBackground from "./FloatingMoodboardBackground";
-import WallGallery from "./WallGallery";
+import WallGallery, { type FrameStyle } from "./WallGallery";
 import PomodoroScheduleSidebar from "./PomodoroScheduleSidebar";
 
 interface PomodoroTimerProps {
