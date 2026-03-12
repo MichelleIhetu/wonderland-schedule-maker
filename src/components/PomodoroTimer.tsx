@@ -431,8 +431,15 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
           <span className="font-display text-primary">{sessionsCompleted}</span>
         </div>
 
-        {/* Task progress */}
-        <div className="w-full z-10">
+        {/* Current task & progress */}
+        <div className="w-full z-10 bg-background/80 backdrop-blur-md rounded-xl p-4 shadow-lg ring-1 ring-border/30">
+          {schedule[currentTaskIndex] && (
+            <div className="mb-3">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">Current Task</span>
+              <p className="text-base font-body font-semibold text-foreground truncate">{schedule[currentTaskIndex].task}</p>
+              <span className="text-xs text-muted-foreground">{schedule[currentTaskIndex].time}</span>
+            </div>
+          )}
           <div className="flex justify-between text-xs text-muted-foreground mb-2">
             <span>Task Progress</span>
             <span>{currentTaskIndex + 1} / {schedule.length}</span>
