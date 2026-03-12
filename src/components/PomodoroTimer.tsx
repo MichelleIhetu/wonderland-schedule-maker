@@ -90,7 +90,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const [wallImageCount, setWallImageCount] = useState<4 | 6 | 8 | 12>(6);
   const [frameStyle, setFrameStyle] = useState<FrameStyle>("wood");
   const [rotateInterval, setRotateInterval] = useState(0);
-  const [use12Hour, setUse12Hour] = useState(false);
+  const [use12Hour, setUse12Hour] = useState(true);
   const [showFullSchedule, setShowFullSchedule] = useState(false);
 
   // Pinterest board connection
