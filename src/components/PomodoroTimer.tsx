@@ -335,7 +335,11 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
                 </SelectContent>
               </Select>
               {moodboardMode === "wall" ? (
-                <>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => setPinterestModalOpen(true)}>
+                    <Link2 className="w-3 h-3" />
+                    {customWallImages.length > 0 ? `${customWallImages.length} pins` : "Pinterest"}
+                  </Button>
                   <Select value={String(wallImageCount)} onValueChange={(v) => setWallImageCount(Number(v) as 4 | 6 | 8 | 12)}>
                     <SelectTrigger className="h-8 w-20 text-xs">
                       <SelectValue />
@@ -359,7 +363,18 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
                       <SelectItem value="rustic">🏚️ Rustic</SelectItem>
                     </SelectContent>
                   </Select>
-                </>
+                  <Select value={String(rotateInterval)} onValueChange={(v) => setRotateInterval(Number(v))}>
+                    <SelectTrigger className="h-8 w-24 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">No rotate</SelectItem>
+                      <SelectItem value="5">Every 5m</SelectItem>
+                      <SelectItem value="10">Every 10m</SelectItem>
+                      <SelectItem value="15">Every 15m</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               ) : (
                 <div className="w-16">
                   <Slider value={[moodboardOpacity * 100]} onValueChange={(v) => setMoodboardOpacity(v[0] / 100)} max={40} min={5} step={5} className="cursor-pointer" />
