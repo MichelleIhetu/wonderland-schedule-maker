@@ -124,6 +124,7 @@ const WallGallery = ({ enabled, imageCount, frameStyle = "wood" }: WallGalleryPr
   if (!enabled || images.length === 0) return null;
 
   const displayImages = images.slice(0, imageCount);
+  const frame = frameStyles[frameStyle];
 
   return (
     <AnimatePresence>
