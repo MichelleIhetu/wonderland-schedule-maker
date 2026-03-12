@@ -81,6 +81,8 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [showMoodboard, setShowMoodboard] = useState(false);
   const [moodboardOpacity, setMoodboardOpacity] = useState(0.15);
+  const [moodboardMode, setMoodboardMode] = useState<"floating" | "wall">("wall");
+  const [wallImageCount, setWallImageCount] = useState<4 | 6 | 8 | 12>(6);
   const [use12Hour, setUse12Hour] = useState(false);
   const [showFullSchedule, setShowFullSchedule] = useState(false);
 
