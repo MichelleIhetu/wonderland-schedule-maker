@@ -453,6 +453,118 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
         onToggleFullSchedule={() => setShowFullSchedule(!showFullSchedule)}
         formatScheduleTime={formatScheduleTime}
       />
+
+      {/* Pinterest Board Picker Modal */}
+      <Dialog open={pinterestModalOpen} onOpenChange={setPinterestModalOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" style={{ color: "#E60023" }}>
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+              </svg>
+              Connect Pinterest Board
+            </DialogTitle>
+            <DialogDescription className="font-body">
+              Paste a Pinterest board URL and pick photos for your wall
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+            {/* URL input */}
+            <form onSubmit={(e) => { e.preventDefault(); handleFetchBoard(); }} className="flex gap-2">
+              <Input
+                placeholder="https://pinterest.com/username/board-name"
+                value={boardUrl}
+                onChange={(e) => setBoardUrl(e.target.value)}
+                className="flex-1"
+              />
+              <Button type="submit" disabled={boardLoading || !boardUrl.trim()} size="sm">
+                {boardLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Fetch"}
+              </Button>
+            </form>
+
+            {/* Image picker */}
+            {fetchedImages.length > 0 && (
+              <>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    {selectedImages.size} of {fetchedImages.length} selected
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => setSelectedImages(new Set(fetchedImages.map((_, i) => i)))}
+                    >
+                      Select all
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => setSelectedImages(new Set())}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 overflow-y-auto flex-1 pr-1">
+                  {fetchedImages.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => toggleImageSelection(i)}
+                      className={`relative rounded-lg overflow-hidden border-2 transition-all ${
+                        selectedImages.has(i)
+                          ? "border-primary ring-2 ring-primary/20"
+                          : "border-transparent hover:border-muted-foreground/20"
+                      }`}
+                    >
+                      <img
+                        src={img.imageUrl}
+                        alt={img.title}
+                        className="w-full h-20 object-cover"
+                        loading="lazy"
+                      />
+                      {selectedImages.has(i) && (
+                        <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="w-3 h-3 text-primary-foreground" />
+                        </div>
+                      )}
+                      <p className="text-[10px] text-muted-foreground p-1 truncate">{img.title}</p>
+                    </button>
+                  ))}
+                </div>
+
+                <Button onClick={handleApplyPinterestImages} className="w-full gap-2" disabled={selectedImages.size === 0}>
+                  <Frame className="w-4 h-4" />
+                  Add {selectedImages.size} photos to wall
+                </Button>
+              </>
+            )}
+
+            {boardLoading && (
+              <div className="text-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">Fetching board...</p>
+              </div>
+            )}
+
+            {/* Clear custom images button */}
+            {customWallImages.length > 0 && fetchedImages.length === 0 && (
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  {customWallImages.length} Pinterest photos active
+                </p>
+                <Button variant="ghost" size="sm" onClick={() => { setCustomWallImages([]); setPinterestModalOpen(false); }}>
+                  <X className="w-4 h-4 mr-1" /> Clear
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
