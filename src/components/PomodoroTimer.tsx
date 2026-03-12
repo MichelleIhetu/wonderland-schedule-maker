@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX, Image, ImageOff, Clock, ChevronRight, List } from "lucide-react";
+import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX, Image, ImageOff, Clock, ChevronRight, List, Frame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CartoonBunny from "./KawaiiBunny";
 import { ScheduleItem } from "@/types/schedule";
 import FloatingMoodboardBackground from "./FloatingMoodboardBackground";
+import WallGallery from "./WallGallery";
 import PomodoroScheduleSidebar from "./PomodoroScheduleSidebar";
 
 interface PomodoroTimerProps {
@@ -79,6 +81,8 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [showMoodboard, setShowMoodboard] = useState(false);
   const [moodboardOpacity, setMoodboardOpacity] = useState(0.15);
+  const [moodboardMode, setMoodboardMode] = useState<"floating" | "wall">("wall");
+  const [wallImageCount, setWallImageCount] = useState<4 | 6 | 8 | 12>(6);
   const [use12Hour, setUse12Hour] = useState(false);
   const [showFullSchedule, setShowFullSchedule] = useState(false);
 
@@ -191,7 +195,12 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
     >
       {/* Main Timer Panel */}
       <div className="relative flex-1 flex flex-col items-center gap-5 p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-primary/20 shadow-card overflow-hidden">
-        <FloatingMoodboardBackground enabled={showMoodboard} opacity={moodboardOpacity} />
+        {showMoodboard && moodboardMode === "floating" && (
+          <FloatingMoodboardBackground enabled={true} opacity={moodboardOpacity} />
+        )}
+        {showMoodboard && moodboardMode === "wall" && (
+          <WallGallery enabled={true} imageCount={wallImageCount} />
+        )}
 
         {/* Header */}
         <div className="w-full flex justify-between items-center z-10">
@@ -246,11 +255,37 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
             <Brain className="w-4 h-4" /> Work
           </Button>
           <Button variant={showMoodboard ? "default" : "outline"} size="sm" onClick={() => setShowMoodboard(!showMoodboard)} className="gap-1">
-            {showMoodboard ? <Image className="w-4 h-4" /> : <ImageOff className="w-4 h-4" />} Ambient
+            {showMoodboard ? <Frame className="w-4 h-4" /> : <ImageOff className="w-4 h-4" />} Moodboard
           </Button>
           {showMoodboard && (
-            <div className="w-16">
-              <Slider value={[moodboardOpacity * 100]} onValueChange={(v) => setMoodboardOpacity(v[0] / 100)} max={40} min={5} step={5} className="cursor-pointer" />
+            <div className="flex items-center gap-2">
+              {/* Mode toggle */}
+              <Select value={moodboardMode} onValueChange={(v) => setMoodboardMode(v as "floating" | "wall")}>
+                <SelectTrigger className="h-8 w-24 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="wall">🖼️ Wall</SelectItem>
+                  <SelectItem value="floating">✨ Float</SelectItem>
+                </SelectContent>
+              </Select>
+              {moodboardMode === "wall" ? (
+                <Select value={String(wallImageCount)} onValueChange={(v) => setWallImageCount(Number(v) as 4 | 6 | 8 | 12)}>
+                  <SelectTrigger className="h-8 w-20 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="4">4 pics</SelectItem>
+                    <SelectItem value="6">6 pics</SelectItem>
+                    <SelectItem value="8">8 pics</SelectItem>
+                    <SelectItem value="12">12 pics</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="w-16">
+                  <Slider value={[moodboardOpacity * 100]} onValueChange={(v) => setMoodboardOpacity(v[0] / 100)} max={40} min={5} step={5} className="cursor-pointer" />
+                </div>
+              )}
             </div>
           )}
           <Button variant={mode === "shortBreak" ? "default" : "outline"} size="sm" onClick={() => switchMode("shortBreak")} className="gap-1">
