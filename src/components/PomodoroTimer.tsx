@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX, Image, ImageOff, Clock, ChevronRight, List } from "lucide-react";
+import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX, Image, ImageOff, Clock, ChevronRight, List, Frame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CartoonBunny from "./KawaiiBunny";
 import { ScheduleItem } from "@/types/schedule";
 import FloatingMoodboardBackground from "./FloatingMoodboardBackground";
+import WallGallery from "./WallGallery";
 import PomodoroScheduleSidebar from "./PomodoroScheduleSidebar";
 
 interface PomodoroTimerProps {
