@@ -200,7 +200,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
           <FloatingMoodboardBackground enabled={true} opacity={moodboardOpacity} />
         )}
         {showMoodboard && moodboardMode === "wall" && (
-          <WallGallery enabled={true} imageCount={wallImageCount} />
+          <WallGallery enabled={true} imageCount={wallImageCount} frameStyle={frameStyle} />
         )}
 
         {/* Header */}
