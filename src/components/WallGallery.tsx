@@ -43,6 +43,15 @@ const getGridCols = (count: number) => {
   return "grid-cols-4";
 };
 
+// Proxy pinimg URLs through a cors-friendly approach
+const getProxiedUrl = (url: string) => {
+  // Pinterest images often block direct hotlinking; use images.weserv.nl proxy
+  if (url.includes('pinimg.com')) {
+    return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=400&h=300&fit=cover&output=webp`;
+  }
+  return url;
+};
+
 const frameStyles: Record<FrameStyle, {
   outer: string;
   inner: string;
@@ -203,12 +212,19 @@ const WallGallery = ({ enabled, imageCount, frameStyle = "wood", customImages, r
                   >
                     {/* Mat / passepartout */}
                     <div className="p-1.5 md:p-2 rounded-[1px]" style={{ background: frame.mat }}>
-                      <div className="relative overflow-hidden">
+                    <div className="relative overflow-hidden aspect-[4/3]">
                         <img
-                          src={img.imageUrl}
+                          src={getProxiedUrl(img.imageUrl)}
                           alt={img.title}
-                          className="w-20 h-14 sm:w-24 sm:h-16 md:w-28 md:h-20 lg:w-32 lg:h-24 object-cover"
+                          className="w-full h-full object-cover"
                           loading="lazy"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            // Fallback: try original URL if proxy fails
+                            if (target.src !== img.imageUrl) {
+                              target.src = img.imageUrl;
+                            }
+                          }}
                         />
                         {/* Glass reflection */}
                         <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/5 pointer-events-none" />
