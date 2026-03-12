@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      moodboard_items: {
+        Row: {
+          board_name: string
+          created_at: string
+          id: string
+          image_url: string
+          source_url: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          board_name?: string
+          created_at?: string
+          id?: string
+          image_url: string
+          source_url?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          board_name?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          source_url?: string | null
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
