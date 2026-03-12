@@ -90,7 +90,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const [wallImageCount, setWallImageCount] = useState<4 | 6 | 8 | 12>(6);
   const [frameStyle, setFrameStyle] = useState<FrameStyle>("wood");
   const [rotateInterval, setRotateInterval] = useState(0);
-  const [use12Hour, setUse12Hour] = useState(false);
+  const [use12Hour, setUse12Hour] = useState(true);
   const [showFullSchedule, setShowFullSchedule] = useState(false);
 
   // Pinterest board connection
@@ -277,8 +277,8 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
             {/* 12h toggle */}
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">12h</span>
-              <Switch checked={use12Hour} onCheckedChange={setUse12Hour} className="scale-75" />
+              <span className="text-xs text-muted-foreground">24h</span>
+              <Switch checked={!use12Hour} onCheckedChange={(checked) => setUse12Hour(!checked)} className="scale-75" />
             </div>
             {/* Lofi */}
             <div className="flex items-center gap-2">
