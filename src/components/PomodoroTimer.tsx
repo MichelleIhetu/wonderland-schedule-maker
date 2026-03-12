@@ -197,6 +197,56 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
     setBunnyMessage(getRandomMessage(newMode));
   };
 
+  const handleFetchBoard = async () => {
+    if (!boardUrl.trim()) return;
+    setBoardLoading(true);
+    setFetchedImages([]);
+    setSelectedImages(new Set());
+    try {
+      const result = await pinterestApi.importBoard(boardUrl);
+      if (result.success && result.images.length > 0) {
+        setFetchedImages(result.images);
+        // Select all by default
+        setSelectedImages(new Set(result.images.map((_, i) => i)));
+        toast.success(`Found ${result.images.length} images!`);
+      } else {
+        toast.error(result.error || "Couldn't find images from that board");
+      }
+    } catch {
+      toast.error("Failed to fetch board. Check the URL.");
+    } finally {
+      setBoardLoading(false);
+    }
+  };
+
+  const handleApplyPinterestImages = () => {
+    const selected = fetchedImages
+      .filter((_, i) => selectedImages.has(i))
+      .map((img, i) => ({
+        id: `pin-${i}-${Date.now()}`,
+        imageUrl: img.imageUrl,
+        title: img.title,
+      }));
+    if (selected.length === 0) {
+      toast.error("Select at least one image");
+      return;
+    }
+    setCustomWallImages(selected);
+    setPinterestModalOpen(false);
+    setShowMoodboard(true);
+    setMoodboardMode("wall");
+    toast.success(`${selected.length} images added to your wall!`);
+  };
+
+  const toggleImageSelection = (index: number) => {
+    setSelectedImages((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
+
   const progress = ((TIMER_DURATIONS[mode] - timeLeft) / TIMER_DURATIONS[mode]) * 100;
   const bunnyMood = isRunning
     ? (mode === "work" ? "focused" : "happy")
