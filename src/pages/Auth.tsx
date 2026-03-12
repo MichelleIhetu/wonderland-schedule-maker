@@ -72,6 +72,22 @@ const Auth = () => {
     }
   };
 
+  const handleAppleSignIn = async () => {
+    setAppleLoading(true);
+    try {
+      const { error } = await lovable.auth.signInWithOAuth("apple", {
+        redirect_uri: window.location.origin,
+      });
+      if (error) {
+        toast.error(error.message || "Apple sign-in failed");
+      }
+    } catch (err: any) {
+      toast.error("Apple sign-in failed");
+    } finally {
+      setAppleLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
       <SpiderWebBackground />
