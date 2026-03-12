@@ -89,8 +89,17 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const [moodboardMode, setMoodboardMode] = useState<"floating" | "wall">("wall");
   const [wallImageCount, setWallImageCount] = useState<4 | 6 | 8 | 12>(6);
   const [frameStyle, setFrameStyle] = useState<FrameStyle>("wood");
+  const [rotateInterval, setRotateInterval] = useState(0);
   const [use12Hour, setUse12Hour] = useState(false);
   const [showFullSchedule, setShowFullSchedule] = useState(false);
+
+  // Pinterest board connection
+  const [pinterestModalOpen, setPinterestModalOpen] = useState(false);
+  const [boardUrl, setBoardUrl] = useState("");
+  const [boardLoading, setBoardLoading] = useState(false);
+  const [fetchedImages, setFetchedImages] = useState<PinterestImage[]>([]);
+  const [selectedImages, setSelectedImages] = useState<Set<number>>(new Set());
+  const [customWallImages, setCustomWallImages] = useState<GalleryImage[]>([]);
 
   useEffect(() => {
     const tick = setInterval(() => setCurrentTime(new Date()), 1000);
