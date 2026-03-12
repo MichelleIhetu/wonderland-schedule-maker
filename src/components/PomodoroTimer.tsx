@@ -264,7 +264,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
           <FloatingMoodboardBackground enabled={true} opacity={moodboardOpacity} />
         )}
         {showMoodboard && moodboardMode === "wall" && (
-          <WallGallery enabled={true} imageCount={wallImageCount} frameStyle={frameStyle} />
+          <WallGallery enabled={true} imageCount={wallImageCount} frameStyle={frameStyle} customImages={customWallImages.length > 0 ? customWallImages : undefined} rotateInterval={rotateInterval} />
         )}
 
         {/* Header */}
