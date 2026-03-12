@@ -1,15 +1,20 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX, Image, ImageOff, Clock, ChevronRight, List, Frame } from "lucide-react";
+import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX, ImageOff, Clock, Frame, RefreshCw, Link2, Loader2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import CartoonBunny from "./KawaiiBunny";
 import { ScheduleItem } from "@/types/schedule";
 import FloatingMoodboardBackground from "./FloatingMoodboardBackground";
-import WallGallery, { type FrameStyle } from "./WallGallery";
+import WallGallery, { type FrameStyle, type GalleryImage } from "./WallGallery";
 import PomodoroScheduleSidebar from "./PomodoroScheduleSidebar";
+import { pinterestApi, type PinterestImage } from "@/lib/api/pinterest";
+import { toast } from "sonner";
 
 interface PomodoroTimerProps {
   schedule: ScheduleItem[];
