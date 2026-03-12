@@ -202,7 +202,7 @@ const Auth = () => {
 
           <p className="text-xs text-center text-muted-foreground/60">
             <Calendar className="w-3 h-3 inline mr-1" />
-            Google sign-in also connects your calendar
+            Google sign-in connects your calendar · Apple Calendar users can sync to Google Calendar
           </p>
         </CardContent>
       </Card>
