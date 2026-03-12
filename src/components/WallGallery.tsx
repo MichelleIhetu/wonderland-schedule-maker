@@ -43,6 +43,15 @@ const getGridCols = (count: number) => {
   return "grid-cols-4";
 };
 
+// Proxy pinimg URLs through a cors-friendly approach
+const getProxiedUrl = (url: string) => {
+  // Pinterest images often block direct hotlinking; use images.weserv.nl proxy
+  if (url.includes('pinimg.com')) {
+    return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=400&h=300&fit=cover&output=webp`;
+  }
+  return url;
+};
+
 const frameStyles: Record<FrameStyle, {
   outer: string;
   inner: string;
