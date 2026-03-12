@@ -21,7 +21,7 @@ interface PomodoroTimerProps {
   onBack: () => void;
 }
 
-const LOFI_STREAM_URL = "https://live.musopen.org:8004/stream"; // Musopen - free classical instrumental music
+const LOFI_STREAM_URL = "https://wwfm.streamguys1.com/live-mp3"; // WWFM Classical - free classical instrumental music
 
 type TimerMode = "work" | "shortBreak" | "longBreak";
 
