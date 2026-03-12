@@ -271,17 +271,31 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
                 </SelectContent>
               </Select>
               {moodboardMode === "wall" ? (
-                <Select value={String(wallImageCount)} onValueChange={(v) => setWallImageCount(Number(v) as 4 | 6 | 8 | 12)}>
-                  <SelectTrigger className="h-8 w-20 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="4">4 pics</SelectItem>
-                    <SelectItem value="6">6 pics</SelectItem>
-                    <SelectItem value="8">8 pics</SelectItem>
-                    <SelectItem value="12">12 pics</SelectItem>
-                  </SelectContent>
-                </Select>
+                <>
+                  <Select value={String(wallImageCount)} onValueChange={(v) => setWallImageCount(Number(v) as 4 | 6 | 8 | 12)}>
+                    <SelectTrigger className="h-8 w-20 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="4">4 pics</SelectItem>
+                      <SelectItem value="6">6 pics</SelectItem>
+                      <SelectItem value="8">8 pics</SelectItem>
+                      <SelectItem value="12">12 pics</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={frameStyle} onValueChange={(v) => setFrameStyle(v as FrameStyle)}>
+                    <SelectTrigger className="h-8 w-28 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="wood">🪵 Natural Wood</SelectItem>
+                      <SelectItem value="black">🖤 Black Modern</SelectItem>
+                      <SelectItem value="gold">✨ Gold Ornate</SelectItem>
+                      <SelectItem value="white">🤍 White Clean</SelectItem>
+                      <SelectItem value="rustic">🏚️ Rustic</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </>
               ) : (
                 <div className="w-16">
                   <Slider value={[moodboardOpacity * 100]} onValueChange={(v) => setMoodboardOpacity(v[0] / 100)} max={40} min={5} step={5} className="cursor-pointer" />
