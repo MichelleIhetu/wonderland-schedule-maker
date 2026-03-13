@@ -155,23 +155,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                       <button
                         key={bookIdx}
                         onClick={() => {
-                          // Ensure task entry exists for this book
-                          while (taskEntries.length <= globalIdx) {
-                            setTaskEntries(prev => [...prev, {
-                              id: Date.now().toString() + globalIdx,
-                              title: "",
-                              duration: "",
-                              deadline: "",
-                              priority: "medium" as const,
-                            }]);
-                          }
-                          setActiveBookIndex(globalIdx);
+                          setIsCalendarModalOpen(true);
                         }}
-                        className={`flex-1 h-full rounded-sm transition-all hover:brightness-110 hover:scale-y-105 cursor-pointer ${
-                          hasTask ? "ring-2 ring-primary ring-offset-1" : ""
-                        } ${activeBookIndex === globalIdx ? "ring-2 ring-accent brightness-125" : ""}`}
+                        className={`flex-1 h-full rounded-sm transition-all hover:brightness-110 hover:scale-y-105 cursor-pointer`}
                         style={{ background: "transparent" }}
-                        title={hasTask ? taskEntries[globalIdx].title : `Book ${globalIdx + 1} — click to add a task`}
+                        title={`Book ${globalIdx + 1} — click to import calendar`}
                       />
                     );
                   })}
@@ -343,6 +331,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           />
         </div>
       </div>
+      <CalendarImportModal
+        isOpen={isCalendarModalOpen}
+        onClose={() => setIsCalendarModalOpen(false)}
+        onImport={handleCalendarImport}
+      />
     </div>
   );
 };
