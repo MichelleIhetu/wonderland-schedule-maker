@@ -237,7 +237,7 @@ const Index = () => {
           <img
             src={bunnyWithSpeechBubble}
             alt="TimeBunny mascot with speech bubble"
-            className="w-56 sm:w-72 md:w-80 lg:w-96 object-contain drop-shadow-xl"
+            className="w-72 sm:w-96 md:w-[28rem] lg:w-[32rem] object-contain drop-shadow-xl"
           />
         </div>
       </div>
