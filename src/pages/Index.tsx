@@ -195,7 +195,7 @@ const Index = () => {
             <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-tight tracking-wider" style={{ color: "hsl(280 50% 65%)" }}>
               TIME
             </h1>
-            <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-tight -mt-2 sm:-mt-4 tracking-wider" style={{ color: "hsl(185 70% 60%)" }}>
+            <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-tight mt-4 sm:mt-6 md:mt-8 tracking-wider" style={{ color: "hsl(185 70% 60%)" }}>
               BUNNY
             </h1>
           </div>
