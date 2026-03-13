@@ -7,6 +7,7 @@ import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import libraryBg from "@/assets/library-background.png";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubbleWelcome from "@/assets/speech-bubble-welcome.png";
+import speechBubbleAlt from "@/assets/speech-bunny-alt.png";
 
 interface TaskEntry {
   id: string;
@@ -35,6 +36,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [importedEvents, setImportedEvents] = useState<CalendarEvent[]>([]);
   const [activeBookIndex, setActiveBookIndex] = useState<number | null>(null);
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
+  const [speechBubbleIndex, setSpeechBubbleIndex] = useState(0);
 
   const nowStr = (() => {
     const n = new Date();
@@ -259,12 +261,17 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
       {/* Bunny mascot - bottom right on the rug */}
       <div className="absolute bottom-0 right-0 z-20">
-        <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
+        <div className="relative cursor-pointer" onClick={() => {
+          setSpeechBubbleIndex((prev) => (prev + 1) % 2);
+          setShowSpeechBubble(true);
+          // Auto-hide after 5 seconds
+          setTimeout(() => setShowSpeechBubble(false), 5000);
+        }}>
           <AnimatePresence>
             {showSpeechBubble && (
               <motion.img
-                src={speechBubbleWelcome}
-                alt="Hi there my name is TimeBunny! Welcome to my home"
+                src={speechBubbleIndex === 0 ? speechBubbleWelcome : speechBubbleAlt}
+                alt={speechBubbleIndex === 0 ? "Hi there my name is TimeBunny! Welcome to my home" : "Alternative message"}
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
