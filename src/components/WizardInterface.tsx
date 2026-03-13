@@ -271,12 +271,13 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         </div>
       )}
 
-      {/* Bunny mascot - bottom right on the rug */}
+      {/* Bunny mascot - bottom right, moves to chair after import */}
       <div className={`absolute z-20 transition-all duration-700 ${
         importedEvents.length > 0 
           ? "bottom-[8%] right-[5%]" 
           : "bottom-0 right-0"
       }`}>
+         <div className="relative cursor-pointer" onClick={() => {
           if (isTyping) return;
           const messages = [
             "Hi there, my name is TimeBunny! Welcome to my home!",
