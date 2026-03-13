@@ -180,41 +180,35 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Clock tick marks around screen edges */}
-      <div className="absolute inset-0 pointer-events-none z-[1]">
-        {/* Top edge ticks */}
-        <div className="absolute top-3 left-[15%] w-[4px] h-[20px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.5)" }} />
-        <div className="absolute top-3 left-[30%] w-[4px] h-[14px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.35)" }} />
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[6px] h-[28px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.6)" }} />
-        <div className="absolute top-3 right-[30%] w-[4px] h-[14px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.35)" }} />
-        <div className="absolute top-3 right-[15%] w-[4px] h-[20px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.5)" }} />
-
-        {/* Bottom edge ticks */}
-        <div className="absolute bottom-3 left-[15%] w-[4px] h-[20px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.5)" }} />
-        <div className="absolute bottom-3 left-[30%] w-[4px] h-[14px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.35)" }} />
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[6px] h-[28px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.6)" }} />
-        <div className="absolute bottom-3 right-[30%] w-[4px] h-[14px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.35)" }} />
-        <div className="absolute bottom-3 right-[15%] w-[4px] h-[20px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.5)" }} />
-
-        {/* Left edge ticks */}
-        <div className="absolute left-3 top-[15%] w-[20px] h-[4px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.5)" }} />
-        <div className="absolute left-3 top-[30%] w-[14px] h-[4px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.35)" }} />
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 w-[28px] h-[6px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.6)" }} />
-        <div className="absolute left-3 bottom-[30%] w-[14px] h-[4px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.35)" }} />
-        <div className="absolute left-3 bottom-[15%] w-[20px] h-[4px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.5)" }} />
-
-        {/* Right edge ticks */}
-        <div className="absolute right-3 top-[15%] w-[20px] h-[4px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.5)" }} />
-        <div className="absolute right-3 top-[30%] w-[14px] h-[4px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.35)" }} />
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 w-[28px] h-[6px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.6)" }} />
-        <div className="absolute right-3 bottom-[30%] w-[14px] h-[4px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.35)" }} />
-        <div className="absolute right-3 bottom-[15%] w-[20px] h-[4px] rounded-full" style={{ background: "hsl(90 80% 45% / 0.5)" }} />
-
-        {/* Corner accent ticks (diagonal feel) */}
-        <div className="absolute top-6 left-6 w-[16px] h-[4px] rounded-full rotate-45" style={{ background: "hsl(90 80% 45% / 0.4)" }} />
-        <div className="absolute top-6 right-6 w-[16px] h-[4px] rounded-full -rotate-45" style={{ background: "hsl(90 80% 45% / 0.4)" }} />
-        <div className="absolute bottom-6 left-6 w-[16px] h-[4px] rounded-full -rotate-45" style={{ background: "hsl(90 80% 45% / 0.4)" }} />
-        <div className="absolute bottom-6 right-6 w-[16px] h-[4px] rounded-full rotate-45" style={{ background: "hsl(90 80% 45% / 0.4)" }} />
+      {/* Clock tick marks in circular pattern */}
+      <div className="absolute inset-0 pointer-events-none z-[1] flex items-center justify-center">
+        <div className="relative" style={{ width: "min(90vw, 90vh)", height: "min(90vw, 90vh)" }}>
+          {Array.from({ length: 60 }).map((_, i) => {
+            const isHour = i % 5 === 0;
+            const angle = i * 6;
+            return (
+              <div
+                key={i}
+                className="absolute top-0 left-1/2 -translate-x-1/2 origin-bottom"
+                style={{
+                  height: "50%",
+                  transform: `translateX(-50%) rotate(${angle}deg)`,
+                }}
+              >
+                <div
+                  className="rounded-full mx-auto"
+                  style={{
+                    width: isHour ? "6px" : "3px",
+                    height: isHour ? "24px" : "12px",
+                    background: isHour
+                      ? "hsl(90 80% 45% / 0.7)"
+                      : "hsl(90 80% 45% / 0.3)",
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Content - positioned above and below clock */}
