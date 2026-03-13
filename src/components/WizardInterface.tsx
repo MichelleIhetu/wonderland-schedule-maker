@@ -252,6 +252,17 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                         ))}
                       </div>
                     )}
+                    {hasValidTasks && (
+                      <Button
+                        onClick={handleComplete}
+                        disabled={isLoading}
+                        className="w-full mt-2 gap-2 font-body text-sm"
+                        size="sm"
+                      >
+                        <PlayCircle className="w-4 h-4" />
+                        {isLoading ? "Generating..." : "Generate Schedule"}
+                      </Button>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
