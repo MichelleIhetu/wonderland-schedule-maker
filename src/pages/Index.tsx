@@ -155,17 +155,20 @@ const Index = () => {
   const playBing = () => {
     const ctx = new AudioContext();
     const now = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(2400, now);
-    osc.frequency.exponentialRampToValueAtTime(1800, now + 0.15);
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-    osc.start(now);
-    osc.stop(now + 0.4);
+    // Layer multiple tones for a chime effect
+    [1046, 1318, 1568].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      const offset = i * 0.08;
+      osc.frequency.setValueAtTime(freq, now + offset);
+      gain.gain.setValueAtTime(0.2, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.6);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.6);
+    });
   };
 
   const handleStart = () => { playBing(); setViewMode("wizard"); };
