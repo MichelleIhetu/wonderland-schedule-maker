@@ -262,25 +262,35 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
       {/* Bunny mascot - bottom right on the rug */}
       <div className="absolute bottom-0 right-0 z-20">
-        <div className="relative cursor-pointer" onClick={() => {
-          if (!showSpeechBubble) {
-            setShowSpeechBubble(true);
-            setTypedText("");
-            setIsTyping(true);
-            const fullText = "Hi there, my name is TimeBunny! Welcome to my home!";
-            let i = 0;
-            const interval = setInterval(() => {
-              i++;
-              setTypedText(fullText.slice(0, i));
-              if (i >= fullText.length) {
-                clearInterval(interval);
-                setIsTyping(false);
-              }
-            }, 40);
-          } else {
+         <div className="relative cursor-pointer" onClick={() => {
+          if (isTyping) return;
+          const messages = [
+            "Hi there, my name is TimeBunny! Welcome to my home!",
+            "Click on one of the books so we can get an idea of what your schedule is like!",
+          ];
+          const nextCount = bubbleClickCount + 1;
+          if (showSpeechBubble && nextCount >= messages.length + 1) {
             setShowSpeechBubble(false);
             setTypedText("");
+            setBubbleClickCount(0);
+            return;
           }
+          const msgIndex = showSpeechBubble ? Math.min(nextCount - 1, messages.length - 1) : 0;
+          const resetCount = showSpeechBubble ? nextCount : 1;
+          setBubbleClickCount(resetCount);
+          setShowSpeechBubble(true);
+          setTypedText("");
+          setIsTyping(true);
+          const fullText = messages[msgIndex];
+          let i = 0;
+          const interval = setInterval(() => {
+            i++;
+            setTypedText(fullText.slice(0, i));
+            if (i >= fullText.length) {
+              clearInterval(interval);
+              setIsTyping(false);
+            }
+          }, 40);
         }}>
           <AnimatePresence>
             {showSpeechBubble && (
