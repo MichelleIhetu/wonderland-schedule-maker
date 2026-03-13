@@ -7,6 +7,7 @@ import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import libraryBg from "@/assets/library-background.png";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubbleWelcome from "@/assets/speech-bubble-welcome.png";
+import speechBubbleAlt from "@/assets/speech-bunny-alt.png";
 
 interface TaskEntry {
   id: string;
