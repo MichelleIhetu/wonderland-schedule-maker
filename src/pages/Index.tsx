@@ -181,15 +181,15 @@ const Index = () => {
 
         {viewMode !== "pomodoro" && (
           <header className="text-center mb-6 flex-shrink-0">
-            <div className="relative flex flex-col items-center gap-2 mb-4">
+            <div className="relative flex flex-col items-center justify-center min-h-[70vh] gap-2 mb-4">
               {/* Clock outline background */}
-              <div className="clock-bg" />
+              <div className="clock-bg" style={{ width: '360px', height: '360px' }} />
               
               {/* Pixel title */}
-              <h1 className="pixel-title text-2xl md:text-3xl text-foreground mb-1 relative z-10">
+              <h1 className="pixel-title text-3xl sm:text-4xl md:text-5xl text-foreground relative z-10">
                 TIME
               </h1>
-              <h1 className="pixel-title text-2xl md:text-3xl text-foreground mb-3 relative z-10">
+              <h1 className="pixel-title text-3xl sm:text-4xl md:text-5xl text-foreground mb-4 relative z-10">
                 BUNNY
               </h1>
 
@@ -197,15 +197,15 @@ const Index = () => {
               <img
                 src={landingBunny}
                 alt="TimeBunny mascot"
-                className="w-40 md:w-52 object-contain relative z-10 -mt-2 drop-shadow-lg"
+                className="w-56 md:w-72 object-contain relative z-10 -mt-2 drop-shadow-lg"
                 style={{ mixBlendMode: "multiply" }}
               />
 
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-body mb-1 border border-primary/30 backdrop-blur-sm bg-card/80">
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-body border border-primary/30 backdrop-blur-sm bg-card/80">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <span className="text-foreground">{currentBgTheme.emoji} {currentBgTheme.name}</span>
               </div>
-              <p className="text-sm text-muted-foreground font-body">Let the bunny guide you through your perfect day</p>
+              <p className="text-sm text-muted-foreground font-body mt-1">Let the bunny guide you through your perfect day</p>
             </div>
           </header>
         )}
