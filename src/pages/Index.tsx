@@ -152,7 +152,23 @@ const Index = () => {
 
   if (generatedSchedule.length > 0 && viewMode === "landing") setViewMode("schedule");
 
-  const handleStart = () => setViewMode("wizard");
+  const playBing = () => {
+    const ctx = new AudioContext();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(1200, now);
+    osc.frequency.exponentialRampToValueAtTime(800, now + 0.15);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    osc.start(now);
+    osc.stop(now + 0.4);
+  };
+
+  const handleStart = () => { playBing(); setViewMode("wizard"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
 
   // ─── LANDING PAGE ───
