@@ -271,8 +271,12 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         </div>
       )}
 
-      {/* Bunny mascot - bottom right on the rug */}
-      <div className="absolute bottom-0 right-0 z-20">
+      {/* Bunny mascot - bottom right, moves to chair after import */}
+      <div className={`absolute z-20 transition-all duration-700 ${
+        importedEvents.length > 0 
+          ? "bottom-[8%] right-[5%]" 
+          : "bottom-0 right-0"
+      }`}>
          <div className="relative cursor-pointer" onClick={() => {
           if (isTyping) return;
           const messages = [
@@ -339,7 +343,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           <img
             src={bunnyMascot}
             alt="TimeBunny mascot"
-            className="w-[22rem] object-contain drop-shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95"
+            className={`object-contain drop-shadow-xl transition-all duration-700 hover:scale-105 active:scale-95 ${
+              importedEvents.length > 0 ? "w-[28rem]" : "w-[22rem]"
+            }`}
           />
         </div>
       </div>
