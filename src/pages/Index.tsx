@@ -233,23 +233,12 @@ const Index = () => {
               </Link>
             </div>
 
-            {/* Bunny mascot with speech bubble - below content, not overlapping */}
-            <div className="flex items-end justify-center gap-2 mt-4 relative z-10 w-full">
-              {/* Speech bubble - to the left of bunny */}
-              <div className="relative w-40 sm:w-48 flex-shrink-0 mb-8 sm:mb-12">
-                <img src={speechBubble} alt="" className="w-full" />
-                <span
-                  className="absolute top-[25%] left-[48%] -translate-x-1/2 text-[8px] sm:text-[10px] text-center leading-tight w-[65%]"
-                  style={{ fontFamily: "'Press Start 2P', cursive", color: "#222" }}
-                >
-                  Hi there! Ready to plan your day?
-                </span>
-              </div>
-              {/* Bunny */}
+            {/* Bunny mascot with integrated speech bubble */}
+            <div className="flex items-end justify-center mt-4 relative z-10 w-full">
               <img
-                src={bunnyMascot}
-                alt="TimeBunny mascot"
-                className="w-32 sm:w-40 md:w-48 object-contain drop-shadow-xl flex-shrink-0"
+                src={bunnyWithSpeechBubble}
+                alt="TimeBunny mascot with speech bubble"
+                className="w-64 sm:w-72 md:w-80 lg:w-96 object-contain drop-shadow-xl"
               />
             </div>
           </div>
