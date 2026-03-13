@@ -6,7 +6,7 @@ import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import libraryBg from "@/assets/library-background.png";
 import bunnyMascot from "@/assets/bunny-mascot.png";
-import speechBubble from "@/assets/bunny-with-speech-bubble.png";
+import speechBubbleWelcome from "@/assets/speech-bubble-welcome.png";
 
 interface TaskEntry {
   id: string;
@@ -34,6 +34,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [importedEvents, setImportedEvents] = useState<CalendarEvent[]>([]);
   const [activeBookIndex, setActiveBookIndex] = useState<number | null>(null);
+  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
 
   const nowStr = (() => {
     const n = new Date();
@@ -255,6 +256,28 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           </div>
         </div>
       )}
+      {/* Bunny mascot - bottom right */}
+      <div className="absolute bottom-4 -right-20 sm:-right-16 z-20">
+        <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
+          <AnimatePresence>
+            {showSpeechBubble && (
+              <motion.img
+                src={speechBubbleWelcome}
+                alt="Hi there my name is TimeBunny! Welcome to my home"
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                className="absolute -top-44 -left-60 w-72 sm:w-80 z-30"
+              />
+            )}
+          </AnimatePresence>
+          <img
+            src={bunnyMascot}
+            alt="TimeBunny mascot"
+            className="w-64 sm:w-80 object-contain drop-shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95"
+          />
+        </div>
+      </div>
     </div>
   );
 };
