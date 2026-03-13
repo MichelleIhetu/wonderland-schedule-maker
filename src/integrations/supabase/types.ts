@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      goal_logs: {
+        Row: {
+          created_at: string
+          goal_id: string
+          hours_logged: number
+          id: string
+          log_date: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          goal_id: string
+          hours_logged?: number
+          id?: string
+          log_date?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          goal_id?: string
+          hours_logged?: number
+          id?: string
+          log_date?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_logs_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goals: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          goal_type: string
+          id: string
+          is_active: boolean
+          start_date: string
+          target_hours: number
+          target_unit: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          goal_type?: string
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          target_hours?: number
+          target_unit?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          goal_type?: string
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          target_hours?: number
+          target_unit?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       moodboard_items: {
         Row: {
           board_name: string
