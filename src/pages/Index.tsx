@@ -157,21 +157,23 @@ const Index = () => {
         {/* Clock outline background */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div
-            className="rounded-full border-[6px] relative"
+            className="rounded-full relative"
             style={{
-              width: "min(70vw, 500px)",
-              height: "min(70vw, 500px)",
-              borderColor: "hsl(100 50% 80% / 0.45)",
+              width: "min(80vw, 550px)",
+              height: "min(80vw, 550px)",
+              border: "8px solid hsl(100 60% 78% / 0.7)",
             }}
           >
-            {/* Hour marks */}
-            <div className="absolute top-[-14px] left-1/2 -translate-x-1/2 w-[6px] h-[24px] rounded bg-[hsl(100_50%_80%_/_0.45)]" />
-            <div className="absolute bottom-[-14px] left-1/2 -translate-x-1/2 w-[6px] h-[24px] rounded bg-[hsl(100_50%_80%_/_0.45)]" />
-            <div className="absolute left-[-14px] top-1/2 -translate-y-1/2 w-[24px] h-[6px] rounded bg-[hsl(100_50%_80%_/_0.45)]" />
-            <div className="absolute right-[-14px] top-1/2 -translate-y-1/2 w-[24px] h-[6px] rounded bg-[hsl(100_50%_80%_/_0.45)]" />
+            {/* Hour marks - 12, 3, 6, 9 */}
+            <div className="absolute top-[-16px] left-1/2 -translate-x-1/2 w-[8px] h-[28px] rounded-full" style={{ background: "hsl(100 60% 78% / 0.7)" }} />
+            <div className="absolute bottom-[-16px] left-1/2 -translate-x-1/2 w-[8px] h-[28px] rounded-full" style={{ background: "hsl(100 60% 78% / 0.7)" }} />
+            <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-[28px] h-[8px] rounded-full" style={{ background: "hsl(100 60% 78% / 0.7)" }} />
+            <div className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-[28px] h-[8px] rounded-full" style={{ background: "hsl(100 60% 78% / 0.7)" }} />
             {/* Clock hands */}
-            <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[4px] h-[35%] rounded-full origin-bottom rotate-[30deg]" style={{ background: "hsl(100 50% 80% / 0.35)" }} />
-            <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[3px] h-[40%] rounded-full origin-bottom rotate-[-60deg]" style={{ background: "hsl(100 50% 80% / 0.35)" }} />
+            <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[6px] h-[35%] rounded-full origin-bottom rotate-[30deg]" style={{ background: "hsl(100 60% 78% / 0.6)" }} />
+            <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[5px] h-[40%] rounded-full origin-bottom rotate-[-60deg]" style={{ background: "hsl(100 60% 78% / 0.6)" }} />
+            {/* Center dot */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full" style={{ background: "hsl(100 60% 78% / 0.6)" }} />
           </div>
         </div>
 
