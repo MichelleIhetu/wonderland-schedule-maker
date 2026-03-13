@@ -26,7 +26,7 @@ interface WizardInterfaceProps {
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
 const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: WizardInterfaceProps) => {
-  const [step, setStep] = useState<WizardStep>("greeting");
+  const [step, setStep] = useState<WizardStep>("tasks");
   const [breakFrequency, setBreakFrequency] = useState<"minimal" | "moderate" | "frequent">("moderate");
   const [taskEntries, setTaskEntries] = useState<TaskEntry[]>([
     { id: "1", title: "", duration: "", deadline: "", priority: "medium" },
