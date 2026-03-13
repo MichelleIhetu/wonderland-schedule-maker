@@ -268,20 +268,6 @@ const Index = () => {
         {/* Bunny mascot - positioned on the right */}
         <div className="absolute bottom-4 -right-28 sm:bottom-8 sm:-right-24 lg:-right-20 z-10">
           <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
-            {/* Speech bubble - animated */}
-            <div
-              className={`absolute -top-8 -left-4 sm:-top-10 sm:-left-8 transition-all duration-500 ease-out ${
-                showSpeechBubble
-                  ? "opacity-100 scale-100 translate-y-0"
-                  : "opacity-0 scale-75 translate-y-4 pointer-events-none"
-              }`}
-            >
-              <img
-                src={speechBubble}
-                alt="Speech bubble"
-                className="w-40 sm:w-52 md:w-60 object-contain"
-              />
-            </div>
             {/* Bunny mascot */}
             <img
               src={bunnyMascot}
