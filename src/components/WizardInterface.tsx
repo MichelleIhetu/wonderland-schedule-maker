@@ -287,16 +287,28 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                className="absolute -top-28 left-1/2 -translate-x-1/2 w-72 sm:w-80 z-30"
+                className="absolute -top-32 left-1/2 -translate-x-1/2 w-72 sm:w-80 z-30"
               >
                 <div
-                  className="relative bg-white p-5 shadow-xl border-2 border-foreground/80"
-                  style={{ borderRadius: "50% 50% 50% 12%", minHeight: "5rem" }}
+                  className="relative bg-white p-5 shadow-xl"
+                  style={{
+                    borderRadius: "50%",
+                    minHeight: "5.5rem",
+                    border: "3px solid hsl(280 40% 20%)",
+                    outline: "2px solid hsl(280 40% 20%)",
+                    outlineOffset: "3px",
+                    boxShadow: "4px 4px 0px hsl(280 40% 20%)",
+                  }}
                 >
                   <p className="text-sm text-center leading-relaxed" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
                     {typedText}
                     {isTyping && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
                   </p>
+                </div>
+                {/* Comic tail */}
+                <div className="flex justify-center -mt-1 gap-1">
+                  <div className="w-4 h-4 bg-white border-2 rounded-full" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                  <div className="w-2.5 h-2.5 bg-white border-2 rounded-full mt-2" style={{ borderColor: "hsl(280 40% 20%)" }} />
                 </div>
               </motion.div>
             )}
