@@ -4,6 +4,9 @@ import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Ca
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
+import libraryBg from "@/assets/library-background.png";
+import bunnyMascot from "@/assets/bunny-mascot.png";
+import speechBubble from "@/assets/bunny-with-speech-bubble.png";
 
 interface TaskEntry {
   id: string;
@@ -30,8 +33,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   ]);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [importedEvents, setImportedEvents] = useState<CalendarEvent[]>([]);
+  const [activeBookIndex, setActiveBookIndex] = useState<number | null>(null);
 
-  // Current start time — defaults to now, user can override
   const nowStr = (() => {
     const n = new Date();
     return `${n.getHours().toString().padStart(2, "0")}:${n.getMinutes().toString().padStart(2, "0")}`;
@@ -107,394 +110,308 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const currentIndex = steps.indexOf(step);
 
   const bunnyMessages: Record<WizardStep, string> = {
-    greeting: "Hello there! I'm the White Rabbit, and I'm here to help you plan your day! Let's make sure you're never late again! 🐰",
+    greeting: "Hi there! Welcome to TimeBunny. Your guide to plan your day!",
     mood: "How are you feeling today? Your energy level helps me plan the perfect schedule!",
-    stress: "And what about your stress level? Don't worry, I'll make sure to include some calming activities!",
-    sleep: "When do you wake up and when do you plan to sleep? Every minute counts in Wonderland!",
-    breaks: "Everyone needs a break for tea time! How often would you like to rest?",
-    tasks: "Wonderful! Now tell me about your tasks for today, and I'll weave them into the perfect schedule!"
+    stress: "And what about your stress level? I'll adjust your schedule accordingly!",
+    sleep: "When do you wake up and when do you plan to sleep?",
+    breaks: "Everyone needs a break! How often would you like to rest?",
+    tasks: "Click on one of the books in the library to write down the events of the day."
+  };
+
+  // Book colors for the shelves
+  const shelfBooks = [
+    // Shelf 1 (top) - these map to task entries
+    ["hsl(170 40% 60%)", "hsl(340 60% 70%)", "hsl(170 35% 55%)", "hsl(330 50% 75%)", "hsl(40 50% 80%)", "hsl(340 55% 65%)", "hsl(170 30% 65%)", "hsl(330 45% 70%)", "hsl(340 50% 60%)"],
+    // Shelf 2 (middle)
+    ["hsl(340 55% 75%)", "hsl(200 60% 65%)", "hsl(340 50% 70%)", "hsl(50 50% 70%)", "hsl(200 55% 60%)", "hsl(340 45% 65%)", "hsl(200 50% 70%)", "hsl(330 55% 75%)"],
+    // Shelf 3 (bottom)
+    ["hsl(280 40% 65%)", "hsl(200 50% 60%)", "hsl(50 55% 65%)", "hsl(340 50% 70%)", "hsl(40 45% 75%)", "hsl(200 55% 65%)", "hsl(50 50% 60%)", "hsl(340 45% 60%)"],
+  ];
+
+  // Render the step content overlay (for non-task steps)
+  const renderStepOverlay = () => {
+    if (step === "tasks") return null;
+
+    return (
+      <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl">
+        <div className="bg-card/95 backdrop-blur-md rounded-2xl border border-primary/20 shadow-2xl p-6 max-w-lg w-full mx-4 max-h-[80%] overflow-y-auto">
+          {/* Progress */}
+          <div className="flex gap-2 mb-4">
+            {steps.map((s, i) => (
+              <div key={s} className={`h-2 flex-1 rounded-full transition-all duration-300 ${i <= currentIndex ? "bg-primary" : "bg-muted/30"}`} />
+            ))}
+          </div>
+
+          {/* Bunny message */}
+          <div className="flex items-start gap-3 mb-6">
+            <div className="text-3xl">🐰</div>
+            <div className="bg-muted/30 rounded-2xl rounded-tl-none p-3 flex-1">
+              <p className="text-foreground font-body text-sm">{bunnyMessages[step]}</p>
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {step === "greeting" && (
+              <motion.div key="greeting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-4">
+                <div className="text-5xl animate-bounce">⏰</div>
+                <Button size="lg" onClick={() => setStep("mood")} className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
+                  <Sparkles className="w-5 h-5" /> Let's Begin!
+                </Button>
+              </motion.div>
+            )}
+
+            {step === "mood" && (
+              <motion.div key="mood" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-2 gap-3">
+                <button onClick={() => { updateSetting("energyLevel", "motivated"); setStep("stress"); }}
+                  className={`p-4 rounded-xl border-2 transition-all hover:scale-105 ${settings.energyLevel === "motivated" ? "border-primary bg-primary/20" : "border-primary/20 bg-card/50 hover:border-primary/50"}`}>
+                  <Battery className="w-10 h-10 mx-auto mb-2 text-green-400" />
+                  <h3 className="font-display text-sm text-foreground">Energized</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Ready to tackle anything!</p>
+                </button>
+                <button onClick={() => { updateSetting("energyLevel", "unmotivated"); setStep("stress"); }}
+                  className={`p-4 rounded-xl border-2 transition-all hover:scale-105 ${settings.energyLevel === "unmotivated" ? "border-primary bg-primary/20" : "border-primary/20 bg-card/50 hover:border-primary/50"}`}>
+                  <BatteryLow className="w-10 h-10 mx-auto mb-2 text-amber-400" />
+                  <h3 className="font-display text-sm text-foreground">Low Energy</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Taking it easy today</p>
+                </button>
+              </motion.div>
+            )}
+
+            {step === "stress" && (
+              <motion.div key="stress" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-3 gap-3">
+                {(["low", "medium", "high"] as StressLevel[]).map((level) => (
+                  <button key={level} onClick={() => { updateSetting("stressLevel", level); setStep("sleep"); }}
+                    className={`p-4 rounded-xl border-2 transition-all hover:scale-105 ${settings.stressLevel === level ? "border-primary bg-primary/20" : "border-primary/20 bg-card/50 hover:border-primary/50"}`}>
+                    {level === "low" && <Heart className="w-8 h-8 mx-auto mb-2 text-green-400" />}
+                    {level === "medium" && <Coffee className="w-8 h-8 mx-auto mb-2 text-amber-400" />}
+                    {level === "high" && <Zap className="w-8 h-8 mx-auto mb-2 text-red-400" />}
+                    <h3 className="font-display text-sm text-foreground capitalize">{level}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {level === "low" && "Calm"}{level === "medium" && "Some pressure"}{level === "high" && "Lots on my mind"}
+                    </p>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+
+            {step === "sleep" && (
+              <motion.div key="sleep" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-card/50 rounded-xl p-4 border border-primary/20">
+                    <div className="flex items-center gap-2 mb-2"><Sun className="w-5 h-5 text-amber-400" /><span className="font-display text-sm text-foreground">Wake Up</span></div>
+                    <input type="text" value={settings.wakeTime} onChange={(e) => updateSetting("wakeTime", e.target.value)} placeholder="e.g. 7:00 AM"
+                      className="w-full bg-background/50 border border-primary/20 rounded-lg p-2 text-foreground text-center placeholder:text-muted-foreground/50 placeholder:text-sm focus:outline-none focus:border-primary/50" />
+                  </div>
+                  <div className="bg-card/50 rounded-xl p-4 border border-primary/20">
+                    <div className="flex items-center gap-2 mb-2"><Moon className="w-5 h-5 text-primary" /><span className="font-display text-sm text-foreground">Bed Time</span></div>
+                    <input type="text" value={settings.bedTime} onChange={(e) => updateSetting("bedTime", e.target.value)} placeholder="e.g. 11:00 PM"
+                      className="w-full bg-background/50 border border-primary/20 rounded-lg p-2 text-foreground text-center placeholder:text-muted-foreground/50 placeholder:text-sm focus:outline-none focus:border-primary/50" />
+                  </div>
+                </div>
+                <div className="bg-primary/5 border border-primary/20 rounded-xl p-3">
+                  <div className="flex items-center gap-2 mb-2"><PlayCircle className="w-4 h-4 text-primary" /><span className="font-display text-xs text-foreground">Starting From</span></div>
+                  <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full bg-background/50 border border-primary/20 rounded-lg p-2 text-foreground text-center focus:outline-none focus:border-primary/50" />
+                </div>
+                <Button onClick={() => setStep("breaks")} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Continue</Button>
+              </motion.div>
+            )}
+
+            {step === "breaks" && (
+              <motion.div key="breaks" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-3 gap-3">
+                {([
+                  { value: "minimal", label: "Minimal", desc: "Short breaks", icon: "⚡" },
+                  { value: "moderate", label: "Balanced", desc: "15 min / 2 hrs", icon: "☕" },
+                  { value: "frequent", label: "Frequent", desc: "10 min / hr", icon: "🍵" },
+                ] as const).map((option) => (
+                  <button key={option.value} onClick={() => { setBreakFrequency(option.value); setStep("tasks"); }}
+                    className={`p-4 rounded-xl border-2 transition-all hover:scale-105 ${breakFrequency === option.value ? "border-primary bg-primary/20" : "border-primary/20 bg-card/50 hover:border-primary/50"}`}>
+                    <span className="text-3xl block mb-2">{option.icon}</span>
+                    <h3 className="font-display text-sm text-foreground">{option.label}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">{option.desc}</p>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {step !== "greeting" && (
+            <Button variant="ghost" onClick={() => setStep(steps[currentIndex - 1])} className="mt-3 text-muted-foreground w-full" disabled={isLoading}>
+              ← Go Back
+            </Button>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="bg-card/80 backdrop-blur-md rounded-2xl border border-primary/20 shadow-glow p-6 min-h-[500px] flex flex-col">
-      {/* Progress indicator */}
-      <div className="flex gap-2 mb-6">
-        {steps.map((s, i) => (
-          <div
-            key={s}
-            className={`h-2 flex-1 rounded-full transition-all duration-300 ${
-              i <= currentIndex ? "bg-primary" : "bg-muted/30"
-            }`}
-          />
-        ))}
-      </div>
+    <div className="relative rounded-2xl overflow-hidden min-h-[500px] flex flex-col" style={{ background: "hsl(280 40% 85%)" }}>
+      {/* Library background image */}
+      <img src={libraryBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
 
-      {/* Bunny message */}
-      <motion.div
-        key={step}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className="flex items-start gap-4 mb-8"
-      >
-        <div className="text-4xl">🐰</div>
-        <div className="bg-muted/30 rounded-2xl rounded-tl-none p-4 flex-1">
-          <p className="text-foreground font-body">{bunnyMessages[step]}</p>
-        </div>
-      </motion.div>
+      {/* Step overlay for non-task steps */}
+      {renderStepOverlay()}
 
-      {/* Step content */}
-      <div className="flex-1">
-        <AnimatePresence mode="wait">
-          {step === "greeting" && (
-            <motion.div
-              key="greeting"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="flex flex-col items-center justify-center h-full gap-6"
-            >
-              <div className="text-6xl animate-bounce">⏰</div>
-              <Button
-                size="lg"
-                onClick={() => setStep("mood")}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
-              >
-                <Sparkles className="w-5 h-5" />
-                Let's Begin!
-              </Button>
-            </motion.div>
-          )}
-
-          {step === "mood" && (
-            <motion.div
-              key="mood"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-            >
-              <button
-                onClick={() => {
-                  updateSetting("energyLevel", "motivated");
-                  setStep("stress");
-                }}
-                className={`p-6 rounded-xl border-2 transition-all hover:scale-105 ${
-                  settings.energyLevel === "motivated"
-                    ? "border-primary bg-primary/20"
-                    : "border-primary/20 bg-card/50 hover:border-primary/50"
-                }`}
-              >
-                <Battery className="w-12 h-12 mx-auto mb-3 text-green-400" />
-                <h3 className="font-display text-lg text-foreground">Energized</h3>
-                <p className="text-sm text-muted-foreground mt-1">Ready to tackle anything!</p>
-              </button>
-
-              <button
-                onClick={() => {
-                  updateSetting("energyLevel", "unmotivated");
-                  setStep("stress");
-                }}
-                className={`p-6 rounded-xl border-2 transition-all hover:scale-105 ${
-                  settings.energyLevel === "unmotivated"
-                    ? "border-primary bg-primary/20"
-                    : "border-primary/20 bg-card/50 hover:border-primary/50"
-                }`}
-              >
-                <BatteryLow className="w-12 h-12 mx-auto mb-3 text-amber-400" />
-                <h3 className="font-display text-lg text-foreground">Low Energy</h3>
-                <p className="text-sm text-muted-foreground mt-1">Taking it easy today</p>
-              </button>
-            </motion.div>
-          )}
-
-          {step === "stress" && (
-            <motion.div
-              key="stress"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-            >
-              {(["low", "medium", "high"] as StressLevel[]).map((level) => (
-                <button
-                  key={level}
-                  onClick={() => {
-                    updateSetting("stressLevel", level);
-                    setStep("sleep");
-                  }}
-                  className={`p-6 rounded-xl border-2 transition-all hover:scale-105 ${
-                    settings.stressLevel === level
-                      ? "border-primary bg-primary/20"
-                      : "border-primary/20 bg-card/50 hover:border-primary/50"
-                  }`}
-                >
-                  {level === "low" && <Heart className="w-10 h-10 mx-auto mb-3 text-green-400" />}
-                  {level === "medium" && <Coffee className="w-10 h-10 mx-auto mb-3 text-amber-400" />}
-                  {level === "high" && <Zap className="w-10 h-10 mx-auto mb-3 text-red-400" />}
-                  <h3 className="font-display text-lg text-foreground capitalize">{level}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {level === "low" && "Calm and relaxed"}
-                    {level === "medium" && "Some pressure"}
-                    {level === "high" && "Lots on my mind"}
-                  </p>
-                </button>
-              ))}
-            </motion.div>
-          )}
-
-          {step === "sleep" && (
-            <motion.div
-              key="sleep"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6"
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="bg-card/50 rounded-xl p-6 border border-primary/20">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Sun className="w-6 h-6 text-amber-400" />
-                    <span className="font-display text-foreground">Wake Up Time</span>
-                  </div>
-                  <input
-                    type="text"
-                    value={settings.wakeTime}
-                    onChange={(e) => updateSetting("wakeTime", e.target.value)}
-                    placeholder="e.g. 7:00 AM or 07:00"
-                    className="w-full bg-background/50 border border-primary/20 rounded-lg p-3 text-foreground text-center text-xl placeholder:text-muted-foreground/50 placeholder:text-base focus:outline-none focus:border-primary/50"
-                  />
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    Enter time like "7:00 AM" or "7:30"
-                  </p>
-                </div>
-
-                <div className="bg-card/50 rounded-xl p-6 border border-primary/20">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Moon className="w-6 h-6 text-primary" />
-                    <span className="font-display text-foreground">Bed Time</span>
-                  </div>
-                  <input
-                    type="text"
-                    value={settings.bedTime}
-                    onChange={(e) => updateSetting("bedTime", e.target.value)}
-                    placeholder="e.g. 11:00 PM or 23:00"
-                    className="w-full bg-background/50 border border-primary/20 rounded-lg p-3 text-foreground text-center text-xl placeholder:text-muted-foreground/50 placeholder:text-base focus:outline-none focus:border-primary/50"
-                  />
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    Enter time like "11:00 PM" or "23:00"
-                  </p>
-                </div>
-              </div>
-
-              {/* Current time subsection */}
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <PlayCircle className="w-5 h-5 text-primary" />
-                  <span className="font-display text-foreground text-sm">Starting From (Now)</span>
-                  <span className="text-xs text-muted-foreground ml-auto">auto-detected ✨</span>
-                </div>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Your schedule will be built from this time, not your wake time. Adjust if needed.
-                </p>
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="w-full bg-background/50 border border-primary/20 rounded-lg p-3 text-foreground text-center text-xl focus:outline-none focus:border-primary/50"
-                />
-              </div>
-
-              <Button
-                onClick={() => setStep("breaks")}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                Continue
-              </Button>
-            </motion.div>
-          )}
-
-          {step === "breaks" && (
-            <motion.div
-              key="breaks"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-            >
-              {([
-                { value: "minimal", label: "Minimal", desc: "Short breaks only", icon: "⚡" },
-                { value: "moderate", label: "Balanced", desc: "15 min every 2 hours", icon: "☕" },
-                { value: "frequent", label: "Frequent", desc: "10 min every hour", icon: "🍵" },
-              ] as const).map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    setBreakFrequency(option.value);
-                    setStep("tasks");
-                  }}
-                  className={`p-6 rounded-xl border-2 transition-all hover:scale-105 ${
-                    breakFrequency === option.value
-                      ? "border-primary bg-primary/20"
-                      : "border-primary/20 bg-card/50 hover:border-primary/50"
-                  }`}
-                >
-                  <span className="text-4xl block mb-3">{option.icon}</span>
-                  <h3 className="font-display text-lg text-foreground">{option.label}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{option.desc}</p>
-                </button>
-              ))}
-            </motion.div>
-          )}
-
-          {step === "tasks" && (
-            <motion.div
-              key="tasks"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-4"
-            >
-              {/* Calendar Import Button */}
-              <Button
-                variant="outline"
-                onClick={() => setIsCalendarModalOpen(true)}
-                className="w-full border-primary/30 hover:bg-primary/10 gap-2"
-              >
-                <Calendar className="w-5 h-5" />
-                Import from Calendar
-                {importedEvents.length > 0 && (
-                  <span className="ml-2 px-2 py-0.5 bg-primary/20 rounded-full text-xs">
-                    {importedEvents.length} events
-                  </span>
-                )}
-              </Button>
-
-              {/* Imported Events Preview */}
-              {importedEvents.length > 0 && (
-                <div className="bg-muted/20 rounded-xl p-3 border border-primary/10">
-                  <p className="text-xs text-muted-foreground mb-2">Imported Events:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {importedEvents.map((event) => (
-                      <div
-                        key={event.id}
-                        className="flex items-center gap-1 px-2 py-1 bg-primary/10 rounded-lg text-xs text-foreground"
-                      >
-                        <span className="truncate max-w-[150px]">{event.title}</span>
-                        <span className="text-muted-foreground">
-                          {event.isAllDay ? '' : event.startTime}
-                        </span>
-                        <button
-                          onClick={() => removeImportedEvent(event.id)}
-                          className="ml-1 hover:text-red-400 transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Structured Task Entries */}
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                {taskEntries.map((task, index) => (
-                  <div key={task.id} className="bg-background/50 border border-primary/20 rounded-xl p-3 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground font-display w-5">{index + 1}.</span>
-                      <input
-                        type="text"
-                        value={task.title}
-                        onChange={(e) => updateTask(task.id, "title", e.target.value)}
-                        placeholder="Task name (e.g., Study for math exam)"
-                        className="flex-1 bg-transparent text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none"
+      {/* Task step: interactive bookshelf */}
+      {step === "tasks" && (
+        <div className="relative z-10 flex-1 flex">
+          {/* Left side - Bookshelf with clickable books */}
+          <div className="w-1/2 relative flex flex-col justify-center p-4">
+            {/* Invisible clickable book areas over the bookshelf image */}
+            <div className="absolute inset-0 flex flex-col justify-between py-[5%] px-[4%]">
+              {shelfBooks.map((shelf, shelfIdx) => (
+                <div key={shelfIdx} className="flex items-end gap-[2px] h-[28%] px-[2%] pb-[2%]">
+                  {shelf.map((_, bookIdx) => {
+                    const globalIdx = shelfIdx * shelf.length + bookIdx;
+                    const hasTask = taskEntries[globalIdx]?.title?.trim();
+                    return (
+                      <button
+                        key={bookIdx}
+                        onClick={() => {
+                          // Ensure task entry exists for this book
+                          while (taskEntries.length <= globalIdx) {
+                            setTaskEntries(prev => [...prev, {
+                              id: Date.now().toString() + globalIdx,
+                              title: "",
+                              duration: "",
+                              deadline: "",
+                              priority: "medium" as const,
+                            }]);
+                          }
+                          setActiveBookIndex(globalIdx);
+                        }}
+                        className={`flex-1 h-full rounded-sm transition-all hover:brightness-110 hover:scale-y-105 cursor-pointer ${
+                          hasTask ? "ring-2 ring-primary ring-offset-1" : ""
+                        } ${activeBookIndex === globalIdx ? "ring-2 ring-accent brightness-125" : ""}`}
+                        style={{ background: "transparent" }}
+                        title={hasTask ? taskEntries[globalIdx].title : `Book ${globalIdx + 1} — click to add a task`}
                       />
-                      {taskEntries.length > 1 && (
-                        <button onClick={() => removeTask(task.id)} className="text-muted-foreground hover:text-destructive transition-colors">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right side - Task input panel + bunny */}
+          <div className="w-1/2 relative flex flex-col justify-end p-4">
+            {/* Task input panel */}
+            <div className="absolute top-4 left-4 right-4 bottom-[45%] z-20">
+              <AnimatePresence mode="wait">
+                {activeBookIndex !== null && taskEntries[activeBookIndex] ? (
+                  <motion.div
+                    key={activeBookIndex}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="bg-card/95 backdrop-blur-md rounded-xl border border-primary/20 shadow-xl p-4 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="pixel-title-alt text-xs" style={{ color: "hsl(280 40% 50%)" }}>Book {activeBookIndex + 1}</span>
+                      <button onClick={() => setActiveBookIndex(null)} className="text-muted-foreground hover:text-foreground">
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
-                    <div className="flex flex-wrap gap-2 pl-7">
+                    <input
+                      type="text"
+                      value={taskEntries[activeBookIndex].title}
+                      onChange={(e) => updateTask(taskEntries[activeBookIndex].id, "title", e.target.value)}
+                      placeholder="Write your task here..."
+                      className="w-full bg-background/50 border border-primary/20 rounded-lg p-2 text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50"
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
                       <input
                         type="text"
-                        value={task.duration}
-                        onChange={(e) => updateTask(task.id, "duration", e.target.value)}
+                        value={taskEntries[activeBookIndex].duration}
+                        onChange={(e) => updateTask(taskEntries[activeBookIndex].id, "duration", e.target.value)}
                         placeholder="Duration (e.g., 2h)"
-                        className="w-28 bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30"
+                        className="flex-1 bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
                       />
-                      <div className="relative flex items-center">
-                        <AlertTriangle className="w-3 h-3 text-muted-foreground absolute left-2" />
-                        <input
-                          type="text"
-                          value={task.deadline}
-                          onChange={(e) => updateTask(task.id, "deadline", e.target.value)}
-                          placeholder="Deadline (e.g., 5 PM today)"
-                          className="w-40 bg-muted/20 border border-primary/10 rounded-lg pl-6 pr-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/30"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        value={taskEntries[activeBookIndex].deadline}
+                        onChange={(e) => updateTask(taskEntries[activeBookIndex].id, "deadline", e.target.value)}
+                        placeholder="Deadline"
+                        className="flex-1 bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+                      />
                       <select
-                        value={task.priority}
-                        onChange={(e) => updateTask(task.id, "priority", e.target.value)}
-                        className="bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground focus:outline-none focus:border-primary/30"
+                        value={taskEntries[activeBookIndex].priority}
+                        onChange={(e) => updateTask(taskEntries[activeBookIndex].id, "priority", e.target.value)}
+                        className="bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground focus:outline-none"
                       >
                         <option value="high">🔴 High</option>
-                        <option value="medium">🟡 Medium</option>
+                        <option value="medium">🟡 Med</option>
                         <option value="low">🟢 Low</option>
                       </select>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="prompt"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center gap-3 pt-4"
+                  >
+                    {/* Calendar import */}
+                    <Button variant="outline" onClick={() => setIsCalendarModalOpen(true)} className="bg-card/80 backdrop-blur-sm border-primary/30 hover:bg-primary/10 gap-2 text-sm">
+                      <Calendar className="w-4 h-4" /> Import Calendar
+                      {importedEvents.length > 0 && <span className="ml-1 px-2 py-0.5 bg-primary/20 rounded-full text-xs">{importedEvents.length}</span>}
+                    </Button>
 
-              <Button
-                variant="outline"
-                onClick={addTask}
-                className="w-full border-dashed border-primary/30 hover:bg-primary/10 gap-2 text-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Add Another Task
-              </Button>
+                    {importedEvents.length > 0 && (
+                      <div className="bg-card/80 backdrop-blur-sm rounded-lg p-2 border border-primary/10 w-full">
+                        <div className="flex flex-wrap gap-1">
+                          {importedEvents.map((event) => (
+                            <div key={event.id} className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded text-xs text-foreground">
+                              <span className="truncate max-w-[100px]">{event.title}</span>
+                              <button onClick={() => removeImportedEvent(event.id)} className="hover:text-destructive"><X className="w-3 h-3" /></button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
+                    {/* Task summary */}
+                    {hasValidTasks && (
+                      <div className="bg-card/80 backdrop-blur-sm rounded-lg p-2 border border-primary/10 w-full">
+                        <p className="text-xs text-muted-foreground mb-1">Tasks added:</p>
+                        {taskEntries.filter(t => t.title.trim()).map((t, i) => (
+                          <div key={t.id} className="text-xs text-foreground flex items-center gap-1">
+                            <span>{t.priority === "high" ? "🔴" : t.priority === "low" ? "🟢" : "🟡"}</span>
+                            <span className="truncate">{t.title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Generate button - bottom area */}
+            <div className="relative z-20 mb-2 space-y-2">
               <Button
                 onClick={handleComplete}
                 disabled={!hasValidTasks || isLoading}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-lg"
               >
                 {isLoading ? (
-                  <>
-                    <Clock className="w-5 h-5 animate-spin" />
-                    Creating your schedule...
-                  </>
+                  <><Clock className="w-5 h-5 animate-spin" /> Creating schedule...</>
                 ) : (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    Generate My Schedule!
-                  </>
+                  <><Sparkles className="w-5 h-5" /> Generate My Schedule!</>
                 )}
               </Button>
-
-              <CalendarImportModal
-                isOpen={isCalendarModalOpen}
-                onClose={() => setIsCalendarModalOpen(false)}
-                onImport={handleCalendarImport}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Back button */}
-      {step !== "greeting" && (
-        <Button
-          variant="ghost"
-          onClick={() => setStep(steps[currentIndex - 1])}
-          className="mt-4 text-muted-foreground"
-          disabled={isLoading}
-        >
-          ← Go Back
-        </Button>
+              <Button variant="ghost" onClick={() => setStep("breaks")} className="w-full text-muted-foreground text-xs bg-card/50 backdrop-blur-sm" disabled={isLoading}>
+                ← Go Back
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
+
+      <CalendarImportModal isOpen={isCalendarModalOpen} onClose={() => setIsCalendarModalOpen(false)} onImport={handleCalendarImport} />
     </div>
   );
 };
