@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, Flame, Target, TrendingUp, Calendar, Archive, Clock } from "lucide-react";
+import { ArrowLeft, Plus, Flame, Target, TrendingUp, Calendar, Archive, Clock, Sparkles, Wand2, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -10,6 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGoals, GoalWithProgress } from "@/hooks/useGoals";
+import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 
 const CATEGORIES = [
