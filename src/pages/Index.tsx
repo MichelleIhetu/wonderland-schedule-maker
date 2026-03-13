@@ -270,7 +270,7 @@ const Index = () => {
           <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
             {/* Speech bubble - animated */}
             <div
-              className={`absolute -top-20 -left-16 sm:-top-24 sm:-left-20 transition-all duration-500 ease-out ${
+              className={`absolute -top-8 -left-4 sm:-top-10 sm:-left-8 transition-all duration-500 ease-out ${
                 showSpeechBubble
                   ? "opacity-100 scale-100 translate-y-0"
                   : "opacity-0 scale-75 translate-y-4 pointer-events-none"
