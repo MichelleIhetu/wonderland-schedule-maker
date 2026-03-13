@@ -130,7 +130,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
 
   return (
-    <div className="relative rounded-2xl overflow-hidden min-h-[500px] flex flex-col" style={{ background: "hsl(280 40% 85%)" }}>
+    <div className="fixed inset-0 overflow-hidden flex flex-col" style={{ background: "hsl(280 40% 85%)" }}>
       {/* Library background image */}
       <img src={libraryBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
 

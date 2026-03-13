@@ -303,72 +303,9 @@ const Index = () => {
     );
   }
 
-  // ─── APP VIEW (wizard / schedule / pomodoro) ───
+  // ─── APP VIEW ───
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {settings.backgroundTheme === "gothic" ? <SpiderWebBackground /> : <ThemeBackground theme={settings.backgroundTheme} />}
-
-      <ThemeCustomizer isOpen={isCustomizerOpen} onClose={() => setIsCustomizerOpen(false)} currentTheme={settings.backgroundTheme} customColors={customColors} onColorsChange={setCustomColors} onReset={handleResetColors} />
-      <CheckInModal isOpen={isCheckInModalOpen} onClose={() => { setIsCheckInModalOpen(false); skipCheckIn(); }} onSubmit={handleCheckInSubmit} currentTask={currentTask} />
-
-      <div className="container max-w-4xl mx-auto px-4 py-6 relative z-10 min-h-screen flex flex-col">
-        {/* Top bar */}
-        <div className="mb-4 flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            {viewMode === "wizard" && generatedSchedule.length === 0 && (
-              <Button variant="ghost" size="sm" onClick={handleBackToLanding} className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Home
-              </Button>
-            )}
-            <ThemeSelector currentTheme={settings.backgroundTheme} onChange={(theme) => setSettings({ ...settings, backgroundTheme: theme })} onOpenCustomizer={() => setIsCustomizerOpen(true)} />
-          </div>
-
-          <div className="flex items-center gap-2">
-            {(viewMode === "pomodoro" || generatedSchedule.length > 0) && (
-              <Button variant="outline" size="sm" onClick={() => navigate("/vibe-check", { state: { backgroundTheme: settings.backgroundTheme } })} className="gap-2">
-                <Clock className="w-4 h-4" />
-                <span className="hidden sm:inline">Vibe Check</span>
-                {minutesUntilNextCheckIn < 60 && <span className="text-xs text-muted-foreground">({minutesUntilNextCheckIn}m)</span>}
-              </Button>
-            )}
-            <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-muted-foreground hover:text-foreground">
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Sign Out</span>
-            </Button>
-          </div>
-        </div>
-
-        {/* App content */}
-        <div className="flex-1 flex flex-col gap-6">
-          {viewMode === "pomodoro" ? (
-            <PomodoroTimer schedule={generatedSchedule} onBack={handleBackToSchedule} />
-          ) : viewMode === "schedule" && generatedSchedule.length > 0 ? (
-            <ScheduleDisplay schedule={generatedSchedule} onClear={handleClearSchedule} onStartPomodoro={handleStartPomodoro} theme={settings.theme} />
-          ) : (
-            <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} />
-          )}
-        </div>
-
-        {viewMode !== "pomodoro" && (
-          <footer className="mt-6 text-center flex-shrink-0 space-y-3">
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <Link to="/moodboard" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 border border-border hover:border-primary/50 transition-colors text-sm font-body text-foreground hover:text-primary">
-                <ImageIcon className="w-4 h-4" />
-                <span>Moodboard</span>
-                <span className="text-muted-foreground">✨</span>
-              </Link>
-              <Link to="/goals" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 border border-border hover:border-primary/50 transition-colors text-sm font-body text-foreground hover:text-primary">
-                <Target className="w-4 h-4" />
-                <span>Long-term Goals</span>
-                <span className="text-muted-foreground">🎯</span>
-              </Link>
-            </div>
-            <p className="text-xs text-muted-foreground/60 font-body italic">"I'm late! I'm late! For a very important date!" — White Rabbit</p>
-          </footer>
-        )}
-      </div>
-    </div>
+    <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} />
   );
 };
 
