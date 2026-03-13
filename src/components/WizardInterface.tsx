@@ -134,8 +134,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       {/* Library background image */}
       <img src={libraryBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
 
-      {/* Step overlay for non-task steps */}
-      {renderStepOverlay()}
 
       {/* Task step: interactive bookshelf */}
       {step === "tasks" && (
