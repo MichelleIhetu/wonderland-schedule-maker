@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import libraryBg from "@/assets/library-background.png";
+import cozyBg from "@/assets/cozy-background.png";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubbleWelcome from "@/assets/speech-bubble-welcome.png";
 
@@ -136,7 +137,18 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   return (
     <div className="fixed inset-0 overflow-hidden flex flex-col" style={{ background: "hsl(280 40% 85%)" }}>
       {/* Library background image */}
-      <img src={libraryBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={importedEvents.length > 0 ? "cozy" : "library"}
+          src={importedEvents.length > 0 ? cozyBg : libraryBg}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+        />
+      </AnimatePresence>
 
 
       {/* Task step: interactive bookshelf */}
