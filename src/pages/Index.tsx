@@ -65,6 +65,8 @@ const Index = () => {
   const [scheduleLoaded, setScheduleLoaded] = useState(false);
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
 
+  useClockTick(viewMode === "landing");
+
   const { isLoading, sendMessage, generatedSchedule, setGeneratedSchedule } = useChat(settings);
   const { saveSchedule, loadTodaySchedule } = useSchedulePersistence(user?.id);
 
