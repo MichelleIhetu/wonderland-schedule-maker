@@ -182,7 +182,7 @@ const Index = () => {
 
       {/* Clock tick marks in circular pattern */}
       <div className="absolute inset-0 pointer-events-none z-[1] flex items-center justify-center">
-        <div className="relative" style={{ width: "min(130vw, 130vh)", height: "min(130vw, 130vh)" }}>
+        <div className="relative" style={{ width: "min(150vw, 150vh)", height: "min(150vw, 150vh)" }}>
           {Array.from({ length: 60 }).map((_, i) => {
             const isHour = i % 5 === 0;
             const angle = i * 6;
