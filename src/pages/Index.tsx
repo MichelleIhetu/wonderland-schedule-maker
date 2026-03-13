@@ -190,13 +190,13 @@ const Index = () => {
           </div>
 
           {/* Main hero area */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 sm:px-12 relative">
+          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 sm:px-12 relative w-full">
             {/* Title */}
-            <div className="text-center">
-              <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight" style={{ color: "hsl(280 50% 65%)" }}>
+            <div className="text-center w-full relative z-10">
+              <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mx-auto" style={{ color: "hsl(280 50% 65%)" }}>
                 TIME
               </h1>
-              <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mt-2" style={{ color: "hsl(185 70% 60%)" }}>
+              <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mt-2 mx-auto" style={{ color: "hsl(185 70% 60%)" }}>
                 BUNNY
               </h1>
             </div>
