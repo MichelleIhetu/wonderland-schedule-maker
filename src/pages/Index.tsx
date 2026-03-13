@@ -62,6 +62,7 @@ const Index = () => {
   const [customColors, setCustomColors] = useState<CustomColors>(defaultThemeColors.gothic);
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [scheduleLoaded, setScheduleLoaded] = useState(false);
+  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
 
   const { isLoading, sendMessage, generatedSchedule, setGeneratedSchedule } = useChat(settings);
   const { saveSchedule, loadTodaySchedule } = useSchedulePersistence(user?.id);
