@@ -189,8 +189,8 @@ const Index = () => {
           </Button>
         </div>
 
-        {/* Title and Start button - grouped together at top */}
-        <div className="flex flex-col items-center pt-8 sm:pt-12">
+        {/* Title and Start button - centered */}
+        <div className="flex-1 flex flex-col items-center justify-center">
           <div className="text-center">
             <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-tight tracking-wider" style={{ color: "hsl(280 50% 65%)" }}>
               TIME
@@ -200,7 +200,6 @@ const Index = () => {
             </h1>
           </div>
 
-          {/* Start button - right underneath BUNNY */}
           <button
             onClick={handleStart}
             className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 mt-4 sm:mt-6"
@@ -209,28 +208,28 @@ const Index = () => {
               start
             </span>
           </button>
+        </div>
 
-          {/* Nav links - positioned at bottom */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-auto mb-8 sm:mb-12">
-            <Link
-              to="/goals"
-              className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
-              style={{ color: "hsl(280 40% 40%)" }}
-            >
-              <Target className="w-4 h-4" />
-              <span className="font-body font-semibold">Goals</span>
-              <span>🎯</span>
-            </Link>
-            <Link
-              to="/moodboard"
-              className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
-              style={{ color: "hsl(280 40% 40%)" }}
-            >
-              <ImageIcon className="w-4 h-4" />
-              <span className="font-body font-semibold">Moodboard</span>
-              <span>✨</span>
-            </Link>
-          </div>
+        {/* Nav links - at the bottom of the page */}
+        <div className="flex flex-wrap items-center justify-center gap-3 pb-8 sm:pb-12">
+          <Link
+            to="/goals"
+            className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+            style={{ color: "hsl(280 40% 40%)" }}
+          >
+            <Target className="w-4 h-4" />
+            <span className="font-body font-semibold">Goals</span>
+            <span>🎯</span>
+          </Link>
+          <Link
+            to="/moodboard"
+            className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+            style={{ color: "hsl(280 40% 40%)" }}
+          >
+            <ImageIcon className="w-4 h-4" />
+            <span className="font-body font-semibold">Moodboard</span>
+            <span>✨</span>
+          </Link>
         </div>
 
         {/* Bunny mascot - positioned on the right */}
