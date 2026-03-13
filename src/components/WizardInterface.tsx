@@ -299,11 +299,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                   </p>
                 </div>
               </motion.div>
-                <p className="text-sm text-foreground" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 30%)" }}>
-                  {typedText}
-                  {isTyping && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
-                </p>
-              </motion.div>
             )}
           </AnimatePresence>
           <img
