@@ -258,7 +258,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       )}
 
       {/* Bunny mascot - bottom right on the rug */}
-      <div className="absolute bottom-0 right-[10%] z-20">
+      <div className="absolute bottom-0 right-0 z-20">
         <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
           <AnimatePresence>
             {showSpeechBubble && (
