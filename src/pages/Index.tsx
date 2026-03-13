@@ -211,8 +211,8 @@ const Index = () => {
               </span>
             </button>
 
-            {/* Nav links - positioned beneath start button */}
-            <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-6 md:mt-8">
+            {/* Nav links - positioned right beneath start button */}
+            <div className="flex flex-wrap items-center gap-3 mt-2 sm:mt-3 md:mt-4">
               <Link
                 to="/goals"
                 className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
