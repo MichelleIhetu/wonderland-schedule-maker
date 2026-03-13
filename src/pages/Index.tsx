@@ -154,27 +154,27 @@ const Index = () => {
   if (viewMode === "landing") {
     return (
       <div className="min-h-screen relative overflow-hidden" style={{ background: "hsl(300 50% 88%)" }}>
-      {/* Clock outline background - CENTERED */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      {/* Clock outline background - FULL PAGE */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4 sm:p-8">
         <div
-          className="rounded-full relative"
+          className="rounded-full relative w-full h-full max-w-none max-h-none"
           style={{
-            width: "min(75vw, 500px)",
-            height: "min(75vw, 500px)",
-            border: "8px solid hsl(90 80% 45%)",
+            width: "min(95vw, 95vh)",
+            height: "min(95vw, 95vh)",
+            border: "12px solid hsl(90 80% 45%)",
             background: "hsl(40 60% 95%)",
           }}
         >
           {/* Hour marks - 12, 3, 6, 9 */}
-          <div className="absolute top-[-16px] left-1/2 -translate-x-1/2 w-[8px] h-[28px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-          <div className="absolute bottom-[-16px] left-1/2 -translate-x-1/2 w-[8px] h-[28px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-          <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-[28px] h-[8px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-          <div className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-[28px] h-[8px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-          {/* Clock hands */}
-          <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[6px] h-[35%] rounded-full origin-bottom rotate-[30deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
-          <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[5px] h-[40%] rounded-full origin-bottom rotate-[-60deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
-          {/* Center dot */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+          <div className="absolute top-[-24px] left-1/2 -translate-x-1/2 w-[12px] h-[40px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+          <div className="absolute bottom-[-24px] left-1/2 -translate-x-1/2 w-[12px] h-[40px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+          <div className="absolute left-[-24px] top-1/2 -translate-y-1/2 w-[40px] h-[12px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+          <div className="absolute right-[-24px] top-1/2 -translate-y-1/2 w-[40px] h-[12px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+          {/* Clock hands - scaled proportionally */}
+          <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[8px] h-[35%] rounded-full origin-bottom rotate-[30deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
+          <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[6px] h-[40%] rounded-full origin-bottom rotate-[-60deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
+          {/* Center dot - larger */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
         </div>
       </div>
 
