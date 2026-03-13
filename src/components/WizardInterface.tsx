@@ -37,6 +37,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const [typedText, setTypedText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [bubbleClickCount, setBubbleClickCount] = useState(0);
 
   const nowStr = (() => {
     const n = new Date();
