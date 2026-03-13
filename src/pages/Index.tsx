@@ -154,96 +154,97 @@ const Index = () => {
   if (viewMode === "landing") {
     return (
       <div className="min-h-screen relative overflow-hidden" style={{ background: "hsl(300 50% 88%)" }}>
-        {/* Clock outline background - shifted left */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none -translate-x-[10%] sm:-translate-x-[15%]">
-          <div
-            className="rounded-full relative"
-            style={{
-              width: "min(80vw, 550px)",
-              height: "min(80vw, 550px)",
-              border: "8px solid hsl(90 80% 45%)",
-              background: "hsl(40 60% 95%)",
-            }}
-          >
-            {/* Hour marks - 12, 3, 6, 9 */}
-            <div className="absolute top-[-16px] left-1/2 -translate-x-1/2 w-[8px] h-[28px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-            <div className="absolute bottom-[-16px] left-1/2 -translate-x-1/2 w-[8px] h-[28px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-            <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-[28px] h-[8px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-            <div className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-[28px] h-[8px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-            {/* Clock hands */}
-            <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[6px] h-[35%] rounded-full origin-bottom rotate-[30deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
-            <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[5px] h-[40%] rounded-full origin-bottom rotate-[-60deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
-            {/* Center dot */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 min-h-screen flex flex-col">
-          {/* Top bar */}
-          <div className="flex items-center justify-between px-4 sm:px-8 py-4">
-            <div />
-            <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)]">
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Sign Out</span>
-            </Button>
-          </div>
-
-          {/* Main hero area - shifted left */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 sm:px-12 relative w-full -translate-x-[10%] sm:-translate-x-[15%]">
-            {/* Title - centered */}
-            <div className="text-center w-full relative z-10">
-              <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-tight mx-auto tracking-wider" style={{ color: "hsl(280 50% 65%)" }}>
-                TIME
-              </h1>
-              <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-tight mt-2 mx-auto tracking-wider" style={{ color: "hsl(185 70% 60%)" }}>
-                BUNNY
-              </h1>
-            </div>
-
-            {/* Glass Start button - positioned closer to title */}
-            <button
-              onClick={handleStart}
-              className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 mt-2 sm:mt-3 md:mt-4"
-            >
-              <span className="pixel-title-alt text-2xl sm:text-3xl" style={{ color: "hsl(330 80% 55%)" }}>
-                start
-              </span>
-            </button>
-
-            {/* Nav links - positioned right beneath start button */}
-            <div className="flex flex-wrap items-center gap-3 mt-2 sm:mt-3 md:mt-4">
-              <Link
-                to="/goals"
-                className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
-                style={{ color: "hsl(280 40% 40%)" }}
-              >
-                <Target className="w-4 h-4" />
-                <span className="font-body font-semibold">Goals</span>
-                <span>🎯</span>
-              </Link>
-              <Link
-                to="/moodboard"
-                className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
-                style={{ color: "hsl(280 40% 40%)" }}
-              >
-                <ImageIcon className="w-4 h-4" />
-                <span className="font-body font-semibold">Moodboard</span>
-                <span>✨</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Bunny mascot with integrated speech bubble - positioned on the right */}
-          <div className="absolute bottom-4 -right-4 sm:bottom-8 sm:-right-2 lg:right-0 z-10">
-            <img
-              src={bunnyWithSpeechBubble}
-              alt="TimeBunny mascot with speech bubble"
-              className="w-64 sm:w-80 md:w-96 lg:w-[28rem] object-contain drop-shadow-xl"
-            />
-          </div>
+      {/* Clock outline background - CENTERED */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div
+          className="rounded-full relative"
+          style={{
+            width: "min(75vw, 500px)",
+            height: "min(75vw, 500px)",
+            border: "8px solid hsl(90 80% 45%)",
+            background: "hsl(40 60% 95%)",
+          }}
+        >
+          {/* Hour marks - 12, 3, 6, 9 */}
+          <div className="absolute top-[-16px] left-1/2 -translate-x-1/2 w-[8px] h-[28px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+          <div className="absolute bottom-[-16px] left-1/2 -translate-x-1/2 w-[8px] h-[28px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+          <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-[28px] h-[8px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+          <div className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-[28px] h-[8px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+          {/* Clock hands */}
+          <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[6px] h-[35%] rounded-full origin-bottom rotate-[30deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
+          <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[5px] h-[40%] rounded-full origin-bottom rotate-[-60deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
+          {/* Center dot */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
         </div>
       </div>
+
+      {/* Content - positioned above and below clock */}
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-4 sm:px-8 py-4">
+          <div />
+          <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)]">
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Sign Out</span>
+          </Button>
+        </div>
+
+        {/* Title - at top of clock */}
+        <div className="flex-1 flex flex-col items-center pt-8 sm:pt-12">
+          <div className="text-center">
+            <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-tight tracking-wider" style={{ color: "hsl(280 50% 65%)" }}>
+              TIME
+            </h1>
+            <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-tight -mt-2 sm:-mt-4 tracking-wider" style={{ color: "hsl(185 70% 60%)" }}>
+              BUNNY
+            </h1>
+          </div>
+        </div>
+
+        {/* Start button and nav - at bottom of clock area */}
+        <div className="flex flex-col items-center justify-center pb-8 sm:pb-12 gap-3">
+          <button
+            onClick={handleStart}
+            className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+          >
+            <span className="pixel-title-alt text-2xl sm:text-3xl" style={{ color: "hsl(330 80% 55%)" }}>
+              start
+            </span>
+          </button>
+
+          {/* Nav links */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link
+              to="/goals"
+              className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+              style={{ color: "hsl(280 40% 40%)" }}
+            >
+              <Target className="w-4 h-4" />
+              <span className="font-body font-semibold">Goals</span>
+              <span>🎯</span>
+            </Link>
+            <Link
+              to="/moodboard"
+              className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+              style={{ color: "hsl(280 40% 40%)" }}
+            >
+              <ImageIcon className="w-4 h-4" />
+              <span className="font-body font-semibold">Moodboard</span>
+              <span>✨</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Bunny mascot - positioned on the right */}
+        <div className="absolute bottom-4 right-0 sm:bottom-8 sm:right-4 lg:right-8 z-10">
+          <img
+            src={bunnyWithSpeechBubble}
+            alt="TimeBunny mascot with speech bubble"
+            className="w-56 sm:w-72 md:w-80 lg:w-96 object-contain drop-shadow-xl"
+          />
+        </div>
+      </div>
+    </div>
     );
   }
 
