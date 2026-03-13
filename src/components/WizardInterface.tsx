@@ -287,7 +287,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                className="absolute -top-24 -left-48 w-72 sm:w-80 z-30"
+                className="absolute -top-28 left-1/2 -translate-x-1/2 w-72 sm:w-80 z-30"
               >
                 <div
                   className="relative bg-white p-5 shadow-xl border-2 border-foreground/80"
