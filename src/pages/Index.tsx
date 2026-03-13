@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Sparkles, ImageIcon, Clock, LogOut } from "lucide-react";
+import { Sparkles, ImageIcon, Clock, LogOut, Target } from "lucide-react";
 import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
