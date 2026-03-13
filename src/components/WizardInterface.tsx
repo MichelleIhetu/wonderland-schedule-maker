@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import libraryBg from "@/assets/library-background.png";
+import cozyBg from "@/assets/cozy-background.png";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubbleWelcome from "@/assets/speech-bubble-welcome.png";
 
