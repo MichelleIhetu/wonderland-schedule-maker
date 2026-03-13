@@ -212,7 +212,7 @@ const Index = () => {
             </button>
 
             {/* Nav links - positioned lower towards bottom of clock */}
-            <div className="flex flex-wrap items-center gap-3 mt-8 sm:mt-12 md:mt-16">
+            <div className="flex flex-wrap items-center gap-3 mt-12 sm:mt-16 md:mt-20 lg:mt-24">
               <Link
                 to="/goals"
                 className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
@@ -241,13 +241,6 @@ const Index = () => {
               alt="TimeBunny mascot with speech bubble"
               className="w-64 sm:w-80 md:w-96 lg:w-[28rem] object-contain drop-shadow-xl"
             />
-          </div>
-
-          {/* Footer */}
-          <div className="text-center py-4 px-4">
-            <p className="text-xs font-body italic" style={{ color: "hsl(280 30% 55%)" }}>
-              "I'm late! I'm late! For a very important date!" — White Rabbit
-            </p>
           </div>
         </div>
       </div>
