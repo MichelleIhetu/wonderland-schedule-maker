@@ -4,7 +4,6 @@ import { Sparkles, ImageIcon, Clock, LogOut, Target } from "lucide-react";
 import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
-import BunnyClock from "@/components/BunnyClock";
 import WizardInterface from "@/components/WizardInterface";
 import ScheduleDisplay from "@/components/ScheduleDisplay";
 import PomodoroTimer from "@/components/PomodoroTimer";
@@ -17,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import { UserSettings, backgroundThemes } from "@/types/schedule";
 import { Button } from "@/components/ui/button";
+import landingBunny from "@/assets/landing-bunny.png";
 
 const defaultSettings: UserSettings = {
   energyLevel: "motivated",
