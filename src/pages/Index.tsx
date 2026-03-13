@@ -191,7 +191,7 @@ const Index = () => {
 
           {/* Main hero area */}
           <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 sm:px-12 relative w-full">
-            {/* Title */}
+            {/* Title - centered */}
             <div className="text-center w-full relative z-10">
               <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mx-auto" style={{ color: "hsl(280 50% 65%)" }}>
                 TIME
@@ -232,15 +232,15 @@ const Index = () => {
                 <span>✨</span>
               </Link>
             </div>
+          </div>
 
-            {/* Bunny mascot with integrated speech bubble */}
-            <div className="flex items-end justify-center mt-4 relative z-10 w-full">
-              <img
-                src={bunnyWithSpeechBubble}
-                alt="TimeBunny mascot with speech bubble"
-                className="w-64 sm:w-72 md:w-80 lg:w-96 object-contain drop-shadow-xl"
-              />
-            </div>
+          {/* Bunny mascot with integrated speech bubble - positioned on the right */}
+          <div className="absolute bottom-4 right-4 sm:bottom-8 sm:right-8 lg:right-12 z-10">
+            <img
+              src={bunnyWithSpeechBubble}
+              alt="TimeBunny mascot with speech bubble"
+              className="w-48 sm:w-56 md:w-64 lg:w-80 object-contain drop-shadow-xl"
+            />
           </div>
 
           {/* Footer */}
