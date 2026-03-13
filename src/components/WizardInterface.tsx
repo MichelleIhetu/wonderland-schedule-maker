@@ -35,6 +35,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [importedEvents, setImportedEvents] = useState<CalendarEvent[]>([]);
   const [activeBookIndex, setActiveBookIndex] = useState<number | null>(null);
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
+  const [typedText, setTypedText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
 
   const nowStr = (() => {
     const n = new Date();
