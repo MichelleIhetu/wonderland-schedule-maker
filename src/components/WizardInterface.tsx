@@ -107,8 +107,12 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       : '';
 
     const startNote = `\n\nSchedule starts NOW at ${startTime} (current real time). Only schedule tasks from this time onwards, not from wake time.`;
+
+    const journalNote = journalText.trim()
+      ? `\n\nHere's what the user wrote about their day:\n"${journalText.trim()}"\nPlease incorporate any mentioned tasks, commitments, or context into the schedule.`
+      : '';
     
-    onComplete(`My tasks:\n${tasksText}${deadlineWarning}${eventsList}${startNote}\n\n${breakText}`);
+    onComplete(`My tasks:\n${tasksText}${deadlineWarning}${eventsList}${journalNote}${startNote}\n\n${breakText}`);
   };
 
   const hasValidTasks = taskEntries.some(t => t.title.trim());
