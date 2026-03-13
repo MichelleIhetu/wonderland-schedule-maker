@@ -39,6 +39,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [typedText, setTypedText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [bubbleClickCount, setBubbleClickCount] = useState(0);
+  const [journalText, setJournalText] = useState("");
+  const [isJournalFocused, setIsJournalFocused] = useState(false);
 
   const nowStr = (() => {
     const n = new Date();
@@ -105,8 +107,12 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       : '';
 
     const startNote = `\n\nSchedule starts NOW at ${startTime} (current real time). Only schedule tasks from this time onwards, not from wake time.`;
+
+    const journalNote = journalText.trim()
+      ? `\n\nHere's what the user wrote about their day:\n"${journalText.trim()}"\nPlease incorporate any mentioned tasks, commitments, or context into the schedule.`
+      : '';
     
-    onComplete(`My tasks:\n${tasksText}${deadlineWarning}${eventsList}${startNote}\n\n${breakText}`);
+    onComplete(`My tasks:\n${tasksText}${deadlineWarning}${eventsList}${journalNote}${startNote}\n\n${breakText}`);
   };
 
   const hasValidTasks = taskEntries.some(t => t.title.trim());
@@ -149,6 +155,31 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           transition={{ duration: 0.8 }}
         />
       </AnimatePresence>
+
+      {/* Journal overlay on notebook background */}
+      {importedEvents.length > 0 && (
+        <div
+          className="absolute inset-0 z-[5] cursor-text"
+          onClick={() => setIsJournalFocused(true)}
+        >
+          <div className="absolute top-[8%] left-[8%] right-[40%] bottom-[15%]">
+            <textarea
+              value={journalText}
+              onChange={(e) => setJournalText(e.target.value)}
+              onFocus={() => setIsJournalFocused(true)}
+              onBlur={() => setIsJournalFocused(false)}
+              placeholder="Write about your day..."
+              className="w-full h-full bg-transparent resize-none focus:outline-none text-[hsl(280_40%_25%)] placeholder:text-[hsl(280_40%_60%/0.4)] leading-[2.65rem] pt-[0.6rem]"
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "1rem",
+                caretColor: "hsl(280 40% 40%)",
+              }}
+              autoFocus={isJournalFocused}
+            />
+          </div>
+        </div>
+      )}
 
 
       {/* Task step: interactive bookshelf */}
