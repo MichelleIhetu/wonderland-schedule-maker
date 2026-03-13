@@ -266,7 +266,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             setShowSpeechBubble(true);
             setTypedText("");
             setIsTyping(true);
-            const fullText = "Hi there, my name is TimeBunny! Welcome to my home 🐰";
+            const fullText = "Hi there, my name is TimeBunny! Welcome to my home!";
             let i = 0;
             const interval = setInterval(() => {
               i++;
@@ -287,9 +287,18 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                className="absolute -top-20 -left-44 w-72 sm:w-80 z-30 bg-white rounded-2xl p-4 shadow-lg border border-primary/20"
-                style={{ borderRadius: "1.2rem 1.2rem 1.2rem 0.3rem" }}
+                className="absolute -top-24 -left-48 w-72 sm:w-80 z-30"
               >
+                <div
+                  className="relative bg-white p-5 shadow-xl border-2 border-foreground/80"
+                  style={{ borderRadius: "50% 50% 50% 12%", minHeight: "5rem" }}
+                >
+                  <p className="text-sm text-center leading-relaxed" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                    {typedText}
+                    {isTyping && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
+                  </p>
+                </div>
+              </motion.div>
                 <p className="text-sm text-foreground" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 30%)" }}>
                   {typedText}
                   {isTyping && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
