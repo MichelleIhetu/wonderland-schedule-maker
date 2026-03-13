@@ -261,17 +261,40 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
       {/* Bunny mascot - bottom right on the rug */}
       <div className="absolute bottom-0 right-0 z-20">
-        <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
+        <div className="relative cursor-pointer" onClick={() => {
+          if (!showSpeechBubble) {
+            setShowSpeechBubble(true);
+            setTypedText("");
+            setIsTyping(true);
+            const fullText = "Hi there, my name is TimeBunny! Welcome to my home 🐰";
+            let i = 0;
+            const interval = setInterval(() => {
+              i++;
+              setTypedText(fullText.slice(0, i));
+              if (i >= fullText.length) {
+                clearInterval(interval);
+                setIsTyping(false);
+              }
+            }, 40);
+          } else {
+            setShowSpeechBubble(false);
+            setTypedText("");
+          }
+        }}>
           <AnimatePresence>
             {showSpeechBubble && (
-              <motion.img
-                src={speechBubbleWelcome}
-                alt="Hi there my name is TimeBunny! Welcome to my home"
+              <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                className="absolute -top-16 -left-36 w-72 sm:w-80 z-30"
-              />
+                className="absolute -top-20 -left-44 w-72 sm:w-80 z-30 bg-white rounded-2xl p-4 shadow-lg border border-primary/20"
+                style={{ borderRadius: "1.2rem 1.2rem 1.2rem 0.3rem" }}
+              >
+                <p className="text-sm text-foreground" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 30%)" }}>
+                  {typedText}
+                  {isTyping && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
+                </p>
+              </motion.div>
             )}
           </AnimatePresence>
           <img
