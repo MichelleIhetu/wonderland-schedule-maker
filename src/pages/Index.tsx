@@ -189,8 +189,8 @@ const Index = () => {
           </Button>
         </div>
 
-        {/* Title - at top of clock */}
-        <div className="flex-1 flex flex-col items-center pt-8 sm:pt-12">
+        {/* Title and Start button - grouped together at top */}
+        <div className="flex flex-col items-center pt-8 sm:pt-12">
           <div className="text-center">
             <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-tight tracking-wider" style={{ color: "hsl(280 50% 65%)" }}>
               TIME
@@ -199,13 +199,11 @@ const Index = () => {
               BUNNY
             </h1>
           </div>
-        </div>
 
-        {/* Start button and nav - at bottom of clock area */}
-        <div className="flex flex-col items-center justify-center pb-8 sm:pb-12 gap-3">
+          {/* Start button - right underneath BUNNY */}
           <button
             onClick={handleStart}
-            className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+            className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 mt-4 sm:mt-6"
           >
             <span className="pixel-title-alt text-2xl sm:text-3xl" style={{ color: "hsl(330 80% 55%)" }}>
               start
