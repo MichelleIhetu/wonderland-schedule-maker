@@ -234,12 +234,26 @@ const Index = () => {
               </Link>
             </div>
 
-            {/* Bunny mascot - positioned at bottom right */}
-            <img
-              src={bunnyMascot}
-              alt="TimeBunny mascot"
-              className="absolute bottom-0 right-0 w-64 sm:w-72 md:w-80 lg:w-96 object-contain drop-shadow-xl pointer-events-none"
-            />
+            {/* Bunny mascot with speech bubble */}
+            <div className="absolute bottom-0 right-0 pointer-events-none">
+              {/* Speech bubble */}
+              <div className="absolute -top-24 sm:-top-28 -left-32 sm:-left-40 w-48 sm:w-56 z-20">
+                <div className="relative">
+                  <img src={speechBubble} alt="" className="w-full" />
+                  <span
+                    className="absolute top-[28%] left-1/2 -translate-x-1/2 text-[10px] sm:text-xs text-center leading-tight w-[70%]"
+                    style={{ fontFamily: "'Press Start 2P', cursive", color: "#222" }}
+                  >
+                    Hi there! Ready to plan your day?
+                  </span>
+                </div>
+              </div>
+              <img
+                src={bunnyMascot}
+                alt="TimeBunny mascot"
+                className="w-64 sm:w-72 md:w-80 lg:w-96 object-contain drop-shadow-xl"
+              />
+            </div>
           </div>
 
           {/* Footer */}
