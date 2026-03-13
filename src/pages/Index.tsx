@@ -189,8 +189,8 @@ const Index = () => {
             </Button>
           </div>
 
-          {/* Main hero area */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 sm:px-12 relative w-full">
+          {/* Main hero area - shifted left */}
+          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 sm:px-12 relative w-full -translate-x-[10%] sm:-translate-x-[15%]">
             {/* Title - centered */}
             <div className="text-center w-full relative z-10">
               <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mx-auto" style={{ color: "hsl(280 50% 65%)" }}>
