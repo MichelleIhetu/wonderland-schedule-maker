@@ -306,10 +306,10 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                   </p>
                 </div>
                 {/* Comic tail */}
-                <div className="flex flex-col items-center mt-1 gap-2">
-                  <div className="w-4 h-4 bg-white border-2 rounded-full" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                  <div className="w-2.5 h-2.5 bg-white border-2 rounded-full" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                  <div className="w-1.5 h-1.5 bg-white border-2 rounded-full" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                <div className="relative h-12 w-full">
+                  <div className="absolute right-[30%] top-0 w-4 h-4 bg-white border-2 rounded-full" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                  <div className="absolute right-[20%] top-4 w-2.5 h-2.5 bg-white border-2 rounded-full" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                  <div className="absolute right-[12%] top-8 w-1.5 h-1.5 bg-white border-2 rounded-full" style={{ borderColor: "hsl(280 40% 20%)" }} />
                 </div>
               </motion.div>
             )}
