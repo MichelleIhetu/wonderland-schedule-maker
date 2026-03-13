@@ -154,8 +154,8 @@ const Index = () => {
   if (viewMode === "landing") {
     return (
       <div className="min-h-screen relative overflow-hidden" style={{ background: "hsl(300 50% 88%)" }}>
-        {/* Clock outline background */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        {/* Clock outline background - shifted left */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none -translate-x-[10%] sm:-translate-x-[15%]">
           <div
             className="rounded-full relative"
             style={{
