@@ -211,8 +211,8 @@ const Index = () => {
               </span>
             </button>
 
-            {/* Nav links - positioned lower towards bottom of clock */}
-            <div className="flex flex-wrap items-center gap-3 mt-12 sm:mt-16 md:mt-20 lg:mt-24">
+            {/* Nav links - positioned beneath start button */}
+            <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-6 md:mt-8">
               <Link
                 to="/goals"
                 className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
