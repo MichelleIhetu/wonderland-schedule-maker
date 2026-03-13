@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Sparkles, ImageIcon, Clock, LogOut, Target } from "lucide-react";
+import { ImageIcon, Clock, LogOut, Target, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
@@ -16,7 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import { UserSettings, backgroundThemes } from "@/types/schedule";
 import { Button } from "@/components/ui/button";
-import landingBunny from "@/assets/landing-bunny.png";
+import bunnyMascot from "@/assets/bunny-mascot.png";
 
 const defaultSettings: UserSettings = {
   energyLevel: "motivated",
@@ -27,7 +27,7 @@ const defaultSettings: UserSettings = {
   bedTime: "23:00",
 };
 
-type ViewMode = "wizard" | "schedule" | "pomodoro";
+type ViewMode = "landing" | "wizard" | "schedule" | "pomodoro";
 
 const hexToHsl = (hex: string): string => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -56,7 +56,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
-  const [viewMode, setViewMode] = useState<ViewMode>("wizard");
+  const [viewMode, setViewMode] = useState<ViewMode>("landing");
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const [customColors, setCustomColors] = useState<CustomColors>(defaultThemeColors.gothic);
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
@@ -87,12 +87,9 @@ const Index = () => {
   }, [generatedSchedule, settings, scheduleLoaded]);
 
   const {
-    isCheckInDue,
     minutesUntilNextCheckIn,
     completeCheckIn,
     skipCheckIn,
-    triggerCheckIn,
-    checkInHistory,
   } = useHourlyCheckIn({
     enabled: viewMode === "pomodoro" || generatedSchedule.length > 0,
     intervalMinutes: 60,
@@ -148,22 +145,135 @@ const Index = () => {
     if (data.needBreak && viewMode === "pomodoro") toast("Taking a longer break", { description: "Enjoy your rest time!", icon: "☕" });
   };
 
-  if (generatedSchedule.length > 0 && viewMode === "wizard") setViewMode("schedule");
+  if (generatedSchedule.length > 0 && viewMode === "landing") setViewMode("schedule");
 
-  const currentBgTheme = backgroundThemes[settings.backgroundTheme];
+  const handleStart = () => setViewMode("wizard");
+  const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
 
+  // ─── LANDING PAGE ───
+  if (viewMode === "landing") {
+    return (
+      <div className="min-h-screen relative overflow-hidden" style={{ background: "hsl(300 50% 88%)" }}>
+        {/* Clock outline background */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div
+            className="rounded-full border-[6px] relative"
+            style={{
+              width: "min(70vw, 500px)",
+              height: "min(70vw, 500px)",
+              borderColor: "hsl(100 50% 80% / 0.45)",
+            }}
+          >
+            {/* Hour marks */}
+            <div className="absolute top-[-14px] left-1/2 -translate-x-1/2 w-[6px] h-[24px] rounded bg-[hsl(100_50%_80%_/_0.45)]" />
+            <div className="absolute bottom-[-14px] left-1/2 -translate-x-1/2 w-[6px] h-[24px] rounded bg-[hsl(100_50%_80%_/_0.45)]" />
+            <div className="absolute left-[-14px] top-1/2 -translate-y-1/2 w-[24px] h-[6px] rounded bg-[hsl(100_50%_80%_/_0.45)]" />
+            <div className="absolute right-[-14px] top-1/2 -translate-y-1/2 w-[24px] h-[6px] rounded bg-[hsl(100_50%_80%_/_0.45)]" />
+            {/* Clock hands */}
+            <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[4px] h-[35%] rounded-full origin-bottom rotate-[30deg]" style={{ background: "hsl(100 50% 80% / 0.35)" }} />
+            <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[3px] h-[40%] rounded-full origin-bottom rotate-[-60deg]" style={{ background: "hsl(100 50% 80% / 0.35)" }} />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 min-h-screen flex flex-col">
+          {/* Top bar */}
+          <div className="flex items-center justify-between px-4 sm:px-8 py-4">
+            <div />
+            <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)]">
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
+          </div>
+
+          {/* Main hero area */}
+          <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 px-6 sm:px-12">
+            {/* Left side: Title + Button */}
+            <div className="flex flex-col items-center md:items-start gap-6 md:gap-8">
+              <div className="text-center md:text-left">
+                <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight" style={{ color: "hsl(280 50% 65%)" }}>
+                  TIME
+                </h1>
+                <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mt-2" style={{ color: "hsl(185 70% 60%)" }}>
+                  BUNNY
+                </h1>
+              </div>
+
+              {/* Glass Start button */}
+              <button
+                onClick={handleStart}
+                className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+              >
+                <span className="pixel-title-alt text-2xl sm:text-3xl" style={{ color: "hsl(330 80% 55%)" }}>
+                  start
+                </span>
+              </button>
+
+              {/* Nav links */}
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  to="/goals"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+                  style={{ color: "hsl(280 40% 40%)" }}
+                >
+                  <Target className="w-4 h-4" />
+                  <span className="font-body font-semibold">Goals</span>
+                  <span>🎯</span>
+                </Link>
+                <Link
+                  to="/moodboard"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+                  style={{ color: "hsl(280 40% 40%)" }}
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  <span className="font-body font-semibold">Moodboard</span>
+                  <span>✨</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right side: Bunny */}
+            <div className="flex-shrink-0">
+              <img
+                src={bunnyMascot}
+                alt="TimeBunny mascot"
+                className="w-48 sm:w-56 md:w-64 lg:w-80 drop-shadow-xl animate-bunny-hop"
+              />
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center py-4 px-4">
+            <p className="text-xs font-body italic" style={{ color: "hsl(280 30% 55%)" }}>
+              "I'm late! I'm late! For a very important date!" — White Rabbit
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── APP VIEW (wizard / schedule / pomodoro) ───
   return (
     <div className="min-h-screen relative overflow-hidden">
       {settings.backgroundTheme === "gothic" ? <SpiderWebBackground /> : <ThemeBackground theme={settings.backgroundTheme} />}
 
       <ThemeCustomizer isOpen={isCustomizerOpen} onClose={() => setIsCustomizerOpen(false)} currentTheme={settings.backgroundTheme} customColors={customColors} onColorsChange={setCustomColors} onReset={handleResetColors} />
-
       <CheckInModal isOpen={isCheckInModalOpen} onClose={() => { setIsCheckInModalOpen(false); skipCheckIn(); }} onSubmit={handleCheckInSubmit} currentTask={currentTask} />
 
       <div className="container max-w-4xl mx-auto px-4 py-6 relative z-10 min-h-screen flex flex-col">
+        {/* Top bar */}
         <div className="mb-4 flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <ThemeSelector currentTheme={settings.backgroundTheme} onChange={(theme) => setSettings({ ...settings, backgroundTheme: theme })} onOpenCustomizer={() => setIsCustomizerOpen(true)} />
-          
+          <div className="flex items-center gap-2">
+            {viewMode === "wizard" && generatedSchedule.length === 0 && (
+              <Button variant="ghost" size="sm" onClick={handleBackToLanding} className="gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Home
+              </Button>
+            )}
+            <ThemeSelector currentTheme={settings.backgroundTheme} onChange={(theme) => setSettings({ ...settings, backgroundTheme: theme })} onOpenCustomizer={() => setIsCustomizerOpen(true)} />
+          </div>
+
           <div className="flex items-center gap-2">
             {(viewMode === "pomodoro" || generatedSchedule.length > 0) && (
               <Button variant="outline" size="sm" onClick={() => navigate("/vibe-check", { state: { backgroundTheme: settings.backgroundTheme } })} className="gap-2">
@@ -179,37 +289,7 @@ const Index = () => {
           </div>
         </div>
 
-        {viewMode !== "pomodoro" && (
-          <header className="text-center mb-6 flex-shrink-0">
-            <div className="relative flex flex-col items-center justify-center min-h-[70vh] gap-2 mb-4">
-              {/* Clock outline background */}
-              <div className="clock-bg" style={{ width: '360px', height: '360px' }} />
-              
-              {/* Pixel title */}
-              <h1 className="pixel-title text-3xl sm:text-4xl md:text-5xl text-foreground relative z-10">
-                TIME
-              </h1>
-              <h1 className="pixel-title text-3xl sm:text-4xl md:text-5xl text-foreground mb-4 relative z-10">
-                BUNNY
-              </h1>
-
-              {/* Bunny mascot */}
-              <img
-                src={landingBunny}
-                alt="TimeBunny mascot"
-                className="w-56 md:w-72 object-contain relative z-10 -mt-2 drop-shadow-lg"
-                style={{ mixBlendMode: "multiply" }}
-              />
-
-              <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-body border border-primary/30 backdrop-blur-sm bg-card/80">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-foreground">{currentBgTheme.emoji} {currentBgTheme.name}</span>
-              </div>
-              <p className="text-sm text-muted-foreground font-body mt-1">Let the bunny guide you through your perfect day</p>
-            </div>
-          </header>
-        )}
-
+        {/* App content */}
         <div className="flex-1 flex flex-col gap-6">
           {viewMode === "pomodoro" ? (
             <PomodoroTimer schedule={generatedSchedule} onBack={handleBackToSchedule} />
