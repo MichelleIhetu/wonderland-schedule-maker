@@ -201,10 +201,10 @@ const Index = () => {
               </h1>
             </div>
 
-            {/* Glass Start button */}
+            {/* Glass Start button - positioned lower beneath clock handles */}
             <button
               onClick={handleStart}
-              className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+              className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 mt-8 sm:mt-12 md:mt-16"
             >
               <span className="pixel-title-alt text-2xl sm:text-3xl" style={{ color: "hsl(330 80% 55%)" }}>
                 start
