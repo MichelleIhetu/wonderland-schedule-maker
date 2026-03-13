@@ -331,6 +331,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           />
         </div>
       </div>
+      <CalendarImportModal
+        isOpen={isCalendarModalOpen}
+        onClose={() => setIsCalendarModalOpen(false)}
+        onImport={handleCalendarImport}
+      />
     </div>
   );
 };
