@@ -17,6 +17,7 @@ import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import { UserSettings, backgroundThemes } from "@/types/schedule";
 import { Button } from "@/components/ui/button";
 import bunnyMascot from "@/assets/bunny-mascot.png";
+import speechBubble from "@/assets/speech-bubble.png";
 
 const defaultSettings: UserSettings = {
   energyLevel: "motivated",
