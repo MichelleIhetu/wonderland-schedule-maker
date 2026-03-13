@@ -236,7 +236,7 @@ const Index = () => {
             <img
               src={bunnyMascot}
               alt="TimeBunny mascot"
-              className="absolute bottom-0 right-0 w-48 sm:w-56 md:w-64 lg:w-72 object-contain drop-shadow-xl pointer-events-none"
+              className="absolute bottom-0 right-0 w-64 sm:w-72 md:w-80 lg:w-96 object-contain drop-shadow-xl pointer-events-none"
             />
           </div>
 
