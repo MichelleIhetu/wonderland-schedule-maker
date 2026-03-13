@@ -235,7 +235,7 @@ const Index = () => {
         </div>
 
         {/* Bunny mascot - positioned on the right */}
-        <div className="absolute bottom-4 -right-8 sm:bottom-8 sm:-right-4 lg:-right-2 z-10">
+        <div className="absolute bottom-4 -right-20 sm:bottom-8 sm:-right-16 lg:-right-12 z-10">
           <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
             {/* Speech bubble - animated */}
             <div
