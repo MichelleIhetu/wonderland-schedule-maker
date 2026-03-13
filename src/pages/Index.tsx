@@ -154,8 +154,8 @@ const Index = () => {
   if (viewMode === "landing") {
     return (
       <div className="min-h-screen relative overflow-hidden" style={{ background: "hsl(300 50% 88%)" }}>
-        {/* Clock outline background */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        {/* Clock outline background - shifted left */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none -translate-x-[10%] sm:-translate-x-[15%]">
           <div
             className="rounded-full relative"
             style={{
@@ -189,8 +189,8 @@ const Index = () => {
             </Button>
           </div>
 
-          {/* Main hero area */}
-          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 sm:px-12 relative w-full">
+          {/* Main hero area - shifted left */}
+          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 sm:px-12 relative w-full -translate-x-[10%] sm:-translate-x-[15%]">
             {/* Title - centered */}
             <div className="text-center w-full relative z-10">
               <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mx-auto" style={{ color: "hsl(280 50% 65%)" }}>
