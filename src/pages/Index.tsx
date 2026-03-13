@@ -235,7 +235,7 @@ const Index = () => {
           </div>
 
           {/* Bunny mascot with integrated speech bubble - positioned on the right */}
-          <div className="absolute bottom-4 right-4 sm:bottom-8 sm:right-8 lg:right-12 z-10">
+          <div className="absolute bottom-4 -right-4 sm:bottom-8 sm:-right-2 lg:right-0 z-10">
             <img
               src={bunnyWithSpeechBubble}
               alt="TimeBunny mascot with speech bubble"
