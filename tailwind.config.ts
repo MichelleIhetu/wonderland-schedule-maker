@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         display: ['Cinzel Decorative', 'serif'],
+        pixel: ['Press Start 2P', 'cursive'],
         body: ['Crimson Text', 'serif'],
       },
       colors: {

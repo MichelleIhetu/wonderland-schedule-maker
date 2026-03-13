@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Press+Start+2P&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -55,6 +55,7 @@
     --shadow-glow: 0 0 30px hsl(280 70% 60% / 0.4);
 
     --font-display: 'Cinzel Decorative', serif;
+    --font-pixel: 'Press Start 2P', cursive;
     --font-body: 'Crimson Text', serif;
 
     --sidebar-background: 270 50% 8%;
@@ -358,4 +359,69 @@
 
 .animate-clock-swing {
   animation: clock-swing 2s ease-in-out infinite;
+}
+
+/* Pixel title 3D text effect */
+.pixel-title {
+  font-family: var(--font-pixel);
+  text-shadow:
+    3px 3px 0px hsl(280 60% 65%),
+    -2px -2px 0px hsl(185 80% 65%);
+  letter-spacing: 0.15em;
+}
+
+.pixel-title-alt {
+  font-family: var(--font-pixel);
+  text-shadow:
+    3px 3px 0px hsl(330 80% 55%),
+    -2px -2px 0px hsl(185 80% 65%);
+  letter-spacing: 0.15em;
+}
+
+/* Glass morphism button */
+.glass-pill {
+  background: hsl(280 40% 85% / 0.35);
+  border: 1.5px solid hsl(280 40% 80% / 0.5);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 24px hsl(280 60% 70% / 0.15),
+    inset 0 1px 0 hsl(0 0% 100% / 0.3);
+}
+
+/* Clock outline background */
+.clock-bg {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  border: 6px solid hsl(100 50% 80% / 0.4);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  pointer-events: none;
+}
+
+.clock-bg::before,
+.clock-bg::after {
+  content: '';
+  position: absolute;
+  background: hsl(100 50% 80% / 0.4);
+  border-radius: 4px;
+}
+
+/* Hour marks */
+.clock-bg::before {
+  width: 6px;
+  height: 20px;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.clock-bg::after {
+  width: 20px;
+  height: 6px;
+  top: 50%;
+  right: -10px;
+  transform: translateY(-50%);
 }
