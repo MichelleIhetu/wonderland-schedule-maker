@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useClockTick } from "@/hooks/useClockTick";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ImageIcon, Clock, LogOut, Target, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -63,6 +64,8 @@ const Index = () => {
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [scheduleLoaded, setScheduleLoaded] = useState(false);
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
+
+  useClockTick(viewMode === "landing");
 
   const { isLoading, sendMessage, generatedSchedule, setGeneratedSchedule } = useChat(settings);
   const { saveSchedule, loadTodaySchedule } = useSchedulePersistence(user?.id);
