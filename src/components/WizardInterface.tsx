@@ -256,6 +256,29 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           </div>
         </div>
       )}
+
+      {/* Bunny mascot - bottom right on the rug */}
+      <div className="absolute bottom-0 right-[10%] z-20">
+        <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
+          <AnimatePresence>
+            {showSpeechBubble && (
+              <motion.img
+                src={speechBubbleWelcome}
+                alt="Hi there my name is TimeBunny! Welcome to my home"
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                className="absolute -top-48 -left-64 w-72 sm:w-80 z-30"
+              />
+            )}
+          </AnimatePresence>
+          <img
+            src={bunnyMascot}
+            alt="TimeBunny mascot"
+            className="w-48 sm:w-56 object-contain drop-shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95"
+          />
+        </div>
+      </div>
     </div>
   );
 };
