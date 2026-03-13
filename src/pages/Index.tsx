@@ -16,7 +16,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import { UserSettings, backgroundThemes } from "@/types/schedule";
 import { Button } from "@/components/ui/button";
-import bunnyWithSpeechBubble from "@/assets/bunny-with-speech-bubble.png";
+import bunnyMascot from "@/assets/bunny-mascot.png";
+import speechBubble from "@/assets/speech-bubble.png";
 
 const defaultSettings: UserSettings = {
   energyLevel: "motivated",
@@ -61,6 +62,7 @@ const Index = () => {
   const [customColors, setCustomColors] = useState<CustomColors>(defaultThemeColors.gothic);
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [scheduleLoaded, setScheduleLoaded] = useState(false);
+  const [showSpeechBubble, setShowSpeechBubble] = useState(false);
 
   const { isLoading, sendMessage, generatedSchedule, setGeneratedSchedule } = useChat(settings);
   const { saveSchedule, loadTodaySchedule } = useSchedulePersistence(user?.id);
@@ -234,11 +236,28 @@ const Index = () => {
 
         {/* Bunny mascot - positioned on the right */}
         <div className="absolute bottom-4 right-0 sm:bottom-8 sm:right-4 lg:right-8 z-10">
-          <img
-            src={bunnyWithSpeechBubble}
-            alt="TimeBunny mascot with speech bubble"
-            className="w-72 sm:w-96 md:w-[28rem] lg:w-[32rem] object-contain drop-shadow-xl"
-          />
+          <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
+            {/* Speech bubble - animated */}
+            <div
+              className={`absolute -top-20 -left-16 sm:-top-24 sm:-left-20 transition-all duration-500 ease-out ${
+                showSpeechBubble
+                  ? "opacity-100 scale-100 translate-y-0"
+                  : "opacity-0 scale-75 translate-y-4 pointer-events-none"
+              }`}
+            >
+              <img
+                src={speechBubble}
+                alt="Speech bubble"
+                className="w-40 sm:w-52 md:w-60 object-contain"
+              />
+            </div>
+            {/* Bunny mascot */}
+            <img
+              src={bunnyMascot}
+              alt="TimeBunny mascot"
+              className="w-72 sm:w-96 md:w-[28rem] lg:w-[32rem] object-contain drop-shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95"
+            />
+          </div>
         </div>
       </div>
     </div>
