@@ -189,59 +189,55 @@ const Index = () => {
           </div>
 
           {/* Main hero area */}
-          <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 px-6 sm:px-12">
-            {/* Left side: Title + Button */}
-            <div className="flex flex-col items-center md:items-start gap-6 md:gap-8">
-              <div className="text-center md:text-left">
-                <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight" style={{ color: "hsl(280 50% 65%)" }}>
-                  TIME
-                </h1>
-                <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mt-2" style={{ color: "hsl(185 70% 60%)" }}>
-                  BUNNY
-                </h1>
-              </div>
+          <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 sm:px-12 relative">
+            {/* Title */}
+            <div className="text-center">
+              <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight" style={{ color: "hsl(280 50% 65%)" }}>
+                TIME
+              </h1>
+              <h1 className="pixel-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight mt-2" style={{ color: "hsl(185 70% 60%)" }}>
+                BUNNY
+              </h1>
+            </div>
 
-              {/* Glass Start button */}
-              <button
-                onClick={handleStart}
-                className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+            {/* Glass Start button */}
+            <button
+              onClick={handleStart}
+              className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+            >
+              <span className="pixel-title-alt text-2xl sm:text-3xl" style={{ color: "hsl(330 80% 55%)" }}>
+                start
+              </span>
+            </button>
+
+            {/* Nav links */}
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                to="/goals"
+                className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+                style={{ color: "hsl(280 40% 40%)" }}
               >
-                <span className="pixel-title-alt text-2xl sm:text-3xl" style={{ color: "hsl(330 80% 55%)" }}>
-                  start
-                </span>
-              </button>
-
-              {/* Nav links */}
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  to="/goals"
-                  className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
-                  style={{ color: "hsl(280 40% 40%)" }}
-                >
-                  <Target className="w-4 h-4" />
-                  <span className="font-body font-semibold">Goals</span>
-                  <span>🎯</span>
-                </Link>
-                <Link
-                  to="/moodboard"
-                  className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
-                  style={{ color: "hsl(280 40% 40%)" }}
-                >
-                  <ImageIcon className="w-4 h-4" />
-                  <span className="font-body font-semibold">Moodboard</span>
-                  <span>✨</span>
-                </Link>
-              </div>
+                <Target className="w-4 h-4" />
+                <span className="font-body font-semibold">Goals</span>
+                <span>🎯</span>
+              </Link>
+              <Link
+                to="/moodboard"
+                className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+                style={{ color: "hsl(280 40% 40%)" }}
+              >
+                <ImageIcon className="w-4 h-4" />
+                <span className="font-body font-semibold">Moodboard</span>
+                <span>✨</span>
+              </Link>
             </div>
 
-            {/* Right side: Bunny */}
-            <div className="flex-shrink-0">
-              <img
-                src={bunnyMascot}
-                alt="TimeBunny mascot"
-                className="w-48 sm:w-56 md:w-64 lg:w-80 drop-shadow-xl animate-bunny-hop"
-              />
-            </div>
+            {/* Bunny mascot - positioned at bottom right */}
+            <img
+              src={bunnyMascot}
+              alt="TimeBunny mascot"
+              className="absolute bottom-0 right-0 w-48 sm:w-56 md:w-64 lg:w-72 object-contain drop-shadow-xl pointer-events-none"
+            />
           </div>
 
           {/* Footer */}
