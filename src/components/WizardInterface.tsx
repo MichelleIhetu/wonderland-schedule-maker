@@ -236,30 +236,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center gap-3 pt-4"
                   >
-                    {/* Calendar import */}
-                    <Button variant="outline" onClick={() => setIsCalendarModalOpen(true)} className="bg-card/80 backdrop-blur-sm border-primary/30 hover:bg-primary/10 gap-2 text-sm">
-                      <Calendar className="w-4 h-4" /> Import Calendar
-                      {importedEvents.length > 0 && <span className="ml-1 px-2 py-0.5 bg-primary/20 rounded-full text-xs">{importedEvents.length}</span>}
-                    </Button>
-
-                    {importedEvents.length > 0 && (
-                      <div className="bg-card/80 backdrop-blur-sm rounded-lg p-2 border border-primary/10 w-full">
-                        <div className="flex flex-wrap gap-1">
-                          {importedEvents.map((event) => (
-                            <div key={event.id} className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded text-xs text-foreground">
-                              <span className="truncate max-w-[100px]">{event.title}</span>
-                              <button onClick={() => removeImportedEvent(event.id)} className="hover:text-destructive"><X className="w-3 h-3" /></button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
                     {/* Task summary */}
                     {hasValidTasks && (
                       <div className="bg-card/80 backdrop-blur-sm rounded-lg p-2 border border-primary/10 w-full">
                         <p className="text-xs text-muted-foreground mb-1">Tasks added:</p>
-                        {taskEntries.filter(t => t.title.trim()).map((t, i) => (
+                        {taskEntries.filter(t => t.title.trim()).map((t) => (
                           <div key={t.id} className="text-xs text-foreground flex items-center gap-1">
                             <span>{t.priority === "high" ? "🔴" : t.priority === "low" ? "🟢" : "🟡"}</span>
                             <span className="truncate">{t.title}</span>
@@ -271,29 +252,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                 )}
               </AnimatePresence>
             </div>
-
-            {/* Generate button - bottom area */}
-            <div className="relative z-20 mb-2 space-y-2">
-              <Button
-                onClick={handleComplete}
-                disabled={!hasValidTasks || isLoading}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shadow-lg"
-              >
-                {isLoading ? (
-                  <><Clock className="w-5 h-5 animate-spin" /> Creating schedule...</>
-                ) : (
-                  <><Sparkles className="w-5 h-5" /> Generate My Schedule!</>
-                )}
-              </Button>
-              <Button variant="ghost" onClick={() => setStep("breaks")} className="w-full text-muted-foreground text-xs bg-card/50 backdrop-blur-sm" disabled={isLoading}>
-                ← Go Back
-              </Button>
-            </div>
           </div>
         </div>
       )}
-
-      <CalendarImportModal isOpen={isCalendarModalOpen} onClose={() => setIsCalendarModalOpen(false)} onImport={handleCalendarImport} />
     </div>
   );
 };
