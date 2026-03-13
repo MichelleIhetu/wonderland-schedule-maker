@@ -188,7 +188,7 @@ const Index = () => {
                   <Sparkles className="w-4 h-4 text-primary" />
                   <span className="text-foreground">{currentBgTheme.emoji} {currentBgTheme.name}</span>
                 </div>
-                <h1 className="font-display text-3xl md:text-4xl text-foreground mb-2 drop-shadow-lg">Wonderland Scheduler</h1>
+                <h1 className="font-display text-3xl md:text-4xl text-foreground mb-2 drop-shadow-lg">TimeBunny</h1>
                 <p className="text-sm text-muted-foreground font-body">Let the White Rabbit guide you through your perfect day</p>
               </div>
             </div>
