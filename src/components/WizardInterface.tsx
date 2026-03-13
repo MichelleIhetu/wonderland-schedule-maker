@@ -275,7 +275,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           <img
             src={bunnyMascot}
             alt="TimeBunny mascot"
-            className="w-[15rem] object-contain drop-shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95"
+            className="w-[22rem] object-contain drop-shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95"
           />
         </div>
       </div>
