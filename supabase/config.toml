@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.google-calendar]
 verify_jwt = false
+
+[functions.suggest-goal-blocks]
+verify_jwt = false
