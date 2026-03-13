@@ -133,7 +133,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
     if (step === "tasks") return null;
 
     return (
-      <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl">
+      <div className="absolute inset-0 z-20 flex items-center justify-center backdrop-blur-sm rounded-2xl">
         <div className="bg-card/95 backdrop-blur-md rounded-2xl border border-primary/20 shadow-2xl p-6 max-w-lg w-full mx-4 max-h-[80%] overflow-y-auto">
           {/* Progress */}
           <div className="flex gap-2 mb-4">
