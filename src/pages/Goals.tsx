@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, Flame, Target, TrendingUp, Calendar, Archive, Clock } from "lucide-react";
+import { ArrowLeft, Plus, Flame, Target, TrendingUp, Calendar, Archive, Clock, Sparkles, Wand2, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -10,6 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGoals, GoalWithProgress } from "@/hooks/useGoals";
+import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 
 const CATEGORIES = [
@@ -253,8 +257,98 @@ function AddGoalDialog({ onAdd }: { onAdd: (g: any) => void }) {
   );
 }
 
+interface GoalSuggestion {
+  goalTitle: string;
+  goalId?: string;
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+  activity: string;
+  reason: string;
+  category?: string;
+}
+
+function SuggestionsPanel({
+  suggestions,
+  onDismiss,
+  onAccept,
+  onClose,
+}: {
+  suggestions: GoalSuggestion[];
+  onDismiss: (idx: number) => void;
+  onAccept: (s: GoalSuggestion) => void;
+  onClose: () => void;
+}) {
+  if (suggestions.length === 0) return null;
+
+  return (
+    <Card className="border-primary/30 bg-primary/5 backdrop-blur-sm mb-6">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" />
+            <CardTitle className="text-base font-display">AI Schedule Suggestions</CardTitle>
+          </div>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+        <CardDescription className="text-xs font-body">
+          Found gaps in your schedule — here's where you can squeeze in goal time
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {suggestions.map((s, i) => (
+          <div
+            key={i}
+            className="flex items-start gap-3 p-3 rounded-lg bg-card/80 border border-border/40"
+          >
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/15 text-primary">
+                  {s.startTime} – {s.endTime}
+                </span>
+                <span className="text-xs text-muted-foreground">{s.durationMinutes}min</span>
+              </div>
+              <p className="text-sm font-medium text-foreground">{s.activity}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                <span className="font-medium">For:</span> {s.goalTitle}
+              </p>
+              <p className="text-xs text-muted-foreground/70 mt-1 italic">💡 {s.reason}</p>
+            </div>
+            <div className="flex gap-1.5 flex-shrink-0">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0 text-primary hover:bg-primary/10"
+                onClick={() => onAccept(s)}
+                title="Add to schedule"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0 text-muted-foreground"
+                onClick={() => onDismiss(i)}
+                title="Dismiss"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Goals() {
+  const { user } = useAuth();
   const { goals, loading, addGoal, logProgress, archiveGoal } = useGoals();
+  const { loadTodaySchedule } = useSchedulePersistence(user?.id);
+  const [suggestions, setSuggestions] = useState<GoalSuggestion[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   const totalStreak = goals.reduce((max, g) => Math.max(max, g.streak), 0);
   const totalHoursThisMonth = goals.reduce((sum, g) => {
@@ -262,6 +356,59 @@ export default function Goals() {
     const monthLogs = g.logs.filter((l) => l.log_date.startsWith(thisMonth));
     return sum + monthLogs.reduce((s, l) => s + Number(l.hours_logged), 0);
   }, 0);
+
+  const handleFindGaps = async () => {
+    if (goals.length === 0) {
+      toast.error("Create some goals first!");
+      return;
+    }
+    setLoadingSuggestions(true);
+    try {
+      const result = await loadTodaySchedule();
+      const schedule = result?.schedule || [];
+      const settings = result?.settings;
+
+      const { data, error } = await supabase.functions.invoke("suggest-goal-blocks", {
+        body: {
+          schedule,
+          goals: goals.map((g) => ({
+            id: g.id,
+            title: g.title,
+            category: g.category,
+            target_hours: g.target_hours,
+            totalLogged: g.totalLogged,
+            goal_type: g.goal_type,
+          })),
+          wakeTime: settings?.wakeTime || "07:00",
+          bedTime: settings?.bedTime || "23:00",
+        },
+      });
+
+      if (error) throw error;
+      if (data?.suggestions) {
+        setSuggestions(data.suggestions);
+        if (data.suggestions.length === 0) {
+          toast("No free gaps found — your day is packed!", { icon: "📋" });
+        } else {
+          toast.success(`Found ${data.suggestions.length} time blocks for your goals!`);
+        }
+      }
+    } catch (e: any) {
+      console.error("Suggestion error:", e);
+      toast.error(e?.message || "Failed to get suggestions");
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  const handleAcceptSuggestion = (s: GoalSuggestion) => {
+    toast.success(`"${s.activity}" at ${s.startTime} noted! Log time when done.`, { icon: "✅" });
+    setSuggestions((prev) => prev.filter((x) => x !== s));
+  };
+
+  const handleDismissSuggestion = (idx: number) => {
+    setSuggestions((prev) => prev.filter((_, i) => i !== idx));
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -275,7 +422,21 @@ export default function Goals() {
               Back
             </Button>
           </Link>
-          <AddGoalDialog onAdd={addGoal} />
+          <div className="flex items-center gap-2">
+            {goals.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={handleFindGaps}
+                disabled={loadingSuggestions}
+              >
+                <Wand2 className={`w-4 h-4 ${loadingSuggestions ? "animate-spin" : ""}`} />
+                {loadingSuggestions ? "Finding gaps..." : "Find Schedule Gaps"}
+              </Button>
+            )}
+            <AddGoalDialog onAdd={addGoal} />
+          </div>
         </div>
 
         <header className="text-center mb-8">
@@ -284,6 +445,14 @@ export default function Goals() {
             "You do not rise to the level of your goals. You fall to the level of your systems." — James Clear
           </p>
         </header>
+
+        {/* AI Suggestions */}
+        <SuggestionsPanel
+          suggestions={suggestions}
+          onDismiss={handleDismissSuggestion}
+          onAccept={handleAcceptSuggestion}
+          onClose={() => setSuggestions([])}
+        />
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-3 mb-8">
