@@ -161,12 +161,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                         style={{ background: "transparent" }}
                         title={`Book ${globalIdx + 1} — click to import calendar`}
                       />
-                        className={`flex-1 h-full rounded-sm transition-all hover:brightness-110 hover:scale-y-105 cursor-pointer ${
-                          hasTask ? "ring-2 ring-primary ring-offset-1" : ""
-                        } ${activeBookIndex === globalIdx ? "ring-2 ring-accent brightness-125" : ""}`}
-                        style={{ background: "transparent" }}
-                        title={hasTask ? taskEntries[globalIdx].title : `Book ${globalIdx + 1} — click to add a task`}
-                      />
                     );
                   })}
                 </div>
