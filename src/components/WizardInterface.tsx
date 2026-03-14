@@ -306,7 +306,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       <div className={`absolute z-20 transition-all duration-700 ${
         importedEvents.length > 0 
           ? "bottom-[16%] right-[-4%]" 
-          : "bottom-[16%] right-[-4%]"
+          : "bottom-[8%] right-[4%]"
       }`}>
          <div className="relative cursor-pointer" onClick={() => {
           if (isTyping) return;
