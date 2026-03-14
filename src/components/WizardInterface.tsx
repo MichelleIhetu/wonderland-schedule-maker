@@ -615,7 +615,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 </div>
 
                 {/* Timer content */}
-                <div className="relative z-10 flex flex-col items-center gap-6 mt-[18vh]">
+                <div className="relative z-10 flex flex-col items-start gap-6 mt-[18vh] ml-[10vw]">
                 {/* Active task button (displayed) */}
                 <div
                   className="w-full text-left px-5 py-4 rounded-2xl shadow-lg"
