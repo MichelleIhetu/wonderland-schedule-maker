@@ -559,6 +559,97 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   Creating your schedule...
                 </p>
               </motion.div>
+            ) : activeTask ? (
+              /* Timer view — active task */
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center gap-6"
+              >
+                {/* Active task button (displayed) */}
+                <div
+                  className="w-full text-left px-5 py-4 rounded-2xl shadow-lg"
+                  style={{
+                    background: activeTask.title.toLowerCase().includes("break")
+                      ? "hsl(150 50% 85%)"
+                      : "hsl(280 30% 92%)",
+                    border: `3px solid ${activeTask.title.toLowerCase().includes("break") ? "hsl(150 40% 65%)" : "hsl(280 30% 75%)"}`,
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs shrink-0" style={{ color: "hsl(0 0% 0%)", fontFamily: "'Squartiqa 4F', 'Share Tech Mono', monospace" }}>
+                      {(() => {
+                        const [h, m] = activeTask.time.split(":");
+                        const hour = parseInt(h);
+                        const ampm = hour >= 12 ? "PM" : "AM";
+                        const h12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                        return `${h12}:${m} ${ampm}`;
+                      })()}
+                    </span>
+                    <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                      {activeTask.title}
+                    </span>
+                  </div>
+                  {activeTask.description && (
+                    <p className="text-xs mt-1 ml-12 opacity-70" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 35%)" }}>
+                      {activeTask.description}
+                    </p>
+                  )}
+                </div>
+
+                {/* Countdown timer */}
+                <div className="flex flex-col items-center gap-2">
+                  <div
+                    className="text-6xl font-bold tracking-wider"
+                    style={{ fontFamily: "'Squartiqa 4F', 'Share Tech Mono', monospace", color: "hsl(280 40% 30%)" }}
+                  >
+                    {formatTimer(timerSeconds)}
+                  </div>
+                  <p className="text-xs" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 50%)" }}>
+                    {timerSeconds === 0 ? "Time's up!" : timerRunning ? "In progress..." : "Paused"}
+                  </p>
+                </div>
+
+                {/* Timer controls */}
+                <div className="flex gap-3">
+                  {timerRunning ? (
+                    <button
+                      onClick={() => setTimerRunning(false)}
+                      className="px-6 py-2 rounded-full transition-all hover:scale-105 active:scale-95"
+                      style={{ background: "hsl(45 90% 55%)", fontFamily: "var(--font-body)" }}
+                    >
+                      Pause
+                    </button>
+                  ) : timerSeconds > 0 ? (
+                    <button
+                      onClick={() => setTimerRunning(true)}
+                      className="px-6 py-2 rounded-full transition-all hover:scale-105 active:scale-95"
+                      style={{ background: "hsl(150 50% 65%)", fontFamily: "var(--font-body)" }}
+                    >
+                      Resume
+                    </button>
+                  ) : null}
+                  <button
+                    onClick={stopTask}
+                    className="px-6 py-2 rounded-full transition-all hover:scale-105 active:scale-95"
+                    style={{ background: "hsl(350 60% 75%)", fontFamily: "var(--font-body)" }}
+                  >
+                    {timerSeconds === 0 ? "Back to Schedule" : "Stop"}
+                  </button>
+                </div>
+
+                {/* Progress bar */}
+                {timerDuration > 0 && (
+                  <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "hsl(280 20% 85%)" }}>
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ background: "hsl(280 40% 55%)" }}
+                      animate={{ width: `${((timerDuration - timerSeconds) / timerDuration) * 100}%` }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+                )}
+              </motion.div>
             ) : (
               <div className="flex flex-col gap-3">
                 {[...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time)).map((item, index) => (
@@ -567,6 +658,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.08 }}
+                    onClick={() => startTask(item)}
                     className="w-full text-left px-5 py-3 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md"
                     style={{
                       background: item.title.toLowerCase().includes("break")
