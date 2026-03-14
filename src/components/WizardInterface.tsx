@@ -381,6 +381,10 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             if (i >= fullText.length) {
               clearInterval(interval);
               setIsTyping(false);
+              // Show energy buttons when energy question finishes typing
+              if (fullText === "How is your energy level?") {
+                setShowEnergyButtons(true);
+              }
               // Auto-advance after first message in notebook scene with 2s delay
               if (fullText === "Life can get messy and chaotic with responsibilities, school, work etc. It's hard to keep track of everything") {
                 setTimeout(() => {
