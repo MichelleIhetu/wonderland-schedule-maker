@@ -32,7 +32,7 @@ type Scene = "library" | "cozy" | "energy";
 const SCENE_CONFIG = {
   library: {
     background: libraryBg,
-    bunnyPosition: "bottom-[0%] right-[1%]",
+    bunnyPosition: "bottom-[0%] right-[-3%]",
     bunnySize: "w-[22rem]",
     messages: [
       "Hi there, my name is TimeBunny! Welcome to my home!",
