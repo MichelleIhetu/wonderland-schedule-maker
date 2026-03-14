@@ -208,7 +208,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
   // ─── BUNNY CLICK HANDLER ───
   const handleBunnyClick = () => {
-    if (isTyping) return;
+    if (isTyping || isAutoAdvancePending) return;
 
     const messages = config.messages;
     const maxMessages = messages.length;
@@ -231,9 +231,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
     typeMessage(fullText, () => {
       // Auto-advance in cozy scene: "Life can get messy..." → 2s → "Here is a safe space..."
       if (scene === "cozy" && fullText === SCENE_CONFIG.cozy.messages[1]) {
+        setIsAutoAdvancePending(true);
         setTimeout(() => {
           const autoMsg = SCENE_CONFIG.cozy.messages[2];
           setBubbleClickCount(prev => prev + 1);
+          setIsAutoAdvancePending(false);
           typeMessage(autoMsg);
         }, 2000);
       }
