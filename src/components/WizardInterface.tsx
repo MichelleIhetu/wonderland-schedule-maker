@@ -315,6 +315,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             : [
               "Hi there, my name is TimeBunny! Welcome to my home!",
               "Click on one of the books so we can get an idea of what your schedule is like!",
+              "Click on the notepad to tell me about your day.",
             ];
           const nextCount = bubbleClickCount + 1;
           if (showSpeechBubble && nextCount >= messages.length + 1) {
