@@ -306,7 +306,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       <div className={`absolute z-20 transition-all duration-700 ${
         importedEvents.length > 0 
           ? "bottom-[16%] right-[-4%]" 
-          : "bottom-[16%] right-[-4%]"
+          : "bottom-[8%] right-[4%]"
       }`}>
          <div className="relative cursor-pointer" onClick={() => {
           if (isTyping) return;
@@ -316,8 +316,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
               "Hi there, my name is TimeBunny! Welcome to my home!",
               "Click on one of the books so we can get an idea of what your schedule is like!",
             ];
+          const maxMessages = importedEvents.length > 0 ? 1 : 2;
           const nextCount = bubbleClickCount + 1;
-          if (showSpeechBubble && nextCount >= messages.length + 1) {
+          if (showSpeechBubble && nextCount >= maxMessages + 1) {
             setShowSpeechBubble(false);
             setTypedText("");
             setBubbleClickCount(0);
