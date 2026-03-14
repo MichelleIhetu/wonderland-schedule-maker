@@ -616,7 +616,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
 
                 {/* Active task button - positioned top-left of the screen */}
                 <div
-                  className="absolute top-6 left-6 z-20 w-32 h-32 flex flex-col items-center justify-center text-center p-3 rounded-xl shadow-lg"
+                  className="absolute top-16 left-6 z-20 flex items-center gap-3 text-left px-5 py-4 rounded-2xl shadow-lg"
                   style={{
                     background: activeTask.title.toLowerCase().includes("break")
                       ? "hsl(150 50% 85%)"
@@ -633,13 +633,13 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                       return `${h12}:${m} ${ampm}`;
                     })()}
                   </span>
-                  <span className="text-xs font-semibold mt-1 line-clamp-2" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                  <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
                     {activeTask.title}
                   </span>
                 </div>
 
                 {/* Timer content */}
-                <div className="relative z-10 flex flex-col items-center gap-6 mt-[22vh]">
+                <div className="relative z-10 flex flex-col items-center gap-6 mt-[28vh]">
 
                 {/* Countdown timer */}
                 <div className="flex flex-col items-center gap-2">
