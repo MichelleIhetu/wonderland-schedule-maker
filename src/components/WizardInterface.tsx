@@ -99,6 +99,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
   const [activeTask, setActiveTask] = useState<ScheduleItem | null>(null);
+  const [showUpNext, setShowUpNext] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerDuration, setTimerDuration] = useState(0); // total seconds
@@ -614,29 +615,92 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   </div>
                 </div>
 
-                {/* Active task button - positioned top-left of the screen */}
-                <div
-                  className="absolute top-24 left-6 z-20 flex items-center gap-3 text-left px-5 py-4 rounded-2xl shadow-lg"
-                  style={{
-                    background: activeTask.title.toLowerCase().includes("break")
-                      ? "hsl(150 50% 85%)"
-                      : "hsl(280 30% 92%)",
-                    border: `3px solid ${activeTask.title.toLowerCase().includes("break") ? "hsl(150 40% 65%)" : "hsl(280 30% 75%)"}`,
-                  }}
-                >
-                  <span className="text-xs shrink-0" style={{ color: "hsl(0 0% 0%)", fontFamily: "'Squartiqa 4F', 'Share Tech Mono', monospace" }}>
-                    {(() => {
-                      const [h, m] = activeTask.time.split(":");
-                      const hour = parseInt(h);
-                      const ampm = hour >= 12 ? "PM" : "AM";
-                      const h12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-                      return `${h12}:${m} ${ampm}`;
-                    })()}
-                  </span>
-                  <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
-                    {activeTask.title}
-                  </span>
-                </div>
+                {/* Up Next tab - positioned top-left */}
+                {(() => {
+                  const sorted = [...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time));
+                  const currentIdx = sorted.findIndex(s => s.id === activeTask.id);
+                  const upcoming = sorted.slice(currentIdx + 1);
+                  return (
+                    <div className="absolute top-24 left-6 z-20 w-64">
+                      {/* Tab header */}
+                      <button
+                        onClick={() => setShowUpNext(prev => !prev)}
+                        className="w-full flex items-center justify-between px-4 py-3 rounded-t-2xl shadow-lg transition-all hover:brightness-105"
+                        style={{
+                          background: "hsl(280 30% 92%)",
+                          border: "2px solid hsl(280 30% 75%)",
+                          borderBottom: showUpNext ? "none" : undefined,
+                          borderRadius: showUpNext ? "1rem 1rem 0 0" : "1rem",
+                        }}
+                      >
+                        <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                          Up Next
+                        </span>
+                        <motion.span
+                          animate={{ rotate: showUpNext ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                          style={{ color: "hsl(280 40% 50%)" }}
+                        >
+                          ▼
+                        </motion.span>
+                      </button>
+
+                      {/* Expandable task list */}
+                      <AnimatePresence>
+                        {showUpNext && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden rounded-b-2xl shadow-lg"
+                            style={{
+                              background: "hsl(280 30% 96%)",
+                              border: "2px solid hsl(280 30% 75%)",
+                              borderTop: "1px solid hsl(280 30% 85%)",
+                            }}
+                          >
+                            <div className="max-h-[50vh] overflow-y-auto p-2 space-y-1.5">
+                              {upcoming.length === 0 ? (
+                                <p className="text-xs text-center py-3" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 50%)" }}>
+                                  No more tasks — you're done! ✧
+                                </p>
+                              ) : (
+                                upcoming.map((item, i) => (
+                                  <button
+                                    key={item.id}
+                                    onClick={() => startTask(item)}
+                                    className="w-full text-left px-3 py-2 rounded-xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                    style={{
+                                      background: item.title.toLowerCase().includes("break")
+                                        ? "hsl(150 50% 85%)"
+                                        : "hsl(280 30% 92%)",
+                                      border: `1.5px solid ${item.title.toLowerCase().includes("break") ? "hsl(150 40% 65%)" : "hsl(280 30% 80%)"}`,
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[10px] shrink-0" style={{ color: "hsl(0 0% 0%)", fontFamily: "'Squartiqa 4F', 'Share Tech Mono', monospace" }}>
+                                        {(() => {
+                                          const [h, m] = item.time.split(":");
+                                          const hour = parseInt(h);
+                                          const ampm = hour >= 12 ? "PM" : "AM";
+                                          const h12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                                          return `${h12}:${m} ${ampm}`;
+                                        })()}
+                                      </span>
+                                      <span className="text-xs font-semibold truncate" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                                        {item.title}
+                                      </span>
+                                    </div>
+                                  </button>
+                                ))
+                              )}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })()}
 
                 {/* Timer content */}
                 <div className="relative z-10 flex flex-col items-center gap-6 mt-[35vh]">
