@@ -464,9 +464,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                   submitSchedule();
                 }}
                 className="px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
-                style={{ background: "hsl(45 80% 55%)" }}
+                style={{ background: "hsl(50 100% 50%)" }}
               >
-                <span className="pixel-title-alt text-xl" style={{ color: "hsl(90 70% 40%)" }}>
+                <span className="pixel-title-alt text-xl" style={{ color: "hsl(120 60% 20%)" }}>
                   {level}
                 </span>
               </button>
