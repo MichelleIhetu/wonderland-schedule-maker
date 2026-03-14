@@ -544,6 +544,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
         </div>
       )}
 
+      {/* Bunny mascot — position & size driven by scene config */}
+      <div className={`absolute z-20 transition-all duration-700 ${config.bunnyPosition}`}>
         <div className="relative cursor-pointer" onClick={handleBunnyClick}>
           <AnimatePresence>
             {showSpeechBubble && (
