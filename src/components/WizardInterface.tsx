@@ -158,16 +158,20 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
       {/* Journal overlay - click background to open */}
       <div
-        className="absolute inset-0 z-[5] cursor-text"
-        onClick={() => setIsJournalFocused(true)}
+        className="absolute inset-0 z-[15] pointer-events-none"
       >
+        {/* Clickable area for opening journal - right half of screen */}
+        <div
+          className="absolute top-0 right-0 w-1/2 h-full pointer-events-auto cursor-text"
+          onClick={() => setIsJournalFocused(true)}
+        />
         <AnimatePresence>
           {isJournalFocused && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className={`absolute ${
+              className={`absolute pointer-events-auto ${
                 importedEvents.length > 0
                   ? "top-[8%] left-[8%] right-[40%] bottom-[15%]"
                   : "top-[10%] left-[10%] right-[50%] bottom-[20%]"
