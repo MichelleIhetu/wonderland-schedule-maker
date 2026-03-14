@@ -95,9 +95,16 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
   // ─── TYPEWRITER HELPER ───
   const typeMessage = (msg: string, onDone?: () => void) => {
-    setTypedText("");
     setIsTyping(true);
     let i = 0;
+    // Set first character immediately to avoid blank flicker
+    setTypedText(msg.slice(0, 1));
+    i = 1;
+    if (msg.length <= 1) {
+      setIsTyping(false);
+      onDone?.();
+      return;
+    }
     const interval = setInterval(() => {
       i++;
       setTypedText(msg.slice(0, i));
