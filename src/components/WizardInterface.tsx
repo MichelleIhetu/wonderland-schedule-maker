@@ -84,6 +84,27 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   };
 
   const handleComplete = () => {
+    setScheduleSubmitted(true);
+    setIsJournalFocused(false);
+    setShowEnergyButtons(true);
+    // Show bunny asking about energy on the new background
+    setShowSpeechBubble(true);
+    setBubbleClickCount(1);
+    setTypedText("");
+    setIsTyping(true);
+    const msg = "How is your energy level?";
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setTypedText(msg.slice(0, i));
+      if (i >= msg.length) {
+        clearInterval(interval);
+        setIsTyping(false);
+      }
+    }, 40);
+  };
+
+  const submitSchedule = () => {
     const breakText = breakFrequency === "minimal" ? "Include minimal short breaks" 
       : breakFrequency === "moderate" ? "Include regular 15-minute breaks every 2 hours"
       : "Include frequent breaks - 10 minutes every hour";
@@ -115,8 +136,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       ? `\n\nHere's what the user wrote about their day:\n"${journalText.trim()}"\nPlease incorporate any mentioned tasks, commitments, or context into the schedule.`
       : '';
     
-    setScheduleSubmitted(true);
-    setIsJournalFocused(false);
     onComplete(`My tasks:\n${tasksText}${deadlineWarning}${eventsList}${journalNote}${startNote}\n\n${breakText}`);
   };
 
