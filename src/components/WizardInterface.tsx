@@ -183,14 +183,28 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                     value={journalText}
                     onChange={(e) => setJournalText(e.target.value)}
                     placeholder="What's on your mind today?"
-                    className="w-full h-[calc(100%-2rem)] bg-transparent resize-none focus:outline-none text-white placeholder:text-white/40 leading-[2rem]"
+                    className="w-full bg-transparent resize-none focus:outline-none text-white placeholder:text-white/40 leading-[2rem]"
                     style={{
                       fontFamily: "var(--font-body)",
                       fontSize: "1rem",
                       caretColor: "white",
+                      height: journalText.trim() ? "calc(100% - 4.5rem)" : "calc(100% - 2rem)",
                     }}
                     autoFocus
                   />
+                  {journalText.trim() && (
+                    <div className="absolute bottom-3 left-4 right-4">
+                      <Button
+                        onClick={(e) => { e.stopPropagation(); handleComplete(); }}
+                        disabled={isLoading}
+                        className="w-full gap-2 font-body text-sm"
+                        size="sm"
+                      >
+                        <PlayCircle className="w-4 h-4" />
+                        {isLoading ? "Generating..." : "Generate Schedule ✨"}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
