@@ -6,6 +6,7 @@ import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
+import scheduleBg from "@/assets/schedule-background.png";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubbleWelcome from "@/assets/speech-bubble-welcome.png";
 
