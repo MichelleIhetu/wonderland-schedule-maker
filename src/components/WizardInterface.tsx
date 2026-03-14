@@ -414,7 +414,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             exit={{ opacity: 0, y: 20 }}
             className="absolute left-[10%] top-[20%] z-30 flex flex-col gap-10"
           >
-            {(["low", "medium", "high"] as const).map((level) => (
+            {(["low", "standard", "high"] as const).map((level) => (
               <button
                 key={level}
                 onClick={() => {
