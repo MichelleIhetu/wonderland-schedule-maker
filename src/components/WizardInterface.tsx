@@ -318,7 +318,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             ];
           const maxMessages = importedEvents.length > 0 ? 1 : 2;
           const nextCount = bubbleClickCount + 1;
-          if (showSpeechBubble && nextCount >= messages.length + 1) {
+          if (showSpeechBubble && nextCount >= maxMessages + 1) {
             setShowSpeechBubble(false);
             setTypedText("");
             setBubbleClickCount(0);
