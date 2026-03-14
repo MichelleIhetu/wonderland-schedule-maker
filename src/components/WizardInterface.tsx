@@ -365,7 +365,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="absolute left-[10%] top-[20%] z-30 flex flex-col gap-4"
+            className="absolute left-[10%] top-[20%] z-30 flex flex-col gap-6"
           >
             {(["low", "medium", "high"] as const).map((level) => (
               <button
