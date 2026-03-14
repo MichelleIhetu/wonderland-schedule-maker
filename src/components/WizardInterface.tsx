@@ -616,7 +616,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
 
                 {/* Active task button - positioned top-left of the screen */}
                 <div
-                  className="absolute top-6 left-6 z-20 w-32 h-32 flex flex-col items-center justify-center text-center p-3 rounded-xl shadow-lg"
+                  className="absolute top-16 left-6 z-20 flex items-center gap-3 text-left px-5 py-4 rounded-2xl shadow-lg"
                   style={{
                     background: activeTask.title.toLowerCase().includes("break")
                       ? "hsl(150 50% 85%)"
