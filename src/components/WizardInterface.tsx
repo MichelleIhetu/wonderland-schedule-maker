@@ -23,6 +23,7 @@ interface WizardInterfaceProps {
   onSettingsChange: (settings: UserSettings) => void;
   onComplete: (tasks: string) => void;
   isLoading: boolean;
+  generatedSchedule: ScheduleItem[];
 }
 
 // ─── SCENE DEFINITIONS ───
