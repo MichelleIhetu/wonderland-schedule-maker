@@ -67,6 +67,14 @@ const SCENE_CONFIG = {
       "How is your stress level?",
     ],
   },
+  schedule: {
+    background: scheduleBg,
+    bunnyPosition: "bottom-[28%] right-[-4%]",
+    bunnySize: "w-[28rem]",
+    messages: [
+      "Here's your schedule! Tap on a task to get started!",
+    ],
+  },
 } as const;
 
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
