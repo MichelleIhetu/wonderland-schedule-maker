@@ -615,7 +615,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 </div>
 
                 {/* Timer content */}
-                <div className="relative z-10 flex flex-col items-center gap-6">
+                <div className="relative z-10 flex flex-col items-center gap-6 mt-[15vh]">
                 {/* Active task button (displayed) */}
                 <div
                   className="w-full text-left px-5 py-4 rounded-2xl shadow-lg"
@@ -651,7 +651,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 <div className="flex flex-col items-center gap-2">
                   <div
                     className="text-6xl font-bold tracking-wider"
-                    style={{ fontFamily: "'Squartiqa 4F', 'Share Tech Mono', monospace", color: "hsl(280 40% 30%)" }}
+                    style={{ fontFamily: "'SCR N Seven', 'Share Tech Mono', monospace", color: "hsl(280 40% 30%)" }}
                   >
                     {formatTimer(timerSeconds)}
                   </div>
