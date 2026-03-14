@@ -6,6 +6,7 @@ import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
+import scheduleBg from "@/assets/schedule-background.png";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubbleWelcome from "@/assets/speech-bubble-welcome.png";
 
@@ -41,6 +42,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [bubbleClickCount, setBubbleClickCount] = useState(0);
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
+  const [scheduleSubmitted, setScheduleSubmitted] = useState(false);
 
   const nowStr = (() => {
     const n = new Date();
@@ -112,6 +114,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       ? `\n\nHere's what the user wrote about their day:\n"${journalText.trim()}"\nPlease incorporate any mentioned tasks, commitments, or context into the schedule.`
       : '';
     
+    setScheduleSubmitted(true);
+    setIsJournalFocused(false);
     onComplete(`My tasks:\n${tasksText}${deadlineWarning}${eventsList}${journalNote}${startNote}\n\n${breakText}`);
   };
 
@@ -145,8 +149,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       {/* Library background image */}
       <AnimatePresence mode="wait">
         <motion.img
-          key={importedEvents.length > 0 ? "cozy" : "library"}
-          src={importedEvents.length > 0 ? cozyBg : libraryBg}
+          key={scheduleSubmitted ? "schedule" : importedEvents.length > 0 ? "cozy" : "library"}
+          src={scheduleSubmitted ? scheduleBg : importedEvents.length > 0 ? cozyBg : libraryBg}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           initial={{ opacity: 0 }}
