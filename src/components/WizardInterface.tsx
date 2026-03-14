@@ -339,7 +339,47 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         </div>
       )}
 
-      {/* Bunny mascot - bottom right, moves to chair after import */}
+      {/* Energy level buttons */}
+      <AnimatePresence>
+        {showEnergyButtons && importedEvents.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="absolute left-[10%] top-1/2 -translate-y-1/2 z-30 flex flex-col gap-4"
+          >
+            {(["low", "medium", "high"] as const).map((level) => (
+              <button
+                key={level}
+                onClick={() => {
+                  updateSetting("energyLevel", level === "low" ? "tired" : level === "medium" ? "moderate" : "motivated");
+                  setShowEnergyButtons(false);
+                  // Auto-advance to next message
+                  const nextMsg = "Click on one of the books so we can get an idea of what your schedule is like!";
+                  setBubbleClickCount(prev => prev + 1);
+                  setTypedText("");
+                  setIsTyping(true);
+                  let k = 0;
+                  const autoInterval = setInterval(() => {
+                    k++;
+                    setTypedText(nextMsg.slice(0, k));
+                    if (k >= nextMsg.length) {
+                      clearInterval(autoInterval);
+                      setIsTyping(false);
+                    }
+                  }, 40);
+                }}
+                className="glass-pill px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+              >
+                <span className="pixel-title-alt text-xl" style={{ color: "hsl(330 80% 55%)" }}>
+                  {level}
+                </span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className={`absolute z-20 transition-all duration-700 ${
         importedEvents.length > 0 
           ? "bottom-[28%] right-[-4%]" 
