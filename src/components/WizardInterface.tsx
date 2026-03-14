@@ -77,6 +77,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const [typedText, setTypedText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isAutoAdvancePending, setIsAutoAdvancePending] = useState(false);
   const [bubbleClickCount, setBubbleClickCount] = useState(0);
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
@@ -124,6 +125,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
     setShowSpeechBubble(false);
     setTypedText("");
     setBubbleClickCount(0);
+    setIsAutoAdvancePending(false);
   };
 
   const removeImportedEvent = (id: string) => {
@@ -153,6 +155,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   // Called when user clicks "Generate Schedule" in the journal
   const handleComplete = () => {
     setIsJournalFocused(false);
+    setIsAutoAdvancePending(false);
     // Transition to energy scene
     setScene("energy");
     setBubbleClickCount(1);
@@ -207,7 +210,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
   // ─── BUNNY CLICK HANDLER ───
   const handleBunnyClick = () => {
-    if (isTyping) return;
+    if (isTyping || isAutoAdvancePending) return;
 
     const messages = config.messages;
     const maxMessages = messages.length;
@@ -230,9 +233,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
     typeMessage(fullText, () => {
       // Auto-advance in cozy scene: "Life can get messy..." → 2s → "Here is a safe space..."
       if (scene === "cozy" && fullText === SCENE_CONFIG.cozy.messages[1]) {
+        setIsAutoAdvancePending(true);
         setTimeout(() => {
           const autoMsg = SCENE_CONFIG.cozy.messages[2];
           setBubbleClickCount(prev => prev + 1);
+          setIsAutoAdvancePending(false);
           typeMessage(autoMsg);
         }, 2000);
       }
