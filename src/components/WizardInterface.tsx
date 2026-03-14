@@ -311,12 +311,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
          <div className="relative cursor-pointer" onClick={() => {
           if (isTyping) return;
           const messages = importedEvents.length > 0
-            ? ["Great! Now that I have a better understanding of what your day is like, let's get started!"]
+            ? [
+              "Great! Now that I have a better understanding of what your day is like, let's get started!",
+              "Click on the notepad to write about your day!",
+            ]
             : [
               "Hi there, my name is TimeBunny! Welcome to my home!",
               "Click on one of the books so we can get an idea of what your schedule is like!",
             ];
-          const maxMessages = importedEvents.length > 0 ? 1 : 2;
+          const maxMessages = messages.length;
           const nextCount = bubbleClickCount + 1;
           if (showSpeechBubble && nextCount >= maxMessages + 1) {
             setShowSpeechBubble(false);
