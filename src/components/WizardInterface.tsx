@@ -616,9 +616,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
 
                 {/* Timer content */}
                 <div className="relative z-10 flex flex-col items-center gap-6 mt-[22vh]">
-                {/* Active task button (displayed) */}
+                {/* Active task button (displayed) - positioned top-left */}
                 <div
-                  className="w-full text-left px-5 py-4 rounded-2xl shadow-lg"
+                  className="absolute top-6 left-6 z-20 w-32 h-32 flex flex-col items-center justify-center text-center p-3 rounded-xl shadow-lg"
                   style={{
                     background: activeTask.title.toLowerCase().includes("break")
                       ? "hsl(150 50% 85%)"
@@ -626,25 +626,18 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     border: `3px solid ${activeTask.title.toLowerCase().includes("break") ? "hsl(150 40% 65%)" : "hsl(280 30% 75%)"}`,
                   }}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs shrink-0" style={{ color: "hsl(0 0% 0%)", fontFamily: "'Squartiqa 4F', 'Share Tech Mono', monospace" }}>
-                      {(() => {
-                        const [h, m] = activeTask.time.split(":");
-                        const hour = parseInt(h);
-                        const ampm = hour >= 12 ? "PM" : "AM";
-                        const h12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-                        return `${h12}:${m} ${ampm}`;
-                      })()}
-                    </span>
-                    <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
-                      {activeTask.title}
-                    </span>
-                  </div>
-                  {activeTask.description && (
-                    <p className="text-xs mt-1 ml-12 opacity-70" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 35%)" }}>
-                      {activeTask.description}
-                    </p>
-                  )}
+                  <span className="text-xs shrink-0" style={{ color: "hsl(0 0% 0%)", fontFamily: "'Squartiqa 4F', 'Share Tech Mono', monospace" }}>
+                    {(() => {
+                      const [h, m] = activeTask.time.split(":");
+                      const hour = parseInt(h);
+                      const ampm = hour >= 12 ? "PM" : "AM";
+                      const h12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                      return `${h12}:${m} ${ampm}`;
+                    })()}
+                  </span>
+                  <span className="text-xs font-semibold mt-1 line-clamp-2" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                    {activeTask.title}
+                  </span>
                 </div>
 
                 {/* Countdown timer */}
