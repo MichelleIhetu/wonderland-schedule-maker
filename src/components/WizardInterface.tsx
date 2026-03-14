@@ -614,11 +614,12 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   </div>
                 </div>
 
-                {/* Timer content */}
-                <div className="relative z-10 flex flex-col items-center gap-6 mt-[22vh]">
-                {/* Active task button (displayed) - positioned top-left */}
+                {/* Active task button - positioned top-left of the screen */}
                 <div
                   className="absolute top-6 left-6 z-20 w-32 h-32 flex flex-col items-center justify-center text-center p-3 rounded-xl shadow-lg"
+
+                {/* Timer content */}
+                <div className="relative z-10 flex flex-col items-center gap-6 mt-[22vh]">
                   style={{
                     background: activeTask.title.toLowerCase().includes("break")
                       ? "hsl(150 50% 85%)"
