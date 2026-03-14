@@ -313,7 +313,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           const messages = importedEvents.length > 0
             ? ["Great! Now that I have a better understanding of what your day is like, let's get started!"]
             : [
-              "Hi there, my name is TimeBunny! Welcome to my home! Click on the notepad to tell me about your day.",
+              "Hi there, my name is TimeBunny! Welcome to my home!",
               "Click on one of the books so we can get an idea of what your schedule is like!",
             ];
           const nextCount = bubbleClickCount + 1;
