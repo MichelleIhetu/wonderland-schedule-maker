@@ -651,7 +651,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 <div className="flex flex-col items-center gap-2">
                   <div
                     className="text-6xl font-bold tracking-wider"
-                    style={{ fontFamily: "'Squartiqa 4F', 'Share Tech Mono', monospace", color: "hsl(280 40% 30%)" }}
+                    style={{ fontFamily: "'SCR N Seven', 'Share Tech Mono', monospace", color: "hsl(280 40% 30%)" }}
                   >
                     {formatTimer(timerSeconds)}
                   </div>
