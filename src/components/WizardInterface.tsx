@@ -314,7 +314,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                         style={{ fontFamily: "'Comic Sans MS', 'Comic Sans', cursive" }}
                       >
                         <PlayCircle className="w-4 h-4" />
-                        {isLoading ? "Generating..." : "Generate Schedule"}
+                        {isLoading ? "Sending..." : "Send"}
                       </Button>
                     </div>
                   )}
