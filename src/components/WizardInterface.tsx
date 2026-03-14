@@ -149,8 +149,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       {/* Library background image */}
       <AnimatePresence mode="wait">
         <motion.img
-          key={importedEvents.length > 0 ? "cozy" : "library"}
-          src={importedEvents.length > 0 ? cozyBg : libraryBg}
+          key={scheduleSubmitted ? "schedule" : importedEvents.length > 0 ? "cozy" : "library"}
+          src={scheduleSubmitted ? scheduleBg : importedEvents.length > 0 ? cozyBg : libraryBg}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           initial={{ opacity: 0 }}
