@@ -183,11 +183,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                     value={journalText}
                     onChange={(e) => setJournalText(e.target.value)}
                     placeholder="What's on your mind today?"
-                    className="w-full h-[calc(100%-2rem)] bg-transparent resize-none focus:outline-none text-[hsl(280_40%_25%)] placeholder:text-[hsl(280_40%_60%/0.4)] leading-[2rem]"
+                    className="w-full h-[calc(100%-2rem)] bg-transparent resize-none focus:outline-none text-white placeholder:text-white/40 leading-[2rem]"
                     style={{
                       fontFamily: "var(--font-body)",
                       fontSize: "1rem",
-                      caretColor: "hsl(280 40% 40%)",
+                      caretColor: "white",
                     }}
                     autoFocus
                   />
