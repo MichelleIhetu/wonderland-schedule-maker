@@ -155,6 +155,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   // Called when user clicks "Generate Schedule" in the journal
   const handleComplete = () => {
     setIsJournalFocused(false);
+    setIsAutoAdvancePending(false);
     // Transition to energy scene
     setScene("energy");
     setBubbleClickCount(1);
