@@ -55,7 +55,7 @@ const SCENE_CONFIG = {
     bunnyPosition: "bottom-[28%] right-[-4%]",
     bunnySize: "w-[28rem]",
     messages: [
-      "Thank you for sharing that with me. How is your energy level?",
+      "Wow! You have a lot on your plate dear, what is your energy level?",
     ],
   },
   stress: {
