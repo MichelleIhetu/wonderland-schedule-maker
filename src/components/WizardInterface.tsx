@@ -305,8 +305,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       {/* Bunny mascot - bottom right, moves to chair after import */}
       <div className={`absolute z-20 transition-all duration-700 ${
         importedEvents.length > 0 
-          ? "bottom-[8%] right-[5%]" 
-          : "bottom-[8%] right-[5%]"
+          ? "bottom-[12%] right-[2%]" 
+          : "bottom-[12%] right-[2%]"
       }`}>
          <div className="relative cursor-pointer" onClick={() => {
           if (isTyping) return;
