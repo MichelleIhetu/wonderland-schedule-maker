@@ -313,7 +313,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           const messages = importedEvents.length > 0
             ? [
               "Great! Now that I have a better understanding of what your day is like, let's get started!",
-              "Click on the notepad to write about your day!",
+              "Let it out, write it out!",
             ]
             : [
               "Hi there, my name is TimeBunny! Welcome to my home!",
@@ -341,6 +341,24 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             if (i >= fullText.length) {
               clearInterval(interval);
               setIsTyping(false);
+              // Auto-advance after "Let it out, write it out!" with 5s delay
+              if (fullText === "Let it out, write it out!") {
+                setTimeout(() => {
+                  const autoMsg = "Click on the notepad to write about your day!";
+                  setBubbleClickCount(prev => prev + 1);
+                  setTypedText("");
+                  setIsTyping(true);
+                  let j = 0;
+                  const autoInterval = setInterval(() => {
+                    j++;
+                    setTypedText(autoMsg.slice(0, j));
+                    if (j >= autoMsg.length) {
+                      clearInterval(autoInterval);
+                      setIsTyping(false);
+                    }
+                  }, 40);
+                }, 5000);
+              }
             }
           }, 40);
         }}>
