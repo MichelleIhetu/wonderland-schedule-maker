@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2 } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
+import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
@@ -23,11 +23,12 @@ interface WizardInterfaceProps {
   onSettingsChange: (settings: UserSettings) => void;
   onComplete: (tasks: string) => void;
   isLoading: boolean;
+  generatedSchedule: ScheduleItem[];
 }
 
 // ─── SCENE DEFINITIONS ───
 // Each scene has: background image, bunny position, bunny size, dialogue messages
-type Scene = "library" | "cozy" | "energy" | "stress";
+type Scene = "library" | "cozy" | "energy" | "stress" | "schedule";
 
 const SCENE_CONFIG = {
   library: {
@@ -66,11 +67,19 @@ const SCENE_CONFIG = {
       "How is your stress level?",
     ],
   },
+  schedule: {
+    background: scheduleBg,
+    bunnyPosition: "bottom-[28%] right-[-4%]",
+    bunnySize: "w-[28rem]",
+    messages: [
+      "Here's your schedule! Tap on a task to get started!",
+    ],
+  },
 } as const;
 
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
-const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: WizardInterfaceProps) => {
+const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule }: WizardInterfaceProps) => {
   // ─── SCENE STATE (single source of truth) ───
   const [scene, setScene] = useState<Scene>("library");
 
@@ -90,6 +99,14 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
 
+  // Auto-show bunny message when schedule arrives
+  useEffect(() => {
+    if (scene === "schedule" && generatedSchedule.length > 0 && !showSpeechBubble) {
+      setShowSpeechBubble(true);
+      setBubbleClickCount(1);
+      typeMessage("Here's your schedule! Tap on a task to get started!");
+    }
+  }, [scene, generatedSchedule.length]);
   const nowStr = (() => {
     const n = new Date();
     return `${n.getHours().toString().padStart(2, "0")}:${n.getMinutes().toString().padStart(2, "0")}`;
@@ -461,6 +478,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                   setShowSpeechBubble(false);
                   setTypedText("");
                   submitSchedule();
+                  setScene("schedule");
                 }}
                 className="px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
                 style={{ background: "hsl(50 100% 50%)" }}
@@ -474,6 +492,59 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         )}
       </AnimatePresence>
 
+      {/* Schedule display — schedule scene */}
+      {scene === "schedule" && (
+        <div className="absolute inset-0 z-[15] flex items-center justify-start p-8">
+          <div className="max-w-md w-full max-h-[80vh] overflow-y-auto">
+            {isLoading && generatedSchedule.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center gap-4 p-8"
+              >
+                <Loader2 className="w-10 h-10 animate-spin" style={{ color: "hsl(280 40% 50%)" }} />
+                <p className="pixel-title-alt text-lg" style={{ color: "hsl(280 40% 40%)" }}>
+                  Creating your schedule...
+                </p>
+              </motion.div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {[...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time)).map((item, index) => (
+                  <motion.button
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.08 }}
+                    className="w-full text-left px-5 py-3 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md"
+                    style={{
+                      background: item.title.toLowerCase().includes("break")
+                        ? "hsl(150 50% 85%)"
+                        : "hsl(280 30% 92%)",
+                      border: `2px solid ${item.title.toLowerCase().includes("break") ? "hsl(150 40% 65%)" : "hsl(280 30% 75%)"}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="pixel-title-alt text-xs shrink-0" style={{ color: "hsl(280 40% 45%)" }}>
+                        {item.time}
+                      </span>
+                      <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                        {item.title}
+                      </span>
+                    </div>
+                    {item.description && (
+                      <p className="text-xs mt-1 ml-12 opacity-70" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 35%)" }}>
+                        {item.description}
+                      </p>
+                    )}
+                  </motion.button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Bunny mascot — position & size driven by scene config */}
       <div className={`absolute z-20 transition-all duration-700 ${config.bunnyPosition}`}>
         <div className="relative cursor-pointer" onClick={handleBunnyClick}>
           <AnimatePresence>
