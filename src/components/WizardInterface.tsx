@@ -356,6 +356,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             ]
             : [
               "Hi there, my name is TimeBunny! Welcome to my home!",
+              "How is your energy level?",
               "Click on one of the books so we can get an idea of what your schedule is like!",
             ];
           const maxMessages = messages.length;
