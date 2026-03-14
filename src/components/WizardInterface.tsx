@@ -365,7 +365,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="absolute left-[10%] top-1/2 -translate-y-1/2 z-30 flex flex-col gap-4"
+            className="absolute left-[10%] top-[20%] z-30 flex flex-col gap-4"
           >
             {(["low", "medium", "high"] as const).map((level) => (
               <button
@@ -377,7 +377,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                   setTypedText("");
                   submitSchedule();
                 }}
-                className="glass-pill px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+                className="px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+                style={{ background: "hsl(197 71% 73%)" }}
               >
                 <span className="pixel-title-alt text-xl" style={{ color: "hsl(330 80% 55%)" }}>
                   {level}
