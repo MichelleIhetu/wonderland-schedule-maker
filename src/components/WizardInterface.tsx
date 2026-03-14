@@ -427,9 +427,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                 key={level}
                 onClick={() => {
                   updateSetting("energyLevel", level === "high" ? "motivated" : "unmotivated");
-                  setShowSpeechBubble(false);
-                  setTypedText("");
-                  submitSchedule();
+                  // Transition to stress scene
+                  setScene("stress");
+                  setBubbleClickCount(1);
+                  setShowSpeechBubble(true);
+                  typeMessage("How is your stress level?");
                 }}
                 className="px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
                 style={{ background: "hsl(197 71% 73%)" }}
