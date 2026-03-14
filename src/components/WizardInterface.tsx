@@ -524,7 +524,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     }}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-xs shrink-0" style={{ color: "hsl(0 0% 0%)", fontFamily: "'Times New Roman', Times, serif" }}>
+                      <span className="text-xs shrink-0" style={{ color: "hsl(0 0% 0%)", fontFamily: "'Squartiqa 4F', 'Share Tech Mono', monospace" }}>
                         {(() => {
                           const [h, m] = item.time.split(":");
                           const hour = parseInt(h);
