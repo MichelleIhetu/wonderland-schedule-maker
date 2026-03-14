@@ -27,7 +27,7 @@ interface WizardInterfaceProps {
 
 // ─── SCENE DEFINITIONS ───
 // Each scene has: background image, bunny position, bunny size, dialogue messages
-type Scene = "library" | "cozy" | "energy";
+type Scene = "library" | "cozy" | "energy" | "stress";
 
 const SCENE_CONFIG = {
   library: {
@@ -56,6 +56,14 @@ const SCENE_CONFIG = {
     bunnySize: "w-[28rem]",
     messages: [
       "Thank you for sharing that with me. How is your energy level?",
+    ],
+  },
+  stress: {
+    background: scheduleBg,
+    bunnyPosition: "bottom-[28%] right-[-4%]",
+    bunnySize: "w-[28rem]",
+    messages: [
+      "How is your stress level?",
     ],
   },
 } as const;
