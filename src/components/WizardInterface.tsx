@@ -99,7 +99,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
 
-  const nowStr = (() => {
+  // Auto-show bunny message when schedule arrives
+  useEffect(() => {
+    if (scene === "schedule" && generatedSchedule.length > 0 && !showSpeechBubble) {
+      setShowSpeechBubble(true);
+      setBubbleClickCount(1);
+      typeMessage("Here's your schedule! Tap on a task to get started!");
+    }
+  }, [scene, generatedSchedule.length]);
+
     const n = new Date();
     return `${n.getHours().toString().padStart(2, "0")}:${n.getMinutes().toString().padStart(2, "0")}`;
   })();
