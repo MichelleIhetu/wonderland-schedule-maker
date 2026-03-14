@@ -197,11 +197,12 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                       <Button
                         onClick={(e) => { e.stopPropagation(); handleComplete(); }}
                         disabled={isLoading}
-                        className="w-full gap-2 font-body text-sm"
+                        className="w-full gap-2 text-sm"
                         size="sm"
+                        style={{ fontFamily: "'Comic Sans MS', 'Comic Sans', cursive" }}
                       >
                         <PlayCircle className="w-4 h-4" />
-                        {isLoading ? "Generating..." : "Generate Schedule ✨"}
+                        {isLoading ? "Generating..." : "Generate Schedule"}
                       </Button>
                     </div>
                   )}
