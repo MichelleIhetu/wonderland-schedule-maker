@@ -313,7 +313,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           const messages = importedEvents.length > 0
             ? [
               "Great! Now that I have a better understanding of what your day is like, let's get started!",
-              "Click on the notepad to write about your day!",
+              "Let it out, write it out!",
             ]
             : [
               "Hi there, my name is TimeBunny! Welcome to my home!",
