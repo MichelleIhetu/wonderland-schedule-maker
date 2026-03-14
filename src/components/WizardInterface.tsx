@@ -359,10 +359,10 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             if (i >= fullText.length) {
               clearInterval(interval);
               setIsTyping(false);
-              // Auto-advance after "Let it out, write it out!" with 5s delay
-              if (fullText === "Let it out, write it out!") {
+              // Auto-advance after first message in notebook scene with 2s delay
+              if (fullText === "Life can get messy and chaotic with responsibilities, school, work etc. It's hard to keep track of everything") {
                 setTimeout(() => {
-                  const autoMsg = "Click on the notepad to write about your day!";
+                  const autoMsg = "Here is a safe space for you to write about your day, tell me what's going on. I'm all ears";
                   setBubbleClickCount(prev => prev + 1);
                   setTypedText("");
                   setIsTyping(true);
@@ -375,7 +375,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                       setIsTyping(false);
                     }
                   }, 40);
-                }, 5000);
+                }, 2000);
               }
             }
           }, 40);
