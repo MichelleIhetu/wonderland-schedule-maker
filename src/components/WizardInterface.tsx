@@ -470,6 +470,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   setShowSpeechBubble(false);
                   setTypedText("");
                   submitSchedule();
+                  setScene("schedule");
                 }}
                 className="px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
                 style={{ background: "hsl(50 100% 50%)" }}
