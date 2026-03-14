@@ -107,7 +107,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
       typeMessage("Here's your schedule! Tap on a task to get started!");
     }
   }, [scene, generatedSchedule.length]);
-
+  const nowStr = (() => {
     const n = new Date();
     return `${n.getHours().toString().padStart(2, "0")}:${n.getMinutes().toString().padStart(2, "0")}`;
   })();
