@@ -84,6 +84,27 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   };
 
   const handleComplete = () => {
+    setScheduleSubmitted(true);
+    setIsJournalFocused(false);
+    setShowEnergyButtons(true);
+    // Show bunny asking about energy on the new background
+    setShowSpeechBubble(true);
+    setBubbleClickCount(1);
+    setTypedText("");
+    setIsTyping(true);
+    const msg = "How is your energy level?";
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setTypedText(msg.slice(0, i));
+      if (i >= msg.length) {
+        clearInterval(interval);
+        setIsTyping(false);
+      }
+    }, 40);
+  };
+
+  const submitSchedule = () => {
     const breakText = breakFrequency === "minimal" ? "Include minimal short breaks" 
       : breakFrequency === "moderate" ? "Include regular 15-minute breaks every 2 hours"
       : "Include frequent breaks - 10 minutes every hour";
@@ -115,8 +136,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       ? `\n\nHere's what the user wrote about their day:\n"${journalText.trim()}"\nPlease incorporate any mentioned tasks, commitments, or context into the schedule.`
       : '';
     
-    setScheduleSubmitted(true);
-    setIsJournalFocused(false);
     onComplete(`My tasks:\n${tasksText}${deadlineWarning}${eventsList}${journalNote}${startNote}\n\n${breakText}`);
   };
 
@@ -339,9 +358,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         </div>
       )}
 
-      {/* Energy level buttons */}
+      {/* Energy level buttons - shown on schedule background after Generate */}
       <AnimatePresence>
-        {showEnergyButtons && importedEvents.length === 0 && (
+        {showEnergyButtons && scheduleSubmitted && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -354,20 +373,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                 onClick={() => {
                   updateSetting("energyLevel", level === "high" ? "motivated" : "unmotivated");
                   setShowEnergyButtons(false);
-                  // Auto-advance to next message
-                  const nextMsg = "Click on one of the books so we can get an idea of what your schedule is like!";
-                  setBubbleClickCount(prev => prev + 1);
+                  setShowSpeechBubble(false);
                   setTypedText("");
-                  setIsTyping(true);
-                  let k = 0;
-                  const autoInterval = setInterval(() => {
-                    k++;
-                    setTypedText(nextMsg.slice(0, k));
-                    if (k >= nextMsg.length) {
-                      clearInterval(autoInterval);
-                      setIsTyping(false);
-                    }
-                  }, 40);
+                  submitSchedule();
                 }}
                 className="glass-pill px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
               >
@@ -396,7 +404,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             ]
             : [
               "Hi there, my name is TimeBunny! Welcome to my home!",
-              "How is your energy level?",
               "Click on one of the books so we can get an idea of what your schedule is like!",
             ];
           const maxMessages = messages.length;
@@ -421,10 +428,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             if (i >= fullText.length) {
               clearInterval(interval);
               setIsTyping(false);
-              // Show energy buttons when energy question finishes typing
-              if (fullText === "How is your energy level?") {
-                setShowEnergyButtons(true);
-              }
               // Auto-advance after first message in notebook scene with 2s delay
               if (fullText === "Life can get messy and chaotic with responsibilities, school, work etc. It's hard to keep track of everything") {
                 setTimeout(() => {
