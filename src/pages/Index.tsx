@@ -305,7 +305,7 @@ const Index = () => {
 
   // ─── APP VIEW ───
   return (
-    <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} />
+    <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} generatedSchedule={generatedSchedule} />
   );
 };
 
