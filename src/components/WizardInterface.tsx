@@ -524,8 +524,14 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     }}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="pixel-title-alt text-xs shrink-0" style={{ color: "hsl(280 40% 45%)" }}>
-                        {item.time}
+                      <span className="text-xs shrink-0" style={{ color: "hsl(0 0% 0%)", fontFamily: "'Times New Roman', Times, serif" }}>
+                        {(() => {
+                          const [h, m] = item.time.split(":");
+                          const hour = parseInt(h);
+                          const ampm = hour >= 12 ? "PM" : "AM";
+                          const h12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                          return `${h12}:${m} ${ampm}`;
+                        })()}
                       </span>
                       <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
                         {item.title}
