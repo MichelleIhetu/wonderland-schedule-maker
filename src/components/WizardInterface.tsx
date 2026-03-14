@@ -42,6 +42,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [bubbleClickCount, setBubbleClickCount] = useState(0);
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
+  const [scheduleSubmitted, setScheduleSubmitted] = useState(false);
 
   const nowStr = (() => {
     const n = new Date();
