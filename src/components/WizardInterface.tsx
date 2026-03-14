@@ -699,6 +699,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     />
                   </div>
                 )}
+                </div>
               </motion.div>
             ) : (
               <div className="flex flex-col gap-3">
