@@ -633,7 +633,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                       return `${h12}:${m} ${ampm}`;
                     })()}
                   </span>
-                  <span className="text-xs font-semibold mt-1 line-clamp-2" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                  <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
                     {activeTask.title}
                   </span>
                 </div>
