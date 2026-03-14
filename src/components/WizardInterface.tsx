@@ -156,53 +156,47 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         />
       </AnimatePresence>
 
-      {/* Journal overlay - click background to open */}
-      <div
-        className="absolute inset-0 z-[15] pointer-events-none"
-      >
-        {/* Clickable area for opening journal - right half of screen */}
+      {/* Journal overlay - only on notebook/cozy background (after calendar import) */}
+      {importedEvents.length > 0 && (
         <div
-          className="absolute top-0 right-0 w-1/2 h-full pointer-events-auto cursor-text"
+          className="absolute inset-0 z-[15] cursor-text"
           onClick={() => setIsJournalFocused(true)}
-        />
-        <AnimatePresence>
-          {isJournalFocused && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className={`absolute pointer-events-auto ${
-                importedEvents.length > 0
-                  ? "top-[8%] left-[8%] right-[40%] bottom-[15%]"
-                  : "top-[10%] left-[10%] right-[50%] bottom-[20%]"
-              }`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative w-full h-full bg-card/90 backdrop-blur-md rounded-xl border border-primary/20 shadow-xl p-4">
-                <button
-                  onClick={(e) => { e.stopPropagation(); setIsJournalFocused(false); }}
-                  className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <p className="text-xs text-muted-foreground mb-2" style={{ fontFamily: "var(--font-body)" }}>📝 Write about your day...</p>
-                <textarea
-                  value={journalText}
-                  onChange={(e) => setJournalText(e.target.value)}
-                  placeholder="What's on your mind today?"
-                  className="w-full h-[calc(100%-2rem)] bg-transparent resize-none focus:outline-none text-[hsl(280_40%_25%)] placeholder:text-[hsl(280_40%_60%/0.4)] leading-[2rem]"
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "1rem",
-                    caretColor: "hsl(280 40% 40%)",
-                  }}
-                  autoFocus
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+        >
+          <AnimatePresence>
+            {isJournalFocused && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="absolute top-[8%] left-[8%] right-[40%] bottom-[15%]"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="relative w-full h-full bg-card/90 backdrop-blur-md rounded-xl border border-primary/20 shadow-xl p-4">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setIsJournalFocused(false); }}
+                    className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <p className="text-xs text-muted-foreground mb-2" style={{ fontFamily: "var(--font-body)" }}>📝 Write about your day...</p>
+                  <textarea
+                    value={journalText}
+                    onChange={(e) => setJournalText(e.target.value)}
+                    placeholder="What's on your mind today?"
+                    className="w-full h-[calc(100%-2rem)] bg-transparent resize-none focus:outline-none text-[hsl(280_40%_25%)] placeholder:text-[hsl(280_40%_60%/0.4)] leading-[2rem]"
+                    style={{
+                      fontFamily: "var(--font-body)",
+                      fontSize: "1rem",
+                      caretColor: "hsl(280 40% 40%)",
+                    }}
+                    autoFocus
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
 
       {/* Task step: interactive bookshelf */}
