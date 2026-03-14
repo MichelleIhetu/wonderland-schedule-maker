@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2 } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { UserSettings, EnergyLevel, StressLevel } from "@/types/schedule";
+import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
