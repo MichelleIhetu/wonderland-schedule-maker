@@ -25,9 +25,47 @@ interface WizardInterfaceProps {
   isLoading: boolean;
 }
 
+// ─── SCENE DEFINITIONS ───
+// Each scene has: background image, bunny position, bunny size, dialogue messages
+type Scene = "library" | "cozy" | "energy";
+
+const SCENE_CONFIG = {
+  library: {
+    background: libraryBg,
+    bunnyPosition: "bottom-[8%] right-[1%]",
+    bunnySize: "w-[22rem]",
+    messages: [
+      "Hi there, my name is TimeBunny! Welcome to my home!",
+      "Click on one of the books so we can get an idea of what your schedule is like!",
+    ],
+  },
+  cozy: {
+    background: cozyBg,
+    bunnyPosition: "bottom-[28%] right-[-4%]",
+    bunnySize: "w-[28rem]",
+    messages: [
+      "Great! Now that I have a better understanding of what your day is like, let's get started!",
+      "Life can get messy and chaotic with responsibilities, school, work etc. It's hard to keep track of everything",
+      "Here is a safe space for you to write about your day, tell me what's going on. I'm all ears",
+      "Let it out, write it out! Click on the notepad to write about your day 📝",
+    ],
+  },
+  energy: {
+    background: scheduleBg,
+    bunnyPosition: "bottom-[28%] right-[-4%]",
+    bunnySize: "w-[28rem]",
+    messages: [
+      "How is your energy level?",
+    ],
+  },
+} as const;
+
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
 const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: WizardInterfaceProps) => {
+  // ─── SCENE STATE (single source of truth) ───
+  const [scene, setScene] = useState<Scene>("library");
+
   const [step, setStep] = useState<WizardStep>("tasks");
   const [breakFrequency, setBreakFrequency] = useState<"minimal" | "moderate" | "frequent">("moderate");
   const [taskEntries, setTaskEntries] = useState<TaskEntry[]>([
@@ -42,8 +80,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   const [bubbleClickCount, setBubbleClickCount] = useState(0);
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
-  const [scheduleSubmitted, setScheduleSubmitted] = useState(false);
-  const [showEnergyButtons, setShowEnergyButtons] = useState(false);
 
   const nowStr = (() => {
     const n = new Date();
@@ -51,12 +87,36 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
   })();
   const [startTime, setStartTime] = useState(nowStr);
 
+  const config = SCENE_CONFIG[scene];
+
   const updateSetting = <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => {
     onSettingsChange({ ...settings, [key]: value });
   };
 
+  // ─── TYPEWRITER HELPER ───
+  const typeMessage = (msg: string, onDone?: () => void) => {
+    setTypedText("");
+    setIsTyping(true);
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setTypedText(msg.slice(0, i));
+      if (i >= msg.length) {
+        clearInterval(interval);
+        setIsTyping(false);
+        onDone?.();
+      }
+    }, 40);
+  };
+
   const handleCalendarImport = (events: CalendarEvent[]) => {
     setImportedEvents(events);
+    // Transition from library → cozy scene
+    setScene("cozy");
+    // Reset speech bubble state for new scene
+    setShowSpeechBubble(false);
+    setTypedText("");
+    setBubbleClickCount(0);
   };
 
   const removeImportedEvent = (id: string) => {
@@ -83,27 +143,17 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
     }
   };
 
+  // Called when user clicks "Generate Schedule" in the journal
   const handleComplete = () => {
-    setScheduleSubmitted(true);
     setIsJournalFocused(false);
-    setShowEnergyButtons(true);
-    // Show bunny asking about energy on the new background
-    setShowSpeechBubble(true);
+    // Transition to energy scene
+    setScene("energy");
     setBubbleClickCount(1);
-    setTypedText("");
-    setIsTyping(true);
-    const msg = "How is your energy level?";
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setTypedText(msg.slice(0, i));
-      if (i >= msg.length) {
-        clearInterval(interval);
-        setIsTyping(false);
-      }
-    }, 40);
+    setShowSpeechBubble(true);
+    typeMessage("How is your energy level?");
   };
 
+  // Called after energy level is selected
   const submitSchedule = () => {
     const breakText = breakFrequency === "minimal" ? "Include minimal short breaks" 
       : breakFrequency === "moderate" ? "Include regular 15-minute breaks every 2 hours"
@@ -141,36 +191,54 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
 
   const hasValidTasks = taskEntries.some(t => t.title.trim());
 
-  const steps: WizardStep[] = ["greeting", "mood", "stress", "sleep", "breaks", "tasks"];
-  const currentIndex = steps.indexOf(step);
-
-  const bunnyMessages: Record<WizardStep, string> = {
-    greeting: "Hi there! Welcome to TimeBunny. Your guide to plan your day!",
-    mood: "How are you feeling today? Your energy level helps me plan the perfect schedule!",
-    stress: "And what about your stress level? I'll adjust your schedule accordingly!",
-    sleep: "When do you wake up and when do you plan to sleep?",
-    breaks: "Everyone needs a break! How often would you like to rest?",
-    tasks: "Click on one of the books in the library to write down the events of the day."
-  };
-
   // Book colors for the shelves
   const shelfBooks = [
-    // Shelf 1 (top) - these map to task entries
     ["hsl(170 40% 60%)", "hsl(340 60% 70%)", "hsl(170 35% 55%)", "hsl(330 50% 75%)", "hsl(40 50% 80%)", "hsl(340 55% 65%)", "hsl(170 30% 65%)", "hsl(330 45% 70%)", "hsl(340 50% 60%)"],
-    // Shelf 2 (middle)
     ["hsl(340 55% 75%)", "hsl(200 60% 65%)", "hsl(340 50% 70%)", "hsl(50 50% 70%)", "hsl(200 55% 60%)", "hsl(340 45% 65%)", "hsl(200 50% 70%)", "hsl(330 55% 75%)"],
-    // Shelf 3 (bottom)
     ["hsl(280 40% 65%)", "hsl(200 50% 60%)", "hsl(50 55% 65%)", "hsl(340 50% 70%)", "hsl(40 45% 75%)", "hsl(200 55% 65%)", "hsl(50 50% 60%)", "hsl(340 45% 60%)"],
   ];
 
+  // ─── BUNNY CLICK HANDLER ───
+  const handleBunnyClick = () => {
+    if (isTyping) return;
+
+    const messages = config.messages;
+    const maxMessages = messages.length;
+    const nextCount = bubbleClickCount + 1;
+
+    // Dismiss bubble after all messages shown
+    if (showSpeechBubble && nextCount >= maxMessages + 1) {
+      setShowSpeechBubble(false);
+      setTypedText("");
+      setBubbleClickCount(0);
+      return;
+    }
+
+    const msgIndex = showSpeechBubble ? Math.min(nextCount - 1, messages.length - 1) : 0;
+    const resetCount = showSpeechBubble ? nextCount : 1;
+    setBubbleClickCount(resetCount);
+    setShowSpeechBubble(true);
+
+    const fullText = messages[msgIndex];
+    typeMessage(fullText, () => {
+      // Auto-advance in cozy scene: "Life can get messy..." → 2s → "Here is a safe space..."
+      if (scene === "cozy" && fullText === SCENE_CONFIG.cozy.messages[1]) {
+        setTimeout(() => {
+          const autoMsg = SCENE_CONFIG.cozy.messages[2];
+          setBubbleClickCount(prev => prev + 1);
+          typeMessage(autoMsg);
+        }, 2000);
+      }
+    });
+  };
 
   return (
     <div className="fixed inset-0 overflow-hidden flex flex-col" style={{ background: "hsl(280 40% 85%)" }}>
-      {/* Library background image */}
+      {/* Background image — driven by scene */}
       <AnimatePresence mode="wait">
         <motion.img
-          key={scheduleSubmitted ? "schedule" : importedEvents.length > 0 ? "cozy" : "library"}
-          src={scheduleSubmitted ? scheduleBg : importedEvents.length > 0 ? cozyBg : libraryBg}
+          key={scene}
+          src={config.background}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           initial={{ opacity: 0 }}
@@ -180,8 +248,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         />
       </AnimatePresence>
 
-      {/* Journal overlay - only on notebook/cozy background (after calendar import) */}
-      {importedEvents.length > 0 && (
+      {/* Journal overlay — cozy scene only */}
+      {scene === "cozy" && (
         <div
           className="absolute inset-0 z-[15] cursor-text"
           onClick={() => setIsJournalFocused(true)}
@@ -237,26 +305,21 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         </div>
       )}
 
-
-      {/* Task step: interactive bookshelf */}
-      {step === "tasks" && (
+      {/* Task step: interactive bookshelf — library scene only */}
+      {scene === "library" && step === "tasks" && (
         <div className="relative z-10 flex-1 flex">
           {/* Left side - Bookshelf with clickable books */}
           <div className="w-1/2 relative flex flex-col justify-center p-4">
-            {/* Invisible clickable book areas over the bookshelf image */}
             <div className="absolute inset-0 flex flex-col justify-between py-[5%] px-[4%]">
               {shelfBooks.map((shelf, shelfIdx) => (
                 <div key={shelfIdx} className="flex items-end gap-[2px] h-[28%] px-[2%] pb-[2%]">
                   {shelf.map((_, bookIdx) => {
                     const globalIdx = shelfIdx * shelf.length + bookIdx;
-                    const hasTask = taskEntries[globalIdx]?.title?.trim();
                     return (
                       <button
                         key={bookIdx}
-                        onClick={() => {
-                          setIsCalendarModalOpen(true);
-                        }}
-                        className={`flex-1 h-full rounded-sm transition-all hover:brightness-110 hover:scale-y-105 cursor-pointer`}
+                        onClick={() => setIsCalendarModalOpen(true)}
+                        className="flex-1 h-full rounded-sm transition-all hover:brightness-110 hover:scale-y-105 cursor-pointer"
                         style={{ background: "transparent" }}
                         title={`Book ${globalIdx + 1} — click to import calendar`}
                       />
@@ -267,9 +330,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
             </div>
           </div>
 
-          {/* Right side - Task input panel + bunny */}
+          {/* Right side - Task input panel */}
           <div className="w-1/2 relative flex flex-col justify-end p-4">
-            {/* Task input panel */}
             <div className="absolute top-4 left-4 right-4 bottom-[45%] z-20">
               <AnimatePresence mode="wait">
                 {activeBookIndex !== null && taskEntries[activeBookIndex] ? (
@@ -295,25 +357,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                       autoFocus
                     />
                     <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={taskEntries[activeBookIndex].duration}
-                        onChange={(e) => updateTask(taskEntries[activeBookIndex].id, "duration", e.target.value)}
-                        placeholder="Duration (e.g., 2h)"
-                        className="flex-1 bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
-                      />
-                      <input
-                        type="text"
-                        value={taskEntries[activeBookIndex].deadline}
-                        onChange={(e) => updateTask(taskEntries[activeBookIndex].id, "deadline", e.target.value)}
-                        placeholder="Deadline"
-                        className="flex-1 bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
-                      />
-                      <select
-                        value={taskEntries[activeBookIndex].priority}
-                        onChange={(e) => updateTask(taskEntries[activeBookIndex].id, "priority", e.target.value)}
-                        className="bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground focus:outline-none"
-                      >
+                      <input type="text" value={taskEntries[activeBookIndex].duration} onChange={(e) => updateTask(taskEntries[activeBookIndex].id, "duration", e.target.value)} placeholder="Duration (e.g., 2h)" className="flex-1 bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none" />
+                      <input type="text" value={taskEntries[activeBookIndex].deadline} onChange={(e) => updateTask(taskEntries[activeBookIndex].id, "deadline", e.target.value)} placeholder="Deadline" className="flex-1 bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none" />
+                      <select value={taskEntries[activeBookIndex].priority} onChange={(e) => updateTask(taskEntries[activeBookIndex].id, "priority", e.target.value)} className="bg-muted/20 border border-primary/10 rounded-lg px-2 py-1 text-xs text-foreground focus:outline-none">
                         <option value="high">🔴 High</option>
                         <option value="medium">🟡 Med</option>
                         <option value="low">🟢 Low</option>
@@ -321,13 +367,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                     </div>
                   </motion.div>
                 ) : (
-                  <motion.div
-                    key="prompt"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex flex-col items-center gap-3 pt-4"
-                  >
-                    {/* Task summary */}
+                  <motion.div key="prompt" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3 pt-4">
                     {hasValidTasks && (
                       <div className="bg-card/80 backdrop-blur-sm rounded-lg p-2 border border-primary/10 w-full">
                         <p className="text-xs text-muted-foreground mb-1">Tasks added:</p>
@@ -340,12 +380,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                       </div>
                     )}
                     {hasValidTasks && (
-                      <Button
-                        onClick={handleComplete}
-                        disabled={isLoading}
-                        className="w-full mt-2 gap-2 font-body text-sm"
-                        size="sm"
-                      >
+                      <Button onClick={handleComplete} disabled={isLoading} className="w-full mt-2 gap-2 font-body text-sm" size="sm">
                         <PlayCircle className="w-4 h-4" />
                         {isLoading ? "Generating..." : "Generate Schedule"}
                       </Button>
@@ -358,9 +393,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         </div>
       )}
 
-      {/* Energy level buttons - shown on schedule background after Generate */}
+      {/* Energy level buttons — energy scene only */}
       <AnimatePresence>
-        {showEnergyButtons && scheduleSubmitted && (
+        {scene === "energy" && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -372,7 +407,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                 key={level}
                 onClick={() => {
                   updateSetting("energyLevel", level === "high" ? "motivated" : "unmotivated");
-                  setShowEnergyButtons(false);
                   setShowSpeechBubble(false);
                   setTypedText("");
                   submitSchedule();
@@ -389,67 +423,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         )}
       </AnimatePresence>
 
-      <div className={`absolute z-20 transition-all duration-700 ${
-        importedEvents.length > 0 
-          ? "bottom-[28%] right-[-4%]" 
-          : "bottom-[8%] right-[1%]"
-      }`}>
-         <div className="relative cursor-pointer" onClick={() => {
-          if (isTyping) return;
-          const messages = importedEvents.length > 0
-            ? [
-              "Great! Now that I have a better understanding of what your day is like, let's get started!",
-              "Life can get messy and chaotic with responsibilities, school, work etc. It's hard to keep track of everything",
-              "Here is a safe space for you to write about your day, tell me what's going on. I'm all ears",
-              "Let it out, write it out! Click on the notepad to write about your day 📝",
-            ]
-            : [
-              "Hi there, my name is TimeBunny! Welcome to my home!",
-              "Click on one of the books so we can get an idea of what your schedule is like!",
-            ];
-          const maxMessages = messages.length;
-          const nextCount = bubbleClickCount + 1;
-          if (showSpeechBubble && nextCount >= maxMessages + 1) {
-            setShowSpeechBubble(false);
-            setTypedText("");
-            setBubbleClickCount(0);
-            return;
-          }
-          const msgIndex = showSpeechBubble ? Math.min(nextCount - 1, messages.length - 1) : 0;
-          const resetCount = showSpeechBubble ? nextCount : 1;
-          setBubbleClickCount(resetCount);
-          setShowSpeechBubble(true);
-          setTypedText("");
-          setIsTyping(true);
-          const fullText = messages[msgIndex];
-          let i = 0;
-          const interval = setInterval(() => {
-            i++;
-            setTypedText(fullText.slice(0, i));
-            if (i >= fullText.length) {
-              clearInterval(interval);
-              setIsTyping(false);
-              // Auto-advance after first message in notebook scene with 2s delay
-              if (fullText === "Life can get messy and chaotic with responsibilities, school, work etc. It's hard to keep track of everything") {
-                setTimeout(() => {
-                  const autoMsg = "Here is a safe space for you to write about your day, tell me what's going on. I'm all ears";
-                  setBubbleClickCount(prev => prev + 1);
-                  setTypedText("");
-                  setIsTyping(true);
-                  let j = 0;
-                  const autoInterval = setInterval(() => {
-                    j++;
-                    setTypedText(autoMsg.slice(0, j));
-                    if (j >= autoMsg.length) {
-                      clearInterval(autoInterval);
-                      setIsTyping(false);
-                    }
-                  }, 40);
-                }, 2000);
-              }
-            }
-          }, 40);
-        }}>
+      {/* Bunny mascot — position & size driven by scene config */}
+      <div className={`absolute z-20 transition-all duration-700 ${config.bunnyPosition}`}>
+        <div className="relative cursor-pointer" onClick={handleBunnyClick}>
           <AnimatePresence>
             {showSpeechBubble && (
               <motion.div
@@ -486,12 +462,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           <img
             src={bunnyMascot}
             alt="TimeBunny mascot"
-            className={`object-contain drop-shadow-xl transition-all duration-700 hover:scale-105 active:scale-95 ${
-              importedEvents.length > 0 ? "w-[28rem]" : "w-[22rem]"
-            }`}
+            className={`object-contain drop-shadow-xl transition-all duration-700 hover:scale-105 active:scale-95 ${config.bunnySize}`}
           />
         </div>
       </div>
+
       <CalendarImportModal
         isOpen={isCalendarModalOpen}
         onClose={() => setIsCalendarModalOpen(false)}
