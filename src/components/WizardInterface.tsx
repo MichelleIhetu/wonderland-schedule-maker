@@ -639,7 +639,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 </div>
 
                 {/* Timer content */}
-                <div className="relative z-10 flex flex-col items-center gap-6 mt-[22vh]">
+                <div className="relative z-10 flex flex-col items-center gap-6 mt-[28vh]">
 
                 {/* Countdown timer */}
                 <div className="flex flex-col items-center gap-2">
