@@ -560,12 +560,62 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 </p>
               </motion.div>
             ) : activeTask ? (
-              /* Timer view — active task */
+              /* Timer view — active task with clock background */
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center gap-6"
+                className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
+                style={{ background: "hsl(300 50% 88%)" }}
               >
+                {/* Clock outline background */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+                  <div
+                    className="rounded-full absolute"
+                    style={{
+                      width: "140vmax",
+                      height: "140vmax",
+                      border: "16px solid hsl(90 80% 45%)",
+                      background: "hsl(40 60% 95%)",
+                    }}
+                  >
+                    <div className="absolute top-[2%] left-1/2 -translate-x-1/2 w-[16px] h-[60px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+                    <div className="absolute bottom-[2%] left-1/2 -translate-x-1/2 w-[16px] h-[60px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+                    <div className="absolute left-[2%] top-1/2 -translate-y-1/2 w-[60px] h-[16px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+                    <div className="absolute right-[2%] top-1/2 -translate-y-1/2 w-[60px] h-[16px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+                    <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[10px] h-[30%] rounded-full origin-bottom rotate-[30deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
+                    <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[8px] h-[35%] rounded-full origin-bottom rotate-[-60deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
+                  </div>
+                </div>
+
+                {/* Clock tick marks */}
+                <div className="absolute inset-0 pointer-events-none z-[1] flex items-center justify-center">
+                  <div className="relative" style={{ width: "min(150vw, 150vh)", height: "min(150vw, 150vh)" }}>
+                    {Array.from({ length: 60 }).map((_, i) => {
+                      const isHour = i % 5 === 0;
+                      const angle = i * 6;
+                      return (
+                        <div
+                          key={i}
+                          className="absolute top-0 left-1/2 -translate-x-1/2 origin-bottom"
+                          style={{ height: "50%", transform: `translateX(-50%) rotate(${angle}deg)` }}
+                        >
+                          <div
+                            className="rounded-full mx-auto"
+                            style={{
+                              width: isHour ? "6px" : "3px",
+                              height: isHour ? "24px" : "12px",
+                              background: isHour ? "hsl(90 80% 45% / 0.7)" : "hsl(90 80% 45% / 0.3)",
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Timer content */}
+                <div className="relative z-10 flex flex-col items-center gap-6">
                 {/* Active task button (displayed) */}
                 <div
                   className="w-full text-left px-5 py-4 rounded-2xl shadow-lg"
