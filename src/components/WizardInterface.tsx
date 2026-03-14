@@ -492,7 +492,58 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
         )}
       </AnimatePresence>
 
-      <div className={`absolute z-20 transition-all duration-700 ${config.bunnyPosition}`}>
+      {/* Schedule display — schedule scene */}
+      {scene === "schedule" && (
+        <div className="absolute inset-0 z-[15] flex items-center justify-start p-8">
+          <div className="max-w-md w-full max-h-[80vh] overflow-y-auto">
+            {isLoading && generatedSchedule.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center gap-4 p-8"
+              >
+                <Loader2 className="w-10 h-10 animate-spin" style={{ color: "hsl(280 40% 50%)" }} />
+                <p className="pixel-title-alt text-lg" style={{ color: "hsl(280 40% 40%)" }}>
+                  Creating your schedule...
+                </p>
+              </motion.div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {[...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time)).map((item, index) => (
+                  <motion.button
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.08 }}
+                    className="w-full text-left px-5 py-3 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md"
+                    style={{
+                      background: item.title.toLowerCase().includes("break")
+                        ? "hsl(150 50% 85%)"
+                        : "hsl(280 30% 92%)",
+                      border: `2px solid ${item.title.toLowerCase().includes("break") ? "hsl(150 40% 65%)" : "hsl(280 30% 75%)"}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="pixel-title-alt text-xs shrink-0" style={{ color: "hsl(280 40% 45%)" }}>
+                        {item.time}
+                      </span>
+                      <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                        {item.title}
+                      </span>
+                    </div>
+                    {item.description && (
+                      <p className="text-xs mt-1 ml-12 opacity-70" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 35%)" }}>
+                        {item.description}
+                      </p>
+                    )}
+                  </motion.button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
         <div className="relative cursor-pointer" onClick={handleBunnyClick}>
           <AnimatePresence>
             {showSpeechBubble && (
