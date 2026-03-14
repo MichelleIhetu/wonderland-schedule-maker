@@ -99,6 +99,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
   const [activeTask, setActiveTask] = useState<ScheduleItem | null>(null);
+  const [showUpNext, setShowUpNext] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerDuration, setTimerDuration] = useState(0); // total seconds
