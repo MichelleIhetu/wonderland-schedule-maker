@@ -358,9 +358,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         </div>
       )}
 
-      {/* Energy level buttons */}
+      {/* Energy level buttons - shown on schedule background after Generate */}
       <AnimatePresence>
-        {showEnergyButtons && importedEvents.length === 0 && (
+        {showEnergyButtons && scheduleSubmitted && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -373,20 +373,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
                 onClick={() => {
                   updateSetting("energyLevel", level === "high" ? "motivated" : "unmotivated");
                   setShowEnergyButtons(false);
-                  // Auto-advance to next message
-                  const nextMsg = "Click on one of the books so we can get an idea of what your schedule is like!";
-                  setBubbleClickCount(prev => prev + 1);
+                  setShowSpeechBubble(false);
                   setTypedText("");
-                  setIsTyping(true);
-                  let k = 0;
-                  const autoInterval = setInterval(() => {
-                    k++;
-                    setTypedText(nextMsg.slice(0, k));
-                    if (k >= nextMsg.length) {
-                      clearInterval(autoInterval);
-                      setIsTyping(false);
-                    }
-                  }, 40);
+                  submitSchedule();
                 }}
                 className="glass-pill px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
               >
