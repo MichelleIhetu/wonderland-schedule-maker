@@ -114,6 +114,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
       ? `\n\nHere's what the user wrote about their day:\n"${journalText.trim()}"\nPlease incorporate any mentioned tasks, commitments, or context into the schedule.`
       : '';
     
+    setScheduleSubmitted(true);
+    setIsJournalFocused(false);
     onComplete(`My tasks:\n${tasksText}${deadlineWarning}${eventsList}${journalNote}${startNote}\n\n${breakText}`);
   };
 
