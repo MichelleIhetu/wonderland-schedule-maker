@@ -445,7 +445,36 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
         )}
       </AnimatePresence>
 
-      {/* Bunny mascot — position & size driven by scene config */}
+      {/* Stress level buttons — stress scene only */}
+      <AnimatePresence>
+        {scene === "stress" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="absolute left-[6%] top-[20%] z-30 flex flex-col gap-10"
+          >
+            {(["high", "average", "low"] as const).map((level) => (
+              <button
+                key={level}
+                onClick={() => {
+                  updateSetting("stressLevel", level === "average" ? "medium" : level);
+                  setShowSpeechBubble(false);
+                  setTypedText("");
+                  submitSchedule();
+                }}
+                className="px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+                style={{ background: "hsl(45 80% 55%)" }}
+              >
+                <span className="pixel-title-alt text-xl" style={{ color: "hsl(90 70% 40%)" }}>
+                  {level}
+                </span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className={`absolute z-20 transition-all duration-700 ${config.bunnyPosition}`}>
         <div className="relative cursor-pointer" onClick={handleBunnyClick}>
           <AnimatePresence>
