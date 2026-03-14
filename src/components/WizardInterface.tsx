@@ -352,7 +352,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
               <button
                 key={level}
                 onClick={() => {
-                  updateSetting("energyLevel", level === "low" ? "tired" : level === "medium" ? "moderate" : "motivated");
+                  updateSetting("energyLevel", level === "high" ? "motivated" : "unmotivated");
                   setShowEnergyButtons(false);
                   // Auto-advance to next message
                   const nextMsg = "Click on one of the books so we can get an idea of what your schedule is like!";
