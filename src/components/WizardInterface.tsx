@@ -125,6 +125,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
     setShowSpeechBubble(false);
     setTypedText("");
     setBubbleClickCount(0);
+    setIsAutoAdvancePending(false);
   };
 
   const removeImportedEvent = (id: string) => {
