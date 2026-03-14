@@ -330,7 +330,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading }: 
           const messages = importedEvents.length > 0
             ? [
               "Great! Now that I have a better understanding of what your day is like, let's get started!",
-              "Let it out, write it out!",
+              "Life can get messy and chaotic with responsibilities, school, work etc. It's hard to keep track of everything",
+              "Here is a safe space for you to write about your day, tell me what's going on. I'm all ears",
             ]
             : [
               "Hi there, my name is TimeBunny! Welcome to my home!",
