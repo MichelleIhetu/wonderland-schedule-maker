@@ -98,6 +98,58 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [bubbleClickCount, setBubbleClickCount] = useState(0);
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
+  const [activeTask, setActiveTask] = useState<ScheduleItem | null>(null);
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timerDuration, setTimerDuration] = useState(0); // total seconds
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Timer countdown effect
+  useEffect(() => {
+    if (timerRunning && timerSeconds > 0) {
+      timerRef.current = setInterval(() => {
+        setTimerSeconds(prev => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current!);
+            setTimerRunning(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }
+  }, [timerRunning]);
+
+  const startTask = (item: ScheduleItem) => {
+    const sorted = [...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time));
+    const idx = sorted.findIndex(s => s.id === item.id);
+    let durationMinutes = 30; // default 30 min
+    if (idx < sorted.length - 1) {
+      const [h1, m1] = sorted[idx].time.split(":").map(Number);
+      const [h2, m2] = sorted[idx + 1].time.split(":").map(Number);
+      durationMinutes = (h2 * 60 + m2) - (h1 * 60 + m1);
+      if (durationMinutes <= 0) durationMinutes = 30;
+    }
+    const totalSec = durationMinutes * 60;
+    setActiveTask(item);
+    setTimerDuration(totalSec);
+    setTimerSeconds(totalSec);
+    setTimerRunning(true);
+  };
+
+  const stopTask = () => {
+    setActiveTask(null);
+    setTimerRunning(false);
+    setTimerSeconds(0);
+    if (timerRef.current) clearInterval(timerRef.current);
+  };
+
+  const formatTimer = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
 
   // Auto-show bunny message when schedule arrives
   useEffect(() => {
