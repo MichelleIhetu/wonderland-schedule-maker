@@ -533,7 +533,6 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
               initial={{ width: 0 }} animate={{ width: `${((currentTaskIndex + 1) / schedule.length) * 100}%` }} />
           </div>
         </div>
-      </div>
 
         {/* Celebration Overlay */}
         <AnimatePresence>
