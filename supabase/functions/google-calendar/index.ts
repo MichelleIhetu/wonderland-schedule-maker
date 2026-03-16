@@ -98,7 +98,7 @@ serve(async (req) => {
 
     const calendarsData = await calendarsResponse.json();
     const calendars = (calendarsData.items || [])
-      .filter((cal: any) => cal?.id && cal?.selected !== false)
+      .filter((cal: any) => cal?.id && cal?.accessRole && cal.accessRole !== 'none')
       .map((cal: any) => ({ id: cal.id as string, summary: cal.summary as string }));
 
     // Fallback to primary if list is empty for any reason
