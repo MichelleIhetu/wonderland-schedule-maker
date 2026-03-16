@@ -53,26 +53,28 @@ serve(async (req) => {
       );
     }
 
-    // Parse body for timezone
+    // Parse body for timezone and day range from client
     let timezone = 'UTC';
+    let timeMin = '';
+    let timeMax = '';
     try {
       const body = await req.json();
       if (body?.timezone) timezone = body.timezone;
+      if (body?.timeMin) timeMin = body.timeMin;
+      if (body?.timeMax) timeMax = body.timeMax;
     } catch {}
 
+    // Fallback range if client did not provide one
+    if (!timeMin || !timeMax) {
+      const todayUtc = new Date();
+      todayUtc.setUTCHours(0, 0, 0, 0);
+      const tomorrowUtc = new Date(todayUtc);
+      tomorrowUtc.setUTCDate(tomorrowUtc.getUTCDate() + 1);
+      timeMin = todayUtc.toISOString();
+      timeMax = tomorrowUtc.toISOString();
+    }
+
     console.log('Using timezone:', timezone);
-
-    // Get today's date range in user's timezone
-    const nowInTz = new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
-    const todayStart = new Date(nowInTz);
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date(nowInTz);
-    todayEnd.setHours(23, 59, 59, 999);
-
-    // Convert back to ISO for the API using timezone offset
-    const timeMin = todayStart.toISOString();
-    const timeMax = todayEnd.toISOString();
-
     console.log('Fetching events from', timeMin, 'to', timeMax);
 
     const calendarResponse = await fetch(
