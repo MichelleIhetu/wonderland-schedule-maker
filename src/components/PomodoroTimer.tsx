@@ -71,6 +71,49 @@ const getCurrentTaskIndexByTime = (items: ScheduleItem[]): number => {
   return originalIndex >= 0 ? originalIndex : 0;
 };
 
+const celebrationMessages = [
+  "You crushed it! 🎉 On to the next one~",
+  "Amazing work! You're unstoppable! ✨",
+  "That's how it's done! Keep this energy! 🌟",
+  "So proud of you! One step closer to greatness! ♡",
+  "Brilliant! You're on fire today! 🔥",
+  "Task conquered! You're a legend! ✧",
+  "Yay! Another one done! Let's keep rolling~ 🎊",
+];
+
+const playCompletionDing = () => {
+  const ctx = new AudioContext();
+  const now = ctx.currentTime;
+  // Happy ascending chime - higher pitched and sparkly
+  [1318, 1568, 2093, 2637].forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    const offset = i * 0.1;
+    osc.frequency.setValueAtTime(freq, now + offset);
+    gain.gain.setValueAtTime(0.25, now + offset);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.8);
+    osc.start(now + offset);
+    osc.stop(now + offset + 0.8);
+  });
+  // Add a shimmer/sparkle layer
+  [3951, 4186].forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "triangle";
+    const offset = 0.3 + i * 0.15;
+    osc.frequency.setValueAtTime(freq, now + offset);
+    gain.gain.setValueAtTime(0.1, now + offset);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.5);
+    osc.start(now + offset);
+    osc.stop(now + offset + 0.5);
+  });
+};
+
 const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const [mode, setMode] = useState<TimerMode>("work");
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATIONS.work);
@@ -92,6 +135,9 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const [rotateInterval, setRotateInterval] = useState(0);
   const [use12Hour, setUse12Hour] = useState(true);
   const [showFullSchedule, setShowFullSchedule] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationMsg, setCelebrationMsg] = useState("");
+  const [completedTasks, setCompletedTasks] = useState<Set<number>>(new Set());
 
   // Pinterest board connection
   const [pinterestModalOpen, setPinterestModalOpen] = useState(false);
