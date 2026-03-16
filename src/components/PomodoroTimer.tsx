@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX, ImageOff, Clock, Frame, RefreshCw, Link2, Loader2, Check, X } from "lucide-react";
+import { Play, Pause, RotateCcw, Coffee, Brain, ChevronLeft, Music, VolumeX, ImageOff, Clock, Frame, RefreshCw, Link2, Loader2, Check, X, CheckCircle2, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -71,6 +71,49 @@ const getCurrentTaskIndexByTime = (items: ScheduleItem[]): number => {
   return originalIndex >= 0 ? originalIndex : 0;
 };
 
+const celebrationMessages = [
+  "You crushed it! 🎉 On to the next one~",
+  "Amazing work! You're unstoppable! ✨",
+  "That's how it's done! Keep this energy! 🌟",
+  "So proud of you! One step closer to greatness! ♡",
+  "Brilliant! You're on fire today! 🔥",
+  "Task conquered! You're a legend! ✧",
+  "Yay! Another one done! Let's keep rolling~ 🎊",
+];
+
+const playCompletionDing = () => {
+  const ctx = new AudioContext();
+  const now = ctx.currentTime;
+  // Happy ascending chime - higher pitched and sparkly
+  [1318, 1568, 2093, 2637].forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    const offset = i * 0.1;
+    osc.frequency.setValueAtTime(freq, now + offset);
+    gain.gain.setValueAtTime(0.25, now + offset);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.8);
+    osc.start(now + offset);
+    osc.stop(now + offset + 0.8);
+  });
+  // Add a shimmer/sparkle layer
+  [3951, 4186].forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "triangle";
+    const offset = 0.3 + i * 0.15;
+    osc.frequency.setValueAtTime(freq, now + offset);
+    gain.gain.setValueAtTime(0.1, now + offset);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.5);
+    osc.start(now + offset);
+    osc.stop(now + offset + 0.5);
+  });
+};
+
 const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const [mode, setMode] = useState<TimerMode>("work");
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATIONS.work);
@@ -92,6 +135,9 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
   const [rotateInterval, setRotateInterval] = useState(0);
   const [use12Hour, setUse12Hour] = useState(true);
   const [showFullSchedule, setShowFullSchedule] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationMsg, setCelebrationMsg] = useState("");
+  const [completedTasks, setCompletedTasks] = useState<Set<number>>(new Set());
 
   // Pinterest board connection
   const [pinterestModalOpen, setPinterestModalOpen] = useState(false);
@@ -197,6 +243,28 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
     setBunnyMessage(getRandomMessage(newMode));
   };
 
+  const completeCurrentTask = useCallback(() => {
+    playCompletionDing();
+    setCompletedTasks((prev) => new Set(prev).add(currentTaskIndex));
+    const msg = celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
+    setCelebrationMsg(msg);
+    setShowCelebration(true);
+    setIsRunning(false);
+
+    // Auto-dismiss celebration after 4 seconds and move to next task
+    setTimeout(() => {
+      setShowCelebration(false);
+      if (currentTaskIndex < schedule.length - 1) {
+        setCurrentTaskIndex((prev) => prev + 1);
+        setMode("work");
+        setTimeLeft(TIMER_DURATIONS.work);
+        setBunnyMessage(getRandomMessage("work"));
+      } else {
+        setBunnyMessage("All tasks complete! You're a star! 🌟");
+      }
+    }, 4000);
+  }, [currentTaskIndex, schedule.length, getRandomMessage]);
+
   const handleFetchBoard = async () => {
     if (!boardUrl.trim()) return;
     setBoardLoading(true);
@@ -296,17 +364,33 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
           </div>
         </div>
 
-        {/* Current Task */}
+        {/* Current Task - Prominent Header */}
         <AnimatePresence mode="wait">
           {currentTask && (
-            <motion.div key={currentTask.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center z-10">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Current Task</p>
-                <span className="text-xs font-display text-primary/80 tabular-nums">{formatClockTime(currentTime)}</span>
+            <motion.div key={currentTask.id} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+              className="w-full z-10 bg-primary/10 backdrop-blur-md rounded-xl p-4 border border-primary/20 shadow-lg"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-semibold text-primary uppercase tracking-wider">Now Working On</span>
+                    <span className="text-xs font-display text-primary/80 tabular-nums">{formatClockTime(currentTime)}</span>
+                  </div>
+                  <h2 className="font-display text-2xl text-foreground leading-tight">{currentTask.title}</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Scheduled at {formatScheduleTime(currentTask.time)}</p>
+                  {currentTask.description && <p className="text-sm text-muted-foreground mt-1">{currentTask.description}</p>}
+                </div>
+                <Button
+                  onClick={completeCurrentTask}
+                  variant="outline"
+                  size="sm"
+                  className="ml-4 gap-1.5 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all shrink-0"
+                  disabled={completedTasks.has(currentTaskIndex)}
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  {completedTasks.has(currentTaskIndex) ? "Done!" : "Complete"}
+                </Button>
               </div>
-              <h2 className="font-display text-xl text-foreground">{currentTask.title}</h2>
-              <p className="text-xs text-muted-foreground/60 mt-0.5">Scheduled at {formatScheduleTime(currentTask.time)}</p>
-              {currentTask.description && <p className="text-sm text-muted-foreground mt-1">{currentTask.description}</p>}
             </motion.div>
           )}
         </AnimatePresence>
@@ -449,9 +533,61 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
               initial={{ width: 0 }} animate={{ width: `${((currentTaskIndex + 1) / schedule.length) * 100}%` }} />
           </div>
         </div>
+
+        {/* Celebration Overlay */}
+        <AnimatePresence>
+          {showCelebration && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/90 backdrop-blur-lg rounded-2xl"
+            >
+              {/* Confetti particles */}
+              {Array.from({ length: 20 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-3 h-3 rounded-full"
+                  style={{
+                    background: ["hsl(var(--primary))", "hsl(var(--accent))", "#ffd700", "#ff69b4", "#7c3aed"][i % 5],
+                    left: `${10 + Math.random() * 80}%`,
+                    top: `${Math.random() * 30}%`,
+                  }}
+                  initial={{ opacity: 0, y: -20, scale: 0 }}
+                  animate={{
+                    opacity: [0, 1, 1, 0],
+                    y: [0, 100 + Math.random() * 200],
+                    x: [-20 + Math.random() * 40],
+                    scale: [0, 1, 0.8, 0],
+                    rotate: [0, 360 * (Math.random() > 0.5 ? 1 : -1)],
+                  }}
+                  transition={{ duration: 2 + Math.random(), delay: Math.random() * 0.5, ease: "easeOut" }}
+                />
+              ))}
+
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: [0, 1.2, 1] }}
+                transition={{ duration: 0.5, ease: "backOut" }}
+              >
+                <PartyPopper className="w-12 h-12 text-primary mb-4" />
+              </motion.div>
+
+              <CartoonBunny mood="celebrating" size="lg" message={celebrationMsg} />
+
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm text-muted-foreground mt-4 font-body"
+              >
+                Moving to next task...
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Sidebar: Next Up / Full Schedule */}
       <PomodoroScheduleSidebar
         schedule={schedule}
         currentTaskIndex={currentTaskIndex}
