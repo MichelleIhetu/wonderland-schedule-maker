@@ -30,7 +30,7 @@ const defaultSettings: UserSettings = {
   bedTime: "23:00",
 };
 
-type ViewMode = "landing" | "wizard" | "schedule" | "pomodoro";
+type ViewMode = "landing" | "wizard" | "schedule";
 
 const hexToHsl = (hex: string): string => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
