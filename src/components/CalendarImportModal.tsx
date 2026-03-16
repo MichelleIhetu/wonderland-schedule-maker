@@ -75,6 +75,13 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
     return () => subscription.unsubscribe();
   }, []);
 
+  // Auto-fetch Google events when modal opens and provider token is available
+  useEffect(() => {
+    if (isOpen && providerToken && session && !hasFetchedGoogle && googleEvents.length === 0) {
+      fetchGoogleCalendarEvents();
+    }
+  }, [isOpen, providerToken, session]);
+
   const handleGoogleSignIn = async () => {
     setError(null);
     setIsGoogleLoading(true);
