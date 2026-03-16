@@ -31,6 +31,7 @@ const App = () => (
           <Route path="/moodboard" element={<ProtectedRoute><Moodboard /></ProtectedRoute>} />
           <Route path="/vibe-check" element={<ProtectedRoute><VibeCheck /></ProtectedRoute>} />
           <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
+          <Route path="/pomodoro" element={<ProtectedRoute><Pomodoro /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
