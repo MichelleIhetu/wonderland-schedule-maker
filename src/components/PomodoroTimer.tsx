@@ -265,6 +265,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
     }, 4000);
   }, [currentTaskIndex, schedule.length, getRandomMessage]);
 
+  const handleFetchBoard = async () => {
     if (!boardUrl.trim()) return;
     setBoardLoading(true);
     setFetchedImages([]);
