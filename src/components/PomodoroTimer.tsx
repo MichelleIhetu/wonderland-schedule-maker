@@ -327,7 +327,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
       className="relative flex flex-col lg:flex-row gap-4 z-10"
     >
       {/* Main Timer Panel */}
-      <div className="relative flex-1 flex flex-col items-center gap-5 p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-primary/20 shadow-card overflow-hidden">
+      <div className="relative flex-1 flex flex-col items-center gap-5 p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-primary/20 shadow-card overflow-visible">
         {showMoodboard && moodboardMode === "floating" && (
           <FloatingMoodboardBackground enabled={true} opacity={moodboardOpacity} />
         )}
