@@ -37,6 +37,7 @@ const SCENE_CONFIG = {
     bunnyPosition: "bottom-[0%] right-[-1%]",
     bunnySize: "w-[22rem]",
     messages: [
+      `${getTimeOfDayGreeting()}! It's ${getFormattedDate()} 🗓️`,
       "Hi there, my name is TimeBunny! Welcome to my home!",
       "Click on one of the books so we can get an idea of what your schedule is like!",
     ],

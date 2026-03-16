@@ -259,6 +259,14 @@ const Index = () => {
             </h1>
           </div>
 
+          {/* Date & Day greeting */}
+          <p className="font-body text-lg sm:text-xl mt-2" style={{ color: "hsl(280 40% 50%)" }}>
+            {todayDate}
+          </p>
+          <p className="font-body text-sm sm:text-base mt-1 opacity-80" style={{ color: "hsl(280 40% 45%)" }}>
+            {dayGreeting}
+          </p>
+
           <button
             onClick={handleStart}
             className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 mt-4 sm:mt-6"
