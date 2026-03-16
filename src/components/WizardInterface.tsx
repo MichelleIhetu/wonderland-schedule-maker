@@ -690,7 +690,13 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   const currentIdx = sorted.findIndex(s => s.id === activeTask.id);
                   const upcoming = sorted.slice(currentIdx + 1);
                   return (
-                    <div className="absolute top-24 left-6 z-20 w-64">
+                    <motion.div
+                      drag
+                      dragMomentum={false}
+                      dragElastic={0}
+                      className="absolute top-24 left-6 z-20 w-64 cursor-grab active:cursor-grabbing"
+                      style={{ touchAction: "none" }}
+                    >
                       {/* Tab header */}
                       <button
                         onClick={() => setShowUpNext(prev => !prev)}
