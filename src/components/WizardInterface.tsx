@@ -4,6 +4,7 @@ import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Ca
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
+import { getFormattedDate, getTimeOfDayGreeting, getDayName } from "@/lib/dayGreetings";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
 import scheduleBg from "@/assets/schedule-background.png";
@@ -36,6 +37,7 @@ const SCENE_CONFIG = {
     bunnyPosition: "bottom-[0%] right-[-1%]",
     bunnySize: "w-[22rem]",
     messages: [
+      `${getTimeOfDayGreeting()}! It's ${getFormattedDate()} 🗓️`,
       "Hi there, my name is TimeBunny! Welcome to my home!",
       "Click on one of the books so we can get an idea of what your schedule is like!",
     ],
@@ -72,7 +74,7 @@ const SCENE_CONFIG = {
     bunnyPosition: "bottom-[28%] right-[-4%]",
     bunnySize: "w-[28rem]",
     messages: [
-      "Here's your schedule! Tap on a task to get started!",
+      `Here's your ${getDayName()} schedule! Tap on a task to get started!`,
     ],
   },
 } as const;

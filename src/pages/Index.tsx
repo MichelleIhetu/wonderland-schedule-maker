@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useClockTick } from "@/hooks/useClockTick";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ImageIcon, Clock, LogOut, Target, ArrowLeft } from "lucide-react";
+import { getFormattedDate, getDayGreeting } from "@/lib/dayGreetings";
 import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
@@ -171,6 +172,9 @@ const Index = () => {
     });
   };
 
+  const todayDate = useMemo(() => getFormattedDate(), []);
+  const dayGreeting = useMemo(() => getDayGreeting(), []);
+
   const handleStart = () => { playBing(); setViewMode("wizard"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
 
@@ -254,6 +258,14 @@ const Index = () => {
               BUNNY
             </h1>
           </div>
+
+          {/* Date & Day greeting */}
+          <p className="font-body text-lg sm:text-xl mt-2" style={{ color: "hsl(280 40% 50%)" }}>
+            {todayDate}
+          </p>
+          <p className="font-body text-sm sm:text-base mt-1 opacity-80" style={{ color: "hsl(280 40% 45%)" }}>
+            {dayGreeting}
+          </p>
 
           <button
             onClick={handleStart}
