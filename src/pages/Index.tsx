@@ -116,7 +116,7 @@ const Index = () => {
       else toast("Vibe check complete!", { icon: "✨" });
       if (result.adjustSchedule === "lighten" && generatedSchedule.length > 0) toast("Lightening your load — non-urgent tasks pushed back", { icon: "📋" });
       else if (result.adjustSchedule === "reschedule") { toast("Let's rebuild your schedule from here", { icon: "🔄" }); setGeneratedSchedule([]); setViewMode("wizard"); }
-      if (result.needBreak && viewMode === "pomodoro") toast("Adding a break for you — take it easy!", { icon: "☕" });
+      if (result.needBreak) toast("Adding a break for you — take it easy!", { icon: "☕" });
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
