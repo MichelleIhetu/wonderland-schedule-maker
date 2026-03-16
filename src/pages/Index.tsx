@@ -8,7 +8,7 @@ import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
 import WizardInterface from "@/components/WizardInterface";
 import ScheduleDisplay from "@/components/ScheduleDisplay";
-import PomodoroTimer from "@/components/PomodoroTimer";
+import ScheduleDisplay from "@/components/ScheduleDisplay";
 import ThemeSelector from "@/components/ThemeSelector";
 import ThemeCustomizer, { CustomColors, defaultThemeColors } from "@/components/ThemeCustomizer";
 import CheckInModal, { CheckInData } from "@/components/CheckInModal";
