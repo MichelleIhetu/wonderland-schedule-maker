@@ -106,6 +106,50 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerDuration, setTimerDuration] = useState(0); // total seconds
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationMsg, setCelebrationMsg] = useState("");
+  const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+
+  const celebrationMessages = [
+    "You crushed it! 🎉 On to the next one~",
+    "Amazing work! You're unstoppable! ✨",
+    "That's how it's done! Keep this energy! 🌟",
+    "So proud of you! One step closer to greatness! ♡",
+    "Brilliant! You're on fire today! 🔥",
+    "Task conquered! You're a legend! ✧",
+    "Yay! Another one done! Let's keep rolling~ 🎊",
+  ];
+
+  const playCompletionDing = () => {
+    const ctx = new AudioContext();
+    const now = ctx.currentTime;
+    [1318, 1568, 2093, 2637].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      const offset = i * 0.1;
+      osc.frequency.setValueAtTime(freq, now + offset);
+      gain.gain.setValueAtTime(0.25, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.8);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.8);
+    });
+    [3951, 4186].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "triangle";
+      const offset = 0.3 + i * 0.15;
+      osc.frequency.setValueAtTime(freq, now + offset);
+      gain.gain.setValueAtTime(0.1, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.5);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.5);
+    });
+  };
 
   // Timer countdown effect
   useEffect(() => {
@@ -147,6 +191,29 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
     setTimerSeconds(0);
     if (timerRef.current) clearInterval(timerRef.current);
   };
+
+  const completeCurrentTask = useCallback(() => {
+    if (!activeTask) return;
+    playCompletionDing();
+    setCompletedTasks(prev => new Set(prev).add(activeTask.id));
+    const msg = celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
+    setCelebrationMsg(msg);
+    setShowCelebration(true);
+    setTimerRunning(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    setTimeout(() => {
+      setShowCelebration(false);
+      // Auto-advance to next task
+      const sorted = [...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time));
+      const currentIdx = sorted.findIndex(s => s.id === activeTask.id);
+      if (currentIdx < sorted.length - 1) {
+        startTask(sorted[currentIdx + 1]);
+      } else {
+        stopTask();
+      }
+    }, 4000);
+  }, [activeTask, generatedSchedule]);
 
   const formatTimer = (sec: number) => {
     const m = Math.floor(sec / 60);
