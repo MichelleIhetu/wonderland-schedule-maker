@@ -172,6 +172,9 @@ const Index = () => {
     });
   };
 
+  const todayDate = useMemo(() => getFormattedDate(), []);
+  const dayGreeting = useMemo(() => getDayGreeting(), []);
+
   const handleStart = () => { playBing(); setViewMode("wizard"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
 
