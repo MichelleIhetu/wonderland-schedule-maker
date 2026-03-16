@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-provider-token',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-provider-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -53,14 +53,25 @@ serve(async (req) => {
       );
     }
 
-    // Get today's date range
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // Parse body for timezone
+    let timezone = 'UTC';
+    try {
+      const body = await req.json();
+      if (body?.timezone) timezone = body.timezone;
+    } catch {}
 
-    const timeMin = today.toISOString();
-    const timeMax = tomorrow.toISOString();
+    console.log('Using timezone:', timezone);
+
+    // Get today's date range in user's timezone
+    const nowInTz = new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
+    const todayStart = new Date(nowInTz);
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(nowInTz);
+    todayEnd.setHours(23, 59, 59, 999);
+
+    // Convert back to ISO for the API using timezone offset
+    const timeMin = todayStart.toISOString();
+    const timeMax = todayEnd.toISOString();
 
     console.log('Fetching events from', timeMin, 'to', timeMax);
 
@@ -68,6 +79,7 @@ serve(async (req) => {
       `https://www.googleapis.com/calendar/v3/calendars/primary/events?` +
       `timeMin=${encodeURIComponent(timeMin)}&` +
       `timeMax=${encodeURIComponent(timeMax)}&` +
+      `timeZone=${encodeURIComponent(timezone)}&` +
       `singleEvents=true&` +
       `orderBy=startTime`,
       {
