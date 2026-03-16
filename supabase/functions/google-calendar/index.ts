@@ -77,13 +77,9 @@ serve(async (req) => {
     console.log('Using timezone:', timezone);
     console.log('Fetching events from', timeMin, 'to', timeMax);
 
-    const calendarResponse = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events?` +
-      `timeMin=${encodeURIComponent(timeMin)}&` +
-      `timeMax=${encodeURIComponent(timeMax)}&` +
-      `timeZone=${encodeURIComponent(timezone)}&` +
-      `singleEvents=true&` +
-      `orderBy=startTime`,
+    // Fetch all visible calendars first (not only "primary")
+    const calendarsResponse = await fetch(
+      'https://www.googleapis.com/calendar/v3/users/me/calendarList',
       {
         headers: {
           Authorization: `Bearer ${providerToken}`,
@@ -91,26 +87,63 @@ serve(async (req) => {
       }
     );
 
-    if (!calendarResponse.ok) {
-      const errorText = await calendarResponse.text();
-      console.error('Google Calendar API error:', calendarResponse.status, errorText);
+    if (!calendarsResponse.ok) {
+      const errorText = await calendarsResponse.text();
+      console.error('Google Calendar list API error:', calendarsResponse.status, errorText);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch calendar events', details: errorText }),
-        { status: calendarResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Failed to fetch calendar list', details: errorText }),
+        { status: calendarsResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const calendarData = await calendarResponse.json();
-    console.log('Fetched', calendarData.items?.length || 0, 'events');
+    const calendarsData = await calendarsResponse.json();
+    const calendars = (calendarsData.items || [])
+      .filter((cal: any) => cal?.id && cal?.selected !== false)
+      .map((cal: any) => ({ id: cal.id as string, summary: cal.summary as string }));
 
-    const events = (calendarData.items || []).map((item: any) => {
+    // Fallback to primary if list is empty for any reason
+    const calendarIds = calendars.length > 0
+      ? calendars
+      : [{ id: 'primary', summary: 'Primary Calendar' }];
+
+    const eventResponses = await Promise.all(
+      calendarIds.map(async (calendar) => {
+        const response = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendar.id)}/events?` +
+          `timeMin=${encodeURIComponent(timeMin)}&` +
+          `timeMax=${encodeURIComponent(timeMax)}&` +
+          `timeZone=${encodeURIComponent(timezone)}&` +
+          `singleEvents=true&` +
+          `orderBy=startTime`,
+          {
+            headers: {
+              Authorization: `Bearer ${providerToken}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const err = await response.text();
+          console.error(`Google Calendar API error for ${calendar.id}:`, response.status, err);
+          return [];
+        }
+
+        const data = await response.json();
+        return (data.items || []).map((item: any) => ({ ...item, _calendarName: calendar.summary }));
+      })
+    );
+
+    const mergedItems = eventResponses.flat();
+    console.log('Fetched', mergedItems.length || 0, 'events across', calendarIds.length, 'calendars');
+
+    const events = mergedItems.map((item: any) => {
       const startDateTime = item.start?.dateTime || item.start?.date;
       const endDateTime = item.end?.dateTime || item.end?.date;
       const isAllDay = !item.start?.dateTime;
-      
+
       let startTime = '';
       let endTime = '';
-      
+
       if (!isAllDay && startDateTime) {
         const startDate = new Date(startDateTime);
         startTime = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -121,7 +154,7 @@ serve(async (req) => {
       }
 
       return {
-        id: item.id,
+        id: `${item.id}-${item.organizer?.email || item._calendarName || 'calendar'}`,
         title: item.summary || 'Untitled Event',
         startTime,
         endTime,
