@@ -8,7 +8,6 @@ import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
 import WizardInterface from "@/components/WizardInterface";
 import ScheduleDisplay from "@/components/ScheduleDisplay";
-import PomodoroTimer from "@/components/PomodoroTimer";
 import ThemeSelector from "@/components/ThemeSelector";
 import ThemeCustomizer, { CustomColors, defaultThemeColors } from "@/components/ThemeCustomizer";
 import CheckInModal, { CheckInData } from "@/components/CheckInModal";
@@ -30,7 +29,7 @@ const defaultSettings: UserSettings = {
   bedTime: "23:00",
 };
 
-type ViewMode = "landing" | "wizard" | "schedule" | "pomodoro";
+type ViewMode = "landing" | "wizard" | "schedule";
 
 const hexToHsl = (hex: string): string => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -97,7 +96,7 @@ const Index = () => {
     completeCheckIn,
     skipCheckIn,
   } = useHourlyCheckIn({
-    enabled: viewMode === "pomodoro" || generatedSchedule.length > 0,
+    enabled: generatedSchedule.length > 0,
     intervalMinutes: 60,
     onCheckInDue: () => {
       navigate("/vibe-check", { state: { backgroundTheme: settings.backgroundTheme } });
@@ -116,7 +115,7 @@ const Index = () => {
       else toast("Vibe check complete!", { icon: "✨" });
       if (result.adjustSchedule === "lighten" && generatedSchedule.length > 0) toast("Lightening your load — non-urgent tasks pushed back", { icon: "📋" });
       else if (result.adjustSchedule === "reschedule") { toast("Let's rebuild your schedule from here", { icon: "🔄" }); setGeneratedSchedule([]); setViewMode("wizard"); }
-      if (result.needBreak && viewMode === "pomodoro") toast("Adding a break for you — take it easy!", { icon: "☕" });
+      if (result.needBreak) toast("Adding a break for you — take it easy!", { icon: "☕" });
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
@@ -139,7 +138,7 @@ const Index = () => {
 
   const handleWizardComplete = (tasks: string) => { sendMessage(tasks); setViewMode("schedule"); };
   const handleClearSchedule = () => { setGeneratedSchedule([]); setViewMode("wizard"); };
-  const handleStartPomodoro = () => { setViewMode("pomodoro"); };
+  const handleStartPomodoro = () => { navigate("/pomodoro", { state: { schedule: generatedSchedule } }); };
   const handleBackToSchedule = () => { setViewMode("schedule"); };
   const handleResetColors = () => { setCustomColors(defaultThemeColors[settings.backgroundTheme]); };
 
@@ -148,7 +147,7 @@ const Index = () => {
     if (data.mood === "struggling") toast("Hang in there! Consider taking a longer break.", { description: "It's okay to adjust your pace.", icon: "💪" });
     else if (data.mood === "great") toast("Amazing! Keep up the great work!", { description: "You're doing wonderfully!", icon: "🌟" });
     else toast("Check-in complete!", { description: "Keep going, you've got this!", icon: "✨" });
-    if (data.needBreak && viewMode === "pomodoro") toast("Taking a longer break", { description: "Enjoy your rest time!", icon: "☕" });
+    if (data.needBreak) toast("Taking a longer break", { description: "Enjoy your rest time!", icon: "☕" });
   };
 
   if (generatedSchedule.length > 0 && viewMode === "landing") setViewMode("schedule");

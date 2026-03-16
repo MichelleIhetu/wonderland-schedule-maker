@@ -9,6 +9,7 @@ import Moodboard from "./pages/Moodboard";
 import VibeCheck from "./pages/VibeCheck";
 import Goals from "./pages/Goals";
 import Auth from "./pages/Auth";
+import Pomodoro from "./pages/Pomodoro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/moodboard" element={<ProtectedRoute><Moodboard /></ProtectedRoute>} />
           <Route path="/vibe-check" element={<ProtectedRoute><VibeCheck /></ProtectedRoute>} />
           <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
+          <Route path="/pomodoro" element={<ProtectedRoute><Pomodoro /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
