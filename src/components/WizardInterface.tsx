@@ -690,7 +690,13 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   const currentIdx = sorted.findIndex(s => s.id === activeTask.id);
                   const upcoming = sorted.slice(currentIdx + 1);
                   return (
-                    <div className="absolute top-24 left-6 z-20 w-64">
+                    <motion.div
+                      drag
+                      dragMomentum={false}
+                      dragElastic={0}
+                      className="absolute top-24 left-6 z-20 w-64 cursor-grab active:cursor-grabbing"
+                      style={{ touchAction: "none" }}
+                    >
                       {/* Tab header */}
                       <button
                         onClick={() => setShowUpNext(prev => !prev)}
@@ -702,6 +708,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                           borderRadius: showUpNext ? "1rem 1rem 0 0" : "1rem",
                         }}
                       >
+                        <span className="text-xs opacity-40 mr-1">⠿</span>
                         <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
                           Up Next
                         </span>
@@ -767,7 +774,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                           </motion.div>
                         )}
                       </AnimatePresence>
-                    </div>
+                    </motion.div>
                   );
                 })()}
 
