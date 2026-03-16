@@ -708,6 +708,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                           borderRadius: showUpNext ? "1rem 1rem 0 0" : "1rem",
                         }}
                       >
+                        <span className="text-xs opacity-40 mr-1">⠿</span>
                         <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
                           Up Next
                         </span>
