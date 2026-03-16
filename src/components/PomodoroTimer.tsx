@@ -243,7 +243,28 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
     setBunnyMessage(getRandomMessage(newMode));
   };
 
-  const handleFetchBoard = async () => {
+  const completeCurrentTask = useCallback(() => {
+    playCompletionDing();
+    setCompletedTasks((prev) => new Set(prev).add(currentTaskIndex));
+    const msg = celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
+    setCelebrationMsg(msg);
+    setShowCelebration(true);
+    setIsRunning(false);
+
+    // Auto-dismiss celebration after 4 seconds and move to next task
+    setTimeout(() => {
+      setShowCelebration(false);
+      if (currentTaskIndex < schedule.length - 1) {
+        setCurrentTaskIndex((prev) => prev + 1);
+        setMode("work");
+        setTimeLeft(TIMER_DURATIONS.work);
+        setBunnyMessage(getRandomMessage("work"));
+      } else {
+        setBunnyMessage("All tasks complete! You're a star! 🌟");
+      }
+    }, 4000);
+  }, [currentTaskIndex, schedule.length, getRandomMessage]);
+
     if (!boardUrl.trim()) return;
     setBoardLoading(true);
     setFetchedImages([]);
