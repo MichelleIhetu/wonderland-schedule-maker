@@ -154,8 +154,10 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
       return;
     }
 
+    // If no provider token, we need to re-auth to get calendar access
     if (!providerToken) {
-      setError('No calendar access token. Please sign out and sign in again.');
+      setError('Calendar access token expired. Signing in again to refresh...');
+      handleGoogleSignIn();
       return;
     }
 
