@@ -160,6 +160,9 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
           Authorization: `Bearer ${session.access_token}`,
           'x-provider-token': providerToken,
         },
+        body: {
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
       });
 
       if (error) {
