@@ -535,7 +535,60 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
         </div>
       </div>
 
-      {/* Sidebar: Next Up / Full Schedule */}
+        {/* Celebration Overlay */}
+        <AnimatePresence>
+          {showCelebration && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/90 backdrop-blur-lg rounded-2xl"
+            >
+              {/* Confetti particles */}
+              {Array.from({ length: 20 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-3 h-3 rounded-full"
+                  style={{
+                    background: ["hsl(var(--primary))", "hsl(var(--accent))", "#ffd700", "#ff69b4", "#7c3aed"][i % 5],
+                    left: `${10 + Math.random() * 80}%`,
+                    top: `${Math.random() * 30}%`,
+                  }}
+                  initial={{ opacity: 0, y: -20, scale: 0 }}
+                  animate={{
+                    opacity: [0, 1, 1, 0],
+                    y: [0, 100 + Math.random() * 200],
+                    x: [-20 + Math.random() * 40],
+                    scale: [0, 1, 0.8, 0],
+                    rotate: [0, 360 * (Math.random() > 0.5 ? 1 : -1)],
+                  }}
+                  transition={{ duration: 2 + Math.random(), delay: Math.random() * 0.5, ease: "easeOut" }}
+                />
+              ))}
+
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: [0, 1.2, 1] }}
+                transition={{ duration: 0.5, ease: "backOut" }}
+              >
+                <PartyPopper className="w-12 h-12 text-primary mb-4" />
+              </motion.div>
+
+              <CartoonBunny mood="celebrating" size="lg" message={celebrationMsg} />
+
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm text-muted-foreground mt-4 font-body"
+              >
+                Moving to next task...
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       <PomodoroScheduleSidebar
         schedule={schedule}
         currentTaskIndex={currentTaskIndex}
