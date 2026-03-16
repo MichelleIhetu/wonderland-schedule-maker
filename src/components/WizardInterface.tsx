@@ -773,7 +773,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                           </motion.div>
                         )}
                       </AnimatePresence>
-                    </div>
+                    </motion.div>
                   );
                 })()}
 
