@@ -188,9 +188,11 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
       const events = data.events || [];
       setGoogleEvents(events);
       setSelectedGoogleEvents(new Set(events.map((e: CalendarEvent) => e.id)));
+      setHasFetchedGoogle(true);
     } catch (err) {
       console.error('Error:', err);
       setError('Failed to fetch calendar events');
+      setHasFetchedGoogle(true);
     } finally {
       setIsGoogleLoading(false);
     }
