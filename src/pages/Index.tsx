@@ -97,7 +97,7 @@ const Index = () => {
     completeCheckIn,
     skipCheckIn,
   } = useHourlyCheckIn({
-    enabled: viewMode === "pomodoro" || generatedSchedule.length > 0,
+    enabled: generatedSchedule.length > 0,
     intervalMinutes: 60,
     onCheckInDue: () => {
       navigate("/vibe-check", { state: { backgroundTheme: settings.backgroundTheme } });
