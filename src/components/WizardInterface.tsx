@@ -900,7 +900,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                       {/* Bunny celebration */}
                       <motion.div
                         initial={{ scale: 0, rotate: -10 }}
-                        animate={{ scale: [0, 1.1, 1], rotate: [−10, 5, 0] }}
+                        animate={{ scale: [0, 1.1, 1], rotate: [-10, 5, 0] }}
                         transition={{ duration: 0.6, delay: 0.2 }}
                       >
                         <img
