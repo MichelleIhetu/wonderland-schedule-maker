@@ -542,6 +542,40 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
                   </p>
                 </div>
               </div>
+            ) : isGoogleLoading ? (
+              <div className="text-center py-8">
+                <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">Fetching today's events...</p>
+              </div>
+            ) : hasFetchedGoogle && googleEvents.length === 0 ? (
+              <div className="text-center py-6">
+                <div className="w-16 h-16 rounded-full bg-muted/30 mx-auto mb-4 flex items-center justify-center">
+                  <Calendar className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-display text-lg text-foreground mb-2">
+                  No events today
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Your Google Calendar has no events for today.
+                </p>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={() => { setHasFetchedGoogle(false); fetchGoogleCalendarEvents(); }}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Refresh
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={handleGoogleSignOut}
+                    className="text-muted-foreground"
+                  >
+                    Sign out
+                  </Button>
+                </div>
+              </div>
             ) : googleEvents.length === 0 ? (
               <div className="text-center py-6">
                 <div className="w-16 h-16 rounded-full bg-green-500/20 mx-auto mb-4 flex items-center justify-center">
@@ -560,17 +594,8 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
                     disabled={isGoogleLoading}
                     className="w-full bg-primary hover:bg-primary/90 gap-2"
                   >
-                    {isGoogleLoading ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Fetching events...
-                      </>
-                    ) : (
-                      <>
-                        <Calendar className="w-5 h-5" />
-                        Fetch Today's Events
-                      </>
-                    )}
+                    <Calendar className="w-5 h-5" />
+                    Fetch Today's Events
                   </Button>
                   
                   <Button
