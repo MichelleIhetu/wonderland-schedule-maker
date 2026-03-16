@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2 } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
@@ -106,6 +106,50 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerDuration, setTimerDuration] = useState(0); // total seconds
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationMsg, setCelebrationMsg] = useState("");
+  const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+
+  const celebrationMessages = [
+    "You crushed it! 🎉 On to the next one~",
+    "Amazing work! You're unstoppable! ✨",
+    "That's how it's done! Keep this energy! 🌟",
+    "So proud of you! One step closer to greatness! ♡",
+    "Brilliant! You're on fire today! 🔥",
+    "Task conquered! You're a legend! ✧",
+    "Yay! Another one done! Let's keep rolling~ 🎊",
+  ];
+
+  const playCompletionDing = () => {
+    const ctx = new AudioContext();
+    const now = ctx.currentTime;
+    [1318, 1568, 2093, 2637].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      const offset = i * 0.1;
+      osc.frequency.setValueAtTime(freq, now + offset);
+      gain.gain.setValueAtTime(0.25, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.8);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.8);
+    });
+    [3951, 4186].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "triangle";
+      const offset = 0.3 + i * 0.15;
+      osc.frequency.setValueAtTime(freq, now + offset);
+      gain.gain.setValueAtTime(0.1, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.5);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.5);
+    });
+  };
 
   // Timer countdown effect
   useEffect(() => {
@@ -147,6 +191,29 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
     setTimerSeconds(0);
     if (timerRef.current) clearInterval(timerRef.current);
   };
+
+  const completeCurrentTask = useCallback(() => {
+    if (!activeTask) return;
+    playCompletionDing();
+    setCompletedTasks(prev => new Set(prev).add(activeTask.id));
+    const msg = celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
+    setCelebrationMsg(msg);
+    setShowCelebration(true);
+    setTimerRunning(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    setTimeout(() => {
+      setShowCelebration(false);
+      // Auto-advance to next task
+      const sorted = [...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time));
+      const currentIdx = sorted.findIndex(s => s.id === activeTask.id);
+      if (currentIdx < sorted.length - 1) {
+        startTask(sorted[currentIdx + 1]);
+      } else {
+        stopTask();
+      }
+    }, 4000);
+  }, [activeTask, generatedSchedule]);
 
   const formatTimer = (sec: number) => {
     const m = Math.floor(sec / 60);
@@ -705,7 +772,27 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 })()}
 
                 {/* Timer content */}
-                <div className="relative z-10 flex flex-col items-center gap-6 mt-[35vh]">
+                <div className="relative z-10 flex flex-col items-center gap-6 mt-[25vh]">
+
+                {/* Now Working On header */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="w-80 rounded-2xl p-4 text-center shadow-lg"
+                  style={{ background: "hsl(280 30% 92% / 0.9)", border: "2px solid hsl(280 30% 75%)", backdropFilter: "blur(8px)" }}
+                >
+                  <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "hsl(280 40% 50%)", fontFamily: "var(--font-body)" }}>
+                    Now Working On
+                  </span>
+                  <h2 className="text-xl font-bold mt-1" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                    {activeTask.title}
+                  </h2>
+                  {activeTask.description && (
+                    <p className="text-xs mt-1 opacity-70" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 35%)" }}>
+                      {activeTask.description}
+                    </p>
+                  )}
+                </motion.div>
 
                 {/* Countdown timer */}
                 <div className="flex flex-col items-center gap-2">
@@ -721,7 +808,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 </div>
 
                 {/* Timer controls */}
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap justify-center">
                   {timerRunning ? (
                     <button
                       onClick={() => setTimerRunning(false)}
@@ -739,6 +826,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                       Resume
                     </button>
                   ) : null}
+                  <button
+                    onClick={completeCurrentTask}
+                    disabled={completedTasks.has(activeTask.id)}
+                    className="px-6 py-2 rounded-full transition-all hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
+                    style={{ background: "hsl(150 60% 55%)", fontFamily: "var(--font-body)", color: "white" }}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    {completedTasks.has(activeTask.id) ? "Done!" : "Complete ✓"}
+                  </button>
                   <button
                     onClick={stopTask}
                     className="px-6 py-2 rounded-full transition-all hover:scale-105 active:scale-95"
@@ -760,6 +856,76 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   </div>
                 )}
                 </div>
+
+                {/* Celebration Overlay */}
+                <AnimatePresence>
+                  {showCelebration && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-[60] flex flex-col items-center justify-center"
+                      style={{ background: "hsl(300 50% 88% / 0.95)", backdropFilter: "blur(12px)" }}
+                    >
+                      {/* Confetti particles */}
+                      {Array.from({ length: 24 }).map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="absolute w-3 h-3 rounded-full"
+                          style={{
+                            background: ["hsl(280 60% 60%)", "hsl(330 80% 60%)", "#ffd700", "#ff69b4", "hsl(150 60% 55%)", "hsl(45 90% 55%)"][i % 6],
+                            left: `${10 + Math.random() * 80}%`,
+                            top: `${Math.random() * 30}%`,
+                          }}
+                          initial={{ opacity: 0, y: -20, scale: 0 }}
+                          animate={{
+                            opacity: [0, 1, 1, 0],
+                            y: [0, 100 + Math.random() * 300],
+                            x: [-30 + Math.random() * 60],
+                            scale: [0, 1.2, 0.8, 0],
+                            rotate: [0, 360 * (Math.random() > 0.5 ? 1 : -1)],
+                          }}
+                          transition={{ duration: 2 + Math.random(), delay: Math.random() * 0.5, ease: "easeOut" }}
+                        />
+                      ))}
+
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: [0, 1.3, 1] }}
+                        transition={{ duration: 0.5, ease: "backOut" }}
+                      >
+                        <PartyPopper className="w-16 h-16 mb-6" style={{ color: "hsl(280 50% 55%)" }} />
+                      </motion.div>
+
+                      {/* Bunny celebration */}
+                      <motion.div
+                        initial={{ scale: 0, rotate: -10 }}
+                        animate={{ scale: [0, 1.1, 1], rotate: [-10, 5, 0] }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                      >
+                        <img
+                          src={bunnyMascot}
+                          alt="Celebrating bunny"
+                          className="w-48 h-48 object-contain drop-shadow-xl"
+                        />
+                      </motion.div>
+
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="text-center mt-4 px-8"
+                      >
+                        <p className="text-2xl font-bold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                          {celebrationMsg}
+                        </p>
+                        <p className="text-sm mt-2 opacity-70" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 40%)" }}>
+                          Moving to next task...
+                        </p>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ) : (
               <div className="flex flex-col gap-3">
