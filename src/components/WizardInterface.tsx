@@ -4,6 +4,7 @@ import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Ca
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
+import { getFormattedDate, getTimeOfDayGreeting, getDayName } from "@/lib/dayGreetings";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
 import scheduleBg from "@/assets/schedule-background.png";
