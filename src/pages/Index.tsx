@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useClockTick } from "@/hooks/useClockTick";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ImageIcon, Clock, LogOut, Target, ArrowLeft } from "lucide-react";
+import { getFormattedDate, getDayGreeting } from "@/lib/dayGreetings";
 import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
