@@ -74,7 +74,7 @@ const SCENE_CONFIG = {
     bunnyPosition: "bottom-[28%] right-[-4%]",
     bunnySize: "w-[28rem]",
     messages: [
-      "Here's your schedule! Tap on a task to get started!",
+      `Here's your ${getDayName()} schedule! Tap on a task to get started!`,
     ],
   },
 } as const;
