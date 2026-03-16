@@ -49,6 +49,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleEvents, setGoogleEvents] = useState<CalendarEvent[]>([]);
   const [selectedGoogleEvents, setSelectedGoogleEvents] = useState<Set<string>>(new Set());
+  const [hasFetchedGoogle, setHasFetchedGoogle] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener — capture provider_token if available
