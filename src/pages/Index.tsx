@@ -139,7 +139,7 @@ const Index = () => {
 
   const handleWizardComplete = (tasks: string) => { sendMessage(tasks); setViewMode("schedule"); };
   const handleClearSchedule = () => { setGeneratedSchedule([]); setViewMode("wizard"); };
-  const handleStartPomodoro = () => { setViewMode("pomodoro"); };
+  const handleStartPomodoro = () => { navigate("/pomodoro", { state: { schedule: generatedSchedule } }); };
   const handleBackToSchedule = () => { setViewMode("schedule"); };
   const handleResetColors = () => { setCustomColors(defaultThemeColors[settings.backgroundTheme]); };
 
