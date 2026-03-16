@@ -166,13 +166,19 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
     setError(null);
 
     try {
+      const localStart = new Date();
+      localStart.setHours(0, 0, 0, 0);
+      const localEnd = new Date(localStart);
+      localEnd.setDate(localEnd.getDate() + 1);
+
       const { data, error } = await supabase.functions.invoke('google-calendar', {
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
           'x-provider-token': providerToken,
         },
         body: {
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          timeMin: localStart.toISOString(),
+          timeMax: localEnd.toISOString(),
         },
       });
 
