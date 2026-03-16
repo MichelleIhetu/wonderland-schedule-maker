@@ -148,7 +148,7 @@ const Index = () => {
     if (data.mood === "struggling") toast("Hang in there! Consider taking a longer break.", { description: "It's okay to adjust your pace.", icon: "💪" });
     else if (data.mood === "great") toast("Amazing! Keep up the great work!", { description: "You're doing wonderfully!", icon: "🌟" });
     else toast("Check-in complete!", { description: "Keep going, you've got this!", icon: "✨" });
-    if (data.needBreak && viewMode === "pomodoro") toast("Taking a longer break", { description: "Enjoy your rest time!", icon: "☕" });
+    if (data.needBreak) toast("Taking a longer break", { description: "Enjoy your rest time!", icon: "☕" });
   };
 
   if (generatedSchedule.length > 0 && viewMode === "landing") setViewMode("schedule");
