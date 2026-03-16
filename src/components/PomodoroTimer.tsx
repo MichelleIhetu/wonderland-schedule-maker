@@ -364,17 +364,33 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
           </div>
         </div>
 
-        {/* Current Task */}
+        {/* Current Task - Prominent Header */}
         <AnimatePresence mode="wait">
           {currentTask && (
-            <motion.div key={currentTask.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center z-10">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">Current Task</p>
-                <span className="text-xs font-display text-primary/80 tabular-nums">{formatClockTime(currentTime)}</span>
+            <motion.div key={currentTask.id} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
+              className="w-full z-10 bg-primary/10 backdrop-blur-md rounded-xl p-4 border border-primary/20 shadow-lg"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-semibold text-primary uppercase tracking-wider">Now Working On</span>
+                    <span className="text-xs font-display text-primary/80 tabular-nums">{formatClockTime(currentTime)}</span>
+                  </div>
+                  <h2 className="font-display text-2xl text-foreground leading-tight">{currentTask.title}</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Scheduled at {formatScheduleTime(currentTask.time)}</p>
+                  {currentTask.description && <p className="text-sm text-muted-foreground mt-1">{currentTask.description}</p>}
+                </div>
+                <Button
+                  onClick={completeCurrentTask}
+                  variant="outline"
+                  size="sm"
+                  className="ml-4 gap-1.5 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all shrink-0"
+                  disabled={completedTasks.has(currentTaskIndex)}
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  {completedTasks.has(currentTaskIndex) ? "Done!" : "Complete"}
+                </Button>
               </div>
-              <h2 className="font-display text-xl text-foreground">{currentTask.title}</h2>
-              <p className="text-xs text-muted-foreground/60 mt-0.5">Scheduled at {formatScheduleTime(currentTask.time)}</p>
-              {currentTask.description && <p className="text-sm text-muted-foreground mt-1">{currentTask.description}</p>}
             </motion.div>
           )}
         </AnimatePresence>
