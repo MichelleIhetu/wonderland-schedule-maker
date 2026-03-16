@@ -79,6 +79,7 @@ serve(async (req) => {
       `https://www.googleapis.com/calendar/v3/calendars/primary/events?` +
       `timeMin=${encodeURIComponent(timeMin)}&` +
       `timeMax=${encodeURIComponent(timeMax)}&` +
+      `timeZone=${encodeURIComponent(timezone)}&` +
       `singleEvents=true&` +
       `orderBy=startTime`,
       {
