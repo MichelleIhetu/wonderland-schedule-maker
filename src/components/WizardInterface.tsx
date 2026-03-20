@@ -640,6 +640,28 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 key={level}
                 onClick={() => {
                   updateSetting("stressLevel", level === "average" ? "medium" : level);
+
+                  if (level === "high") {
+                    // Show encouragement before generating schedule
+                    const stressEncouragements = [
+                      "I can see you're under a lot of pressure. Let me build you a gentle schedule with extra breaks 💛",
+                      "High stress? I've got you. I'll make sure to add calming moments throughout your day 🌿",
+                      "You're carrying a lot right now. Let's lighten the load together — I'll keep things manageable ✨",
+                    ];
+                    const msg = stressEncouragements[Math.floor(Math.random() * stressEncouragements.length)];
+                    setBubbleClickCount(1);
+                    setShowSpeechBubble(true);
+                    typeMessage(msg, () => {
+                      setTimeout(() => {
+                        setShowSpeechBubble(false);
+                        setTypedText("");
+                        submitSchedule();
+                        setScene("schedule");
+                      }, 2500);
+                    });
+                    return;
+                  }
+
                   setShowSpeechBubble(false);
                   setTypedText("");
                   submitSchedule();
