@@ -66,6 +66,9 @@ export default function ScheduleDisplay({ schedule, onClear, onStartPomodoro, th
               <div className="flex flex-col items-center min-w-[50px]">
                 <Clock className="w-4 h-4 text-muted-foreground mb-1" />
                 <span className="font-display text-sm">{item.time}</span>
+                {item.endTime && (
+                  <span className="font-display text-[10px] text-muted-foreground">– {item.endTime}</span>
+                )}
               </div>
 
               {/* Divider */}
