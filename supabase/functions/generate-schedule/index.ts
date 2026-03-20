@@ -87,12 +87,16 @@ When generating the schedule, use this EXACT JSON format wrapped in <schedule> t
     {
       "title": "Task name",
       "time": "HH:MM",
+      "endTime": "HH:MM",
       "description": "Brief description",
       "suit": "hearts" | "diamonds" | "clubs" | "spades"
     }
   ]
 }
 </schedule>
+
+IMPORTANT: "time" is the start time. "endTime" is when it ends. Both MUST be in HH:MM 24-hour format.
+For [FIXED] calendar events, copy the start and end times EXACTLY as provided — do not change them.
 
 Suit assignments:
 - hearts: Self-care, breaks, meals, relaxation
