@@ -136,32 +136,61 @@ serve(async (req) => {
     const mergedItems = eventResponses.flat();
     console.log('Fetched', mergedItems.length || 0, 'events across', calendarIds.length, 'calendars');
 
-    const events = mergedItems.map((item: any) => {
-      const startDateTime = item.start?.dateTime || item.start?.date;
-      const endDateTime = item.end?.dateTime || item.end?.date;
-      const isAllDay = !item.start?.dateTime;
-
-      let startTime = '';
-      let endTime = '';
-
-      if (!isAllDay && startDateTime) {
-        const startDate = new Date(startDateTime);
-        startTime = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    // Helper: format a date-time string to HH:MM in the user's timezone
+    const toLocalHHMM = (dateTimeStr: string, tz: string): string => {
+      try {
+        const d = new Date(dateTimeStr);
+        const parts = new Intl.DateTimeFormat('en-GB', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+          timeZone: tz,
+        }).formatToParts(d);
+        const hour = parts.find(p => p.type === 'hour')?.value || '00';
+        const minute = parts.find(p => p.type === 'minute')?.value || '00';
+        return `${hour}:${minute}`;
+      } catch {
+        // Fallback: extract from ISO string
+        const d = new Date(dateTimeStr);
+        return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
       }
-      if (!isAllDay && endDateTime) {
-        const endDate = new Date(endDateTime);
-        endTime = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-      }
+    };
 
-      return {
-        id: `${item.id}-${item.organizer?.email || item._calendarName || 'calendar'}`,
-        title: item.summary || 'Untitled Event',
-        startTime,
-        endTime,
-        description: item.description || '',
-        isAllDay,
-      };
-    });
+    // Get "now" in the user's timezone for filtering past events
+    const nowISO = new Date().toISOString();
+
+    const events = mergedItems
+      .filter((item: any) => {
+        // Keep all-day events
+        if (!item.start?.dateTime) return true;
+        // Filter out events whose end time has already passed
+        const endDateTime = item.end?.dateTime || item.start?.dateTime;
+        return new Date(endDateTime) > new Date(nowISO);
+      })
+      .map((item: any) => {
+        const startDateTime = item.start?.dateTime || item.start?.date;
+        const endDateTime = item.end?.dateTime || item.end?.date;
+        const isAllDay = !item.start?.dateTime;
+
+        let startTime = '';
+        let endTime = '';
+
+        if (!isAllDay && startDateTime) {
+          startTime = toLocalHHMM(startDateTime, timezone);
+        }
+        if (!isAllDay && endDateTime) {
+          endTime = toLocalHHMM(endDateTime, timezone);
+        }
+
+        return {
+          id: `${item.id}-${item.organizer?.email || item._calendarName || 'calendar'}`,
+          title: item.summary || 'Untitled Event',
+          startTime,
+          endTime,
+          description: item.description || '',
+          isAllDay,
+        };
+      });
 
     return new Response(
       JSON.stringify({ events }),
