@@ -56,10 +56,12 @@ DEADLINE OPTIMIZATION ENGINE — CORE RULES
    - If two deadline tasks conflict (not enough time for both), WARN THE USER IMMEDIATELY with specific times showing the conflict.
    - HIGH PRIORITY + deadline = gets the best focus time slot (morning for motivated users, after a break for unmotivated users).
 
-2. CALENDAR EVENTS AS IMMUTABLE WALLS:
-   - Events marked [FIXED] or "from your calendar" CANNOT be moved, shortened, or overlapped.
-   - Treat them as concrete walls. Schedule around them.
-   - Include them in the final schedule marked with "📌 Fixed: from your calendar".
+2. CALENDAR EVENTS AS IMMUTABLE WALLS (CRITICAL):
+   - Events marked [FIXED] CANNOT be moved, shortened, or overlapped.
+   - You MUST copy their EXACT start time into the "time" field of the output. Do NOT change, round, or reassign their time.
+   - If a fixed event says "[FIXED] Meeting (14:30 - 15:30)", the output MUST have "time": "14:30" and "endTime": "15:30".
+   - Treat them as concrete walls. Schedule other tasks AROUND them — never during them.
+   - Mark them in the output with "📌 Fixed" prefix in the description.
 
 3. TIME-BLOCKING STRATEGY:
    - After placing deadlines and fixed blocks, fill remaining gaps with non-deadline tasks.
@@ -85,12 +87,16 @@ When generating the schedule, use this EXACT JSON format wrapped in <schedule> t
     {
       "title": "Task name",
       "time": "HH:MM",
+      "endTime": "HH:MM",
       "description": "Brief description",
       "suit": "hearts" | "diamonds" | "clubs" | "spades"
     }
   ]
 }
 </schedule>
+
+IMPORTANT: "time" is the start time. "endTime" is when it ends. Both MUST be in HH:MM 24-hour format.
+For [FIXED] calendar events, copy the start and end times EXACTLY as provided — do not change them.
 
 Suit assignments:
 - hearts: Self-care, breaks, meals, relaxation
