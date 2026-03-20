@@ -299,11 +299,54 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
     }
   };
 
+  // Distress keyword detection
+  const distressKeywords = [
+    "failed", "fail", "bombed", "flunked", "messed up",
+    "stressed", "overwhelmed", "anxious", "anxiety", "depressed", "sad",
+    "can't do this", "give up", "giving up", "hopeless", "worthless",
+    "crying", "cried", "terrible", "awful", "horrible", "worst",
+    "exhausted", "burned out", "burnout", "broke down", "falling apart",
+    "struggling", "lost", "lonely", "scared", "worried", "panicking",
+  ];
+
+  const encouragementMessages = [
+    "Hey, I hear you. It's okay to have tough days — they don't define you. You're stronger than you think 💛",
+    "I know things feel heavy right now, but you've gotten through hard times before and you will again ✨",
+    "It's okay to not be okay. Take a breath. I'm here, and we'll figure this out together 🤍",
+    "You're doing better than you think. One step at a time — that's all it takes 🌱",
+    "Bad moments pass. You're still here, still trying, and that takes real courage 💪",
+    "Remember: a setback is a setup for a comeback. Let's make the rest of today count 🌟",
+  ];
+
+  const detectDistress = (text: string): boolean => {
+    const lower = text.toLowerCase();
+    return distressKeywords.some(keyword => lower.includes(keyword));
+  };
+
   // Called when user clicks "Generate Schedule" in the journal
   const handleComplete = () => {
     setIsJournalFocused(false);
     setIsAutoAdvancePending(false);
-    // Transition to energy scene
+
+    // Check for distress in journal text — show encouragement first
+    if (detectDistress(journalText)) {
+      const msg = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+      setScene("energy");
+      setBubbleClickCount(1);
+      setShowSpeechBubble(true);
+      typeMessage(msg, () => {
+        // After encouragement finishes typing, wait then show energy question
+        setIsAutoAdvancePending(true);
+        setTimeout(() => {
+          setIsAutoAdvancePending(false);
+          setBubbleClickCount(prev => prev + 1);
+          typeMessage("Now, let's take care of you. What is your energy level?");
+        }, 3000);
+      });
+      return;
+    }
+
+    // No distress — normal flow
     setScene("energy");
     setBubbleClickCount(1);
     setShowSpeechBubble(true);
