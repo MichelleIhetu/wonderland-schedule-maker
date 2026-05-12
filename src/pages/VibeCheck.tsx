@@ -7,7 +7,7 @@ import {
   RefreshCw, CalendarClock, Zap
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import CartoonBunny from "@/components/KawaiiBunny";
+import bunnyMascot from "@/assets/bunny-mascot.png";
 import type { BackgroundTheme } from "@/types/schedule";
 
 export interface VibeCheckResult {
