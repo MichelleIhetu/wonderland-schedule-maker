@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import bunnyMascot from "@/assets/bunny-mascot.png";
+import { useAuth } from "@/hooks/useAuth";
+import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import type { BackgroundTheme } from "@/types/schedule";
 
 export interface VibeCheckResult {
@@ -42,6 +44,8 @@ const COLORS = {
 const VibeCheck = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const { appendVibeCheck } = useSchedulePersistence(user?.id);
   const _backgroundTheme: BackgroundTheme = (location.state as any)?.backgroundTheme ?? "gothic";
 
   const [step, setStep] = useState<Step>("mood");
@@ -89,7 +93,7 @@ const VibeCheck = () => {
     return "happy" as const;
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     const result: VibeCheckResult = {
       mood: mood!,
       energy: energy!,
@@ -97,6 +101,11 @@ const VibeCheck = () => {
       adjustSchedule: adjustSchedule!,
       notes,
     };
+    try {
+      await appendVibeCheck({ at: new Date().toISOString(), ...result });
+    } catch (e) {
+      console.error(e);
+    }
     navigate("/", { state: { vibeCheckResult: result } });
   };
 

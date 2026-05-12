@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import { getFormattedDate, getTimeOfDayGreeting, getDayName } from "@/lib/dayGreetings";
+import { useAuth } from "@/hooks/useAuth";
+import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
 import scheduleBg from "@/assets/schedule-background.png";
@@ -84,6 +86,8 @@ type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
 const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule }: WizardInterfaceProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { saveJournal, loadTodaySchedule } = useSchedulePersistence(user?.id);
   // ─── SCENE STATE (single source of truth) ───
   const [scene, setScene] = useState<Scene>("library");
 
@@ -102,6 +106,21 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [bubbleClickCount, setBubbleClickCount] = useState(0);
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
+
+  // Load saved journal text once
+  useEffect(() => {
+    if (!user) return;
+    loadTodaySchedule().then((r) => {
+      if (r?.journalText) setJournalText((cur) => cur || r.journalText);
+    });
+  }, [user]);
+
+  // Debounced save of journal text
+  useEffect(() => {
+    if (!user) return;
+    const t = setTimeout(() => { saveJournal(journalText); }, 800);
+    return () => clearTimeout(t);
+  }, [journalText, user]);
   const [activeTask, setActiveTask] = useState<ScheduleItem | null>(null);
   const [showUpNext, setShowUpNext] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(0);
