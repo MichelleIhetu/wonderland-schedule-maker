@@ -106,7 +106,13 @@ const VibeCheck = () => {
     } catch (e) {
       console.error(e);
     }
-    navigate("/", { state: { vibeCheckResult: result } });
+    const fromPomodoro = (location.state as any)?.fromPomodoro;
+    const schedule = (location.state as any)?.schedule;
+    if (fromPomodoro) {
+      navigate("/pomodoro", { state: { vibeCheckResult: result, schedule } });
+    } else {
+      navigate("/", { state: { vibeCheckResult: result } });
+    }
   };
 
   // Pixel button — chunky shadow like Goals page
