@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -82,6 +83,7 @@ const SCENE_CONFIG = {
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
 const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule }: WizardInterfaceProps) => {
+  const navigate = useNavigate();
   // ─── SCENE STATE (single source of truth) ───
   const [scene, setScene] = useState<Scene>("library");
 
@@ -898,6 +900,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                       Resume
                     </button>
                   ) : null}
+                  <button
+                    onClick={() => navigate("/vibe-check", { state: { fromPomodoro: true, schedule: generatedSchedule, backgroundTheme: settings.backgroundTheme } })}
+                    className="px-6 py-2 rounded-full transition-all hover:scale-105 active:scale-95 flex items-center gap-2 text-white"
+                    style={{ background: "hsl(210 90% 55%)", fontFamily: "var(--font-body)" }}
+                    title="Need a break? Feeling distracted or overwhelmed?"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Vibe Check
+                  </button>
                   <button
                     onClick={completeCurrentTask}
                     disabled={completedTasks.has(activeTask.id)}
