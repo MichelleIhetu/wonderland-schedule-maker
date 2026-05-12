@@ -70,9 +70,9 @@ const Index = () => {
   const { isLoading, sendMessage, generatedSchedule, setGeneratedSchedule } = useChat(settings);
   const { saveSchedule, loadTodaySchedule } = useSchedulePersistence(user?.id);
 
-  // Load today's schedule on mount
+  // Load today's schedule on mount (works with or without auth via localStorage fallback)
   useEffect(() => {
-    if (!user || scheduleLoaded) return;
+    if (scheduleLoaded) return;
     loadTodaySchedule().then((result) => {
       if (result && result.schedule.length > 0) {
         setGeneratedSchedule(result.schedule);
@@ -82,7 +82,7 @@ const Index = () => {
       }
       setScheduleLoaded(true);
     });
-  }, [user, scheduleLoaded]);
+  }, [scheduleLoaded, loadTodaySchedule]);
 
   // Save schedule whenever it changes
   useEffect(() => {
