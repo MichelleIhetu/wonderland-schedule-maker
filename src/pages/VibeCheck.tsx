@@ -335,9 +335,9 @@ const VibeCheck = () => {
 
                   <div className="grid grid-cols-3 gap-3 py-2">
                     {[
-                      { label: "MOOD", val: mood === "great" ? "🔥" : mood === "okay" ? "😐" : "😮‍💨" },
-                      { label: "ENERGY", val: energy === "high" ? "⚡" : energy === "medium" ? "🔋" : "🪫" },
-                      { label: "BREAK", val: needBreak ? "☕" : "💪" },
+                      { label: "MOOD", val: mood === "great" ? "Locked In" : mood === "okay" ? "Mid Vibes" : "Not It" },
+                      { label: "ENERGY", val: energy === "high" ? "Full Charge" : energy === "medium" ? "Cruising" : "Low Bat" },
+                      { label: "BREAK", val: needBreak ? "Yes Please" : "Nah, Good" },
                     ].map((s) => (
                       <div
                         key={s.label}
@@ -351,7 +351,7 @@ const VibeCheck = () => {
                         <p style={PIXEL} className="text-[8px]">
                           <span style={{ color: COLORS.inkSoft }}>{s.label}</span>
                         </p>
-                        <p className="text-2xl mt-1">{s.val}</p>
+                        <p style={VT} className="text-base mt-1" >{s.val}</p>
                       </div>
                     ))}
                   </div>
