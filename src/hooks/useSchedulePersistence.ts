@@ -18,6 +18,39 @@ export interface SessionExtras {
 
 const today = () => new Date().toISOString().split("T")[0];
 const LS_KEY = (date: string) => `timebunny:session:${date}`;
+const SNAPSHOT_KEY = "timebunny:snapshot";
+const SNAPSHOT_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
+
+export interface ScheduleSnapshot {
+  schedule: ScheduleItem[];
+  settings: UserSettings | null;
+  savedAt: number; // epoch ms
+}
+
+export const saveScheduleSnapshot = (schedule: ScheduleItem[], settings: UserSettings | null) => {
+  try {
+    const snap: ScheduleSnapshot = { schedule, settings, savedAt: Date.now() };
+    localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snap));
+  } catch (e) {
+    console.error("Failed to save snapshot:", e);
+  }
+};
+
+export const loadScheduleSnapshot = (): ScheduleSnapshot | null => {
+  try {
+    const raw = localStorage.getItem(SNAPSHOT_KEY);
+    if (!raw) return null;
+    const snap = JSON.parse(raw) as ScheduleSnapshot;
+    if (!snap?.savedAt || Date.now() - snap.savedAt > SNAPSHOT_TTL_MS) {
+      localStorage.removeItem(SNAPSHOT_KEY);
+      return null;
+    }
+    return snap;
+  } catch {
+    return null;
+  }
+};
+
 
 interface LocalSession {
   schedule: ScheduleItem[];
