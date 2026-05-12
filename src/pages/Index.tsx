@@ -14,7 +14,7 @@ import CheckInModal, { CheckInData } from "@/components/CheckInModal";
 import { useHourlyCheckIn } from "@/hooks/useHourlyCheckIn";
 import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
-import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
+import { useSchedulePersistence, loadScheduleSnapshot } from "@/hooks/useSchedulePersistence";
 import { UserSettings, backgroundThemes } from "@/types/schedule";
 import { Button } from "@/components/ui/button";
 import bunnyMascot from "@/assets/bunny-mascot.png";
