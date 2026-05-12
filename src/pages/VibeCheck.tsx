@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import bunnyMascot from "@/assets/bunny-mascot.png";
+import { useAuth } from "@/hooks/useAuth";
+import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import type { BackgroundTheme } from "@/types/schedule";
 
 export interface VibeCheckResult {
