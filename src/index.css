@@ -425,3 +425,14 @@
   right: -10px;
   transform: translateY(-50%);
 }
+/* Crisp pixel-art image rendering across browsers and DPRs */
+.pixel-img {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
