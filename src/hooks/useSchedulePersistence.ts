@@ -62,7 +62,7 @@ export function useSchedulePersistence(userId: string | undefined) {
       .eq("user_id", userId)
       .eq("schedule_date", date)
       .maybeSingle();
-    const prev = (data?.vibe_checks as VibeCheckEntry[] | null) ?? [];
+    const prev = (data?.vibe_checks as unknown as VibeCheckEntry[] | null) ?? [];
     const next = [...prev, entry];
     const { error } = await supabase
       .from("user_schedules")
