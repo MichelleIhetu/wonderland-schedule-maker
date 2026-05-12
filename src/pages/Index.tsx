@@ -305,7 +305,8 @@ const Index = () => {
             <img
               src={bunnyMascot}
               alt="TimeBunny mascot"
-              className="w-72 sm:w-96 md:w-[28rem] lg:w-[32rem] object-contain drop-shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95"
+              className="w-72 sm:w-96 md:w-[28rem] lg:w-[32rem] object-contain drop-shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95 pixel-img"
+              draggable={false}
             />
           </div>
         </div>
