@@ -152,29 +152,35 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          journal_text: string | null
           schedule_data: Json
           schedule_date: string
           settings: Json | null
           updated_at: string
           user_id: string
+          vibe_checks: Json
         }
         Insert: {
           created_at?: string
           id?: string
+          journal_text?: string | null
           schedule_data: Json
           schedule_date?: string
           settings?: Json | null
           updated_at?: string
           user_id: string
+          vibe_checks?: Json
         }
         Update: {
           created_at?: string
           id?: string
+          journal_text?: string | null
           schedule_data?: Json
           schedule_date?: string
           settings?: Json | null
           updated_at?: string
           user_id?: string
+          vibe_checks?: Json
         }
         Relationships: []
       }
