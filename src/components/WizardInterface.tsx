@@ -1094,7 +1094,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
           <img
             src={bunnyMascot}
             alt="TimeBunny mascot"
-            className={`object-contain drop-shadow-xl transition-all duration-700 hover:scale-105 active:scale-95 ${config.bunnySize}`}
+            className={`object-contain drop-shadow-xl transition-all duration-700 hover:scale-105 active:scale-95 pixel-img ${config.bunnySize}`}
+            draggable={false}
           />
         </div>
       </div>
