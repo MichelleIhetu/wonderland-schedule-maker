@@ -278,6 +278,17 @@ const Index = () => {
 
         {/* Nav links - at the bottom of the page */}
         <div className="flex flex-wrap items-center justify-center gap-3 pb-8 sm:pb-12">
+          {generatedSchedule.length > 0 && (
+            <button
+              onClick={handleStartPomodoro}
+              className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+              style={{ color: "hsl(330 80% 45%)" }}
+            >
+              <Clock className="w-4 h-4" />
+              <span className="font-body font-semibold">Focus Timer</span>
+              <span>⏱️</span>
+            </button>
+          )}
           <Link
             to="/goals"
             className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
