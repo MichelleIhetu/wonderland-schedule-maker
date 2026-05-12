@@ -274,6 +274,17 @@ const Index = () => {
               start
             </span>
           </button>
+
+          {generatedSchedule.length > 0 && (
+            <button
+              onClick={() => setViewMode("schedule")}
+              className="glass-pill px-8 sm:px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 mt-4"
+            >
+              <span className="font-body font-semibold text-base sm:text-lg" style={{ color: "hsl(280 50% 50%)" }}>
+                take me to my schedule →
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Nav links - at the bottom of the page */}
@@ -298,15 +309,17 @@ const Index = () => {
             <span className="font-body font-semibold">Goals</span>
             <span>🎯</span>
           </Link>
-          <Link
-            to="/moodboard"
-            className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
-            style={{ color: "hsl(280 40% 40%)" }}
-          >
-            <ImageIcon className="w-4 h-4" />
-            <span className="font-body font-semibold">Moodboard</span>
-            <span>✨</span>
-          </Link>
+          {generatedSchedule.length > 0 && (
+            <button
+              onClick={() => setViewMode("schedule")}
+              className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+              style={{ color: "hsl(280 40% 40%)" }}
+            >
+              <ImageIcon className="w-4 h-4" />
+              <span className="font-body font-semibold">My Day</span>
+              <span>📅</span>
+            </button>
+          )}
         </div>
 
         {/* Bunny mascot - positioned on the right */}
