@@ -7,7 +7,7 @@ import {
   RefreshCw, CalendarClock, Zap
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import CartoonBunny from "@/components/KawaiiBunny";
+import bunnyMascot from "@/assets/bunny-mascot.png";
 import type { BackgroundTheme } from "@/types/schedule";
 
 export interface VibeCheckResult {
@@ -195,7 +195,7 @@ const VibeCheck = () => {
         >
           {/* Bunny header */}
           <div className="pt-6 pb-3 flex flex-col items-center">
-            <CartoonBunny mood={getBunnyMood()} size="sm" message={getBunnyMessage()} />
+            <img src={bunnyMascot} alt="Bunny mascot" className="w-32 h-32 object-contain" style={{ imageRendering: "pixelated" }} />
           </div>
 
           {/* Step content */}
