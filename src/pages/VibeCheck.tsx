@@ -89,7 +89,7 @@ const VibeCheck = () => {
     return "happy" as const;
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     const result: VibeCheckResult = {
       mood: mood!,
       energy: energy!,
@@ -97,6 +97,11 @@ const VibeCheck = () => {
       adjustSchedule: adjustSchedule!,
       notes,
     };
+    try {
+      await appendVibeCheck({ at: new Date().toISOString(), ...result });
+    } catch (e) {
+      console.error(e);
+    }
     navigate("/", { state: { vibeCheckResult: result } });
   };
 
