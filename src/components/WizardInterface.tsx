@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import { getFormattedDate, getTimeOfDayGreeting, getDayName } from "@/lib/dayGreetings";
+import { useAuth } from "@/hooks/useAuth";
+import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
 import scheduleBg from "@/assets/schedule-background.png";
