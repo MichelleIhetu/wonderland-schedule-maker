@@ -1033,6 +1033,16 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
               </motion.div>
             ) : (
               <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    saveScheduleSnapshot(generatedSchedule, settings);
+                    toast.success("Schedule saved! It'll be ready for 12 hours 💾", { icon: "🐰" });
+                  }}
+                  className="self-end px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95 shadow-md text-white font-semibold text-sm"
+                  style={{ background: "hsl(280 55% 55%)", fontFamily: "var(--font-body)" }}
+                >
+                  💾 Save schedule (12h)
+                </button>
                 {[...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time)).map((item, index) => (
                   <motion.button
                     key={item.id}
