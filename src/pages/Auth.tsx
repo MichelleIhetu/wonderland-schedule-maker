@@ -60,6 +60,8 @@ const Auth = () => {
         extraParams: {
           prompt: "consent",
           access_type: "offline",
+          include_granted_scopes: "true",
+          scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
         },
       });
       if (error) {
