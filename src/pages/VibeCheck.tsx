@@ -44,6 +44,8 @@ const COLORS = {
 const VibeCheck = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const { appendVibeCheck } = useSchedulePersistence(user?.id);
   const _backgroundTheme: BackgroundTheme = (location.state as any)?.backgroundTheme ?? "gothic";
 
   const [step, setStep] = useState<Step>("mood");
