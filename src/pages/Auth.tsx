@@ -57,9 +57,11 @@ const Auth = () => {
     try {
       const { error } = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
+        scopes: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
         extraParams: {
           prompt: "consent",
           access_type: "offline",
+          include_granted_scopes: "true",
         },
       });
       if (error) {
