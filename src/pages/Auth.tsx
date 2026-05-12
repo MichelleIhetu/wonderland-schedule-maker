@@ -212,7 +212,15 @@ const Auth = () => {
               )}
             </Button>
           </form>
-          <div className="text-center">
+          <div className="text-center space-y-2">
+            {isLogin && (
+              <button
+                onClick={handleForgotPassword}
+                className="block w-full text-sm text-primary hover:underline transition-colors font-body"
+              >
+                Forgot password?
+              </button>
+            )}
             <button
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-muted-foreground hover:text-primary transition-colors font-body"
