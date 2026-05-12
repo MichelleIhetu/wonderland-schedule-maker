@@ -989,7 +989,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                         <img
                           src={bunnyMascot}
                           alt="Celebrating bunny"
-                          className="w-48 h-48 object-contain drop-shadow-xl"
+                          className="w-48 h-48 object-contain drop-shadow-xl pixel-img"
+                          draggable={false}
                         />
                       </motion.div>
 
