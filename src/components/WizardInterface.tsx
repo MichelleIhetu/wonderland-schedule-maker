@@ -106,6 +106,21 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [bubbleClickCount, setBubbleClickCount] = useState(0);
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
+
+  // Load saved journal text once
+  useEffect(() => {
+    if (!user) return;
+    loadTodaySchedule().then((r) => {
+      if (r?.journalText) setJournalText((cur) => cur || r.journalText);
+    });
+  }, [user]);
+
+  // Debounced save of journal text
+  useEffect(() => {
+    if (!user) return;
+    const t = setTimeout(() => { saveJournal(journalText); }, 800);
+    return () => clearTimeout(t);
+  }, [journalText, user]);
   const [activeTask, setActiveTask] = useState<ScheduleItem | null>(null);
   const [showUpNext, setShowUpNext] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(0);
