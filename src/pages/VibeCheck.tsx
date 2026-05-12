@@ -6,11 +6,8 @@ import {
   Coffee, CheckCircle2, ArrowRight, ArrowLeft, Sparkles,
   RefreshCw, CalendarClock, Zap
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import CartoonBunny from "@/components/KawaiiBunny";
-import SpiderWebBackground from "@/components/SpiderWebBackground";
-import ThemeBackground from "@/components/ThemeBackground";
 import type { BackgroundTheme } from "@/types/schedule";
 
 export interface VibeCheckResult {
@@ -22,13 +19,30 @@ export interface VibeCheckResult {
 }
 
 type Step = "mood" | "energy" | "break" | "adjust" | "done";
-
 const stepOrder: Step[] = ["mood", "energy", "break", "adjust", "done"];
+
+const PIXEL: React.CSSProperties = { fontFamily: "'Press Start 2P', cursive" };
+const VT: React.CSSProperties = { fontFamily: "'VT323', monospace" };
+
+// Palette aligned with active task timer & Goals page
+const COLORS = {
+  bg: "hsl(300 50% 88%)",
+  card: "hsl(40 60% 95%)",
+  border: "hsl(280 30% 60%)",
+  borderSoft: "hsl(280 30% 80%)",
+  ink: "hsl(280 40% 22%)",
+  inkSoft: "hsl(280 30% 45%)",
+  accent: "hsl(280 55% 55%)",
+  green: "hsl(150 55% 55%)",
+  yellow: "hsl(45 90% 60%)",
+  red: "hsl(350 70% 65%)",
+  blue: "hsl(210 80% 60%)",
+};
 
 const VibeCheck = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const backgroundTheme: BackgroundTheme = (location.state as any)?.backgroundTheme ?? "gothic";
+  const _backgroundTheme: BackgroundTheme = (location.state as any)?.backgroundTheme ?? "gothic";
 
   const [step, setStep] = useState<Step>("mood");
   const [mood, setMood] = useState<VibeCheckResult["mood"] | null>(null);
@@ -43,7 +57,6 @@ const VibeCheck = () => {
   const canProceed = () => {
     if (step === "mood") return mood !== null;
     if (step === "energy") return energy !== null;
-    if (step === "break") return true;
     if (step === "adjust") return adjustSchedule !== null;
     return true;
   };
@@ -52,7 +65,6 @@ const VibeCheck = () => {
     const idx = stepOrder.indexOf(step);
     if (idx < stepOrder.length - 1) setStep(stepOrder[idx + 1]);
   };
-
   const goBack = () => {
     const idx = stepOrder.indexOf(step);
     if (idx > 0) setStep(stepOrder[idx - 1]);
@@ -60,18 +72,15 @@ const VibeCheck = () => {
 
   const getBunnyMessage = () => {
     switch (step) {
-      case "mood": return "Hey! How are you vibing right now? 🐰";
+      case "mood": return "Hey! How are you vibing right now?";
       case "energy": return "And your energy levels?";
       case "break": return "Do you need some time to recharge?";
       case "adjust": return "Should we change up your schedule?";
-      case "done": return getResultMessage();
+      case "done":
+        if (mood === "struggling") return "Hang in there! Let's make things easier 💪";
+        if (mood === "great") return "You're on fire! Keep that momentum! 🔥";
+        return "Steady progress is still progress! ✨";
     }
-  };
-
-  const getResultMessage = () => {
-    if (mood === "struggling") return "Hang in there! Let's make things easier for you 💪";
-    if (mood === "great") return "You're on fire! Keep that momentum! 🔥";
-    return "Steady progress is still progress! ✨";
   };
 
   const getBunnyMood = () => {
@@ -91,37 +100,101 @@ const VibeCheck = () => {
     navigate("/", { state: { vibeCheckResult: result } });
   };
 
-  return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
-      {backgroundTheme === "gothic" ? (
-        <SpiderWebBackground />
-      ) : (
-        <ThemeBackground theme={backgroundTheme} />
-      )}
+  // Pixel button — chunky shadow like Goals page
+  const PixelBtn = ({
+    selected, onClick, color, children,
+  }: { selected: boolean; onClick: () => void; color: string; children: React.ReactNode }) => (
+    <button
+      onClick={onClick}
+      className="p-4 rounded-xl transition-all flex flex-col items-center gap-2 active:translate-y-0.5"
+      style={{
+        background: selected ? color : "white",
+        border: `3px solid ${selected ? color : COLORS.borderSoft}`,
+        boxShadow: selected
+          ? `4px 4px 0px ${COLORS.border}`
+          : `4px 4px 0px ${COLORS.borderSoft}`,
+        color: selected ? "white" : COLORS.ink,
+      }}
+    >
+      {children}
+    </button>
+  );
 
-      <div className="relative z-10 w-full max-w-lg mx-auto px-4">
-        {/* Progress bar */}
-        <div className="mb-8">
-          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+  return (
+    <div
+      className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
+      style={{ background: COLORS.bg }}
+    >
+      {/* Decorative clock tick marks like the active timer scene */}
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-50">
+        <div className="relative" style={{ width: "min(140vw, 140vh)", height: "min(140vw, 140vh)" }}>
+          {Array.from({ length: 60 }).map((_, i) => {
+            const isHour = i % 5 === 0;
+            return (
+              <div
+                key={i}
+                className="absolute top-0 left-1/2 -translate-x-1/2 origin-bottom"
+                style={{ height: "50%", transform: `translateX(-50%) rotate(${i * 6}deg)` }}
+              >
+                <div
+                  className="rounded-full mx-auto"
+                  style={{
+                    width: isHour ? "5px" : "2px",
+                    height: isHour ? "20px" : "10px",
+                    background: isHour ? "hsl(280 40% 50% / 0.4)" : "hsl(280 40% 50% / 0.2)",
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-lg mx-auto">
+        {/* Pixel header */}
+        <div className="text-center mb-4">
+          <h1 style={PIXEL} className="text-[14px] mb-2" >
+            <span style={{ color: COLORS.ink }}>VIBE</span>{" "}
+            <span style={{ color: COLORS.accent }}>CHECK</span>
+          </h1>
+          <p style={VT} className="text-lg" >
+            <span style={{ color: COLORS.inkSoft }}>STEP {currentIndex + 1} / {stepOrder.length}</span>
+          </p>
+        </div>
+
+        {/* Pixel progress bar */}
+        <div className="mb-5 px-1">
+          <div
+            className="h-4 w-full p-0.5"
+            style={{
+              background: "white",
+              border: `2px solid ${COLORS.border}`,
+              boxShadow: `3px 3px 0px ${COLORS.border}`,
+            }}
+          >
             <motion.div
-              className="h-full bg-primary rounded-full"
+              className="h-full"
+              style={{ background: COLORS.accent }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-2 text-center font-body">
-            Vibe Check — Step {currentIndex + 1} of {stepOrder.length}
-          </p>
         </div>
 
         {/* Card */}
         <motion.div
-          className="bg-card/95 backdrop-blur-md border border-border rounded-2xl shadow-2xl overflow-hidden"
-          initial={{ opacity: 0, y: 30 }}
+          className="overflow-hidden"
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          style={{
+            background: COLORS.card,
+            border: `4px solid ${COLORS.border}`,
+            borderRadius: "1.25rem",
+            boxShadow: `8px 8px 0px ${COLORS.border}`,
+          }}
         >
           {/* Bunny header */}
-          <div className="pt-8 pb-4 flex flex-col items-center">
+          <div className="pt-6 pb-3 flex flex-col items-center">
             <CartoonBunny mood={getBunnyMood()} size="sm" message={getBunnyMessage()} />
           </div>
 
@@ -129,152 +202,167 @@ const VibeCheck = () => {
           <div className="px-6 pb-6">
             <AnimatePresence mode="wait">
               {step === "mood" && (
-                <motion.div key="mood" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} className="space-y-4">
-                  <h2 className="text-center font-display text-xl text-foreground">How's your motivation?</h2>
+                <motion.div key="mood" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-4">
+                  <h2 style={PIXEL} className="text-center text-[11px]" >
+                    <span style={{ color: COLORS.ink }}>HOW'S YOUR MOTIVATION?</span>
+                  </h2>
                   <div className="grid grid-cols-3 gap-3">
                     {([
-                      { value: "great" as const, icon: Smile, label: "Locked in 🔥", color: "green" },
-                      { value: "okay" as const, icon: Meh, label: "Mid vibes", color: "yellow" },
-                      { value: "struggling" as const, icon: Frown, label: "Not it 😮‍💨", color: "red" },
+                      { value: "great" as const, icon: Smile, label: "Locked In", color: COLORS.green },
+                      { value: "okay" as const, icon: Meh, label: "Mid Vibes", color: COLORS.yellow },
+                      { value: "struggling" as const, icon: Frown, label: "Not It", color: COLORS.red },
                     ]).map(({ value, icon: Icon, label, color }) => (
-                      <button
-                        key={value}
-                        onClick={() => setMood(value)}
-                        className={`p-5 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
-                          mood === value
-                            ? `border-${color}-500 bg-${color}-500/10 scale-105`
-                            : "border-border hover:border-primary/40"
-                        }`}
-                      >
-                        <Icon className={`w-10 h-10 ${mood === value ? `text-${color}-500` : "text-muted-foreground"}`} />
-                        <p className="text-xs font-body font-medium">{label}</p>
-                      </button>
+                      <PixelBtn key={value} selected={mood === value} onClick={() => setMood(value)} color={color}>
+                        <Icon className="w-9 h-9" />
+                        <p style={VT} className="text-base leading-none">{label}</p>
+                      </PixelBtn>
                     ))}
                   </div>
                 </motion.div>
               )}
 
               {step === "energy" && (
-                <motion.div key="energy" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} className="space-y-4">
-                  <h2 className="text-center font-display text-xl text-foreground">Energy level?</h2>
+                <motion.div key="energy" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-4">
+                  <h2 style={PIXEL} className="text-center text-[11px]" >
+                    <span style={{ color: COLORS.ink }}>ENERGY LEVEL?</span>
+                  </h2>
                   <div className="grid grid-cols-3 gap-3">
                     {([
-                      { value: "high" as const, icon: Battery, label: "Full charge ⚡", color: "green" },
-                      { value: "medium" as const, icon: BatteryMedium, label: "Getting there", color: "yellow" },
-                      { value: "low" as const, icon: BatteryLow, label: "Running low 🪫", color: "red" },
+                      { value: "high" as const, icon: Battery, label: "Full Charge", color: COLORS.green },
+                      { value: "medium" as const, icon: BatteryMedium, label: "Cruising", color: COLORS.yellow },
+                      { value: "low" as const, icon: BatteryLow, label: "Low Bat", color: COLORS.red },
                     ]).map(({ value, icon: Icon, label, color }) => (
-                      <button
-                        key={value}
-                        onClick={() => setEnergy(value)}
-                        className={`p-5 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
-                          energy === value
-                            ? `border-${color}-500 bg-${color}-500/10 scale-105`
-                            : "border-border hover:border-primary/40"
-                        }`}
-                      >
-                        <Icon className={`w-10 h-10 ${energy === value ? `text-${color}-500` : "text-muted-foreground"}`} />
-                        <p className="text-xs font-body font-medium">{label}</p>
-                      </button>
+                      <PixelBtn key={value} selected={energy === value} onClick={() => setEnergy(value)} color={color}>
+                        <Icon className="w-9 h-9" />
+                        <p style={VT} className="text-base leading-none">{label}</p>
+                      </PixelBtn>
                     ))}
                   </div>
                 </motion.div>
               )}
 
               {step === "break" && (
-                <motion.div key="break" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} className="space-y-4">
-                  <h2 className="text-center font-display text-xl text-foreground">Need a break?</h2>
+                <motion.div key="break" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-4">
+                  <h2 style={PIXEL} className="text-center text-[11px]" >
+                    <span style={{ color: COLORS.ink }}>NEED A BREAK?</span>
+                  </h2>
                   <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => setNeedBreak(false)}
-                      className={`p-5 rounded-xl border-2 transition-all flex flex-col items-center gap-3 ${
-                        !needBreak ? "border-primary bg-primary/10 scale-105" : "border-border hover:border-primary/40"
-                      }`}
-                    >
-                      <Zap className={`w-10 h-10 ${!needBreak ? "text-primary" : "text-muted-foreground"}`} />
-                      <div className="text-center">
-                        <p className="text-sm font-body font-medium">Nah, I'm good</p>
-                        <p className="text-xs text-muted-foreground">Keep the grind going</p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => setNeedBreak(true)}
-                      className={`p-5 rounded-xl border-2 transition-all flex flex-col items-center gap-3 ${
-                        needBreak ? "border-primary bg-primary/10 scale-105" : "border-border hover:border-primary/40"
-                      }`}
-                    >
-                      <Coffee className={`w-10 h-10 ${needBreak ? "text-primary" : "text-muted-foreground"}`} />
-                      <div className="text-center">
-                        <p className="text-sm font-body font-medium">Yes please 🙏</p>
-                        <p className="text-xs text-muted-foreground">Add a break soon</p>
-                      </div>
-                    </button>
+                    <PixelBtn selected={!needBreak} onClick={() => setNeedBreak(false)} color={COLORS.blue}>
+                      <Zap className="w-9 h-9" />
+                      <p style={VT} className="text-base leading-none">Nah, I'm Good</p>
+                      <p style={VT} className="text-sm opacity-75">Keep Grinding</p>
+                    </PixelBtn>
+                    <PixelBtn selected={needBreak} onClick={() => setNeedBreak(true)} color={COLORS.green}>
+                      <Coffee className="w-9 h-9" />
+                      <p style={VT} className="text-base leading-none">Yes Please</p>
+                      <p style={VT} className="text-sm opacity-75">Add A Break</p>
+                    </PixelBtn>
                   </div>
                 </motion.div>
               )}
 
               {step === "adjust" && (
-                <motion.div key="adjust" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} className="space-y-4">
-                  <h2 className="text-center font-display text-xl text-foreground">Adjust your schedule?</h2>
+                <motion.div key="adjust" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-4">
+                  <h2 style={PIXEL} className="text-center text-[11px]" >
+                    <span style={{ color: COLORS.ink }}>ADJUST SCHEDULE?</span>
+                  </h2>
                   <div className="space-y-3">
                     {([
-                      { value: "keep" as const, icon: CheckCircle2, title: "Keep it as is", desc: "I'm on track, no changes needed" },
-                      { value: "lighten" as const, icon: CalendarClock, title: "Lighten the load", desc: "Push non-urgent tasks to later or tomorrow" },
-                      { value: "reschedule" as const, icon: RefreshCw, title: "Reschedule everything", desc: "Rebuild my schedule from now" },
-                    ]).map(({ value, icon: Icon, title, desc }) => (
-                      <button
-                        key={value}
-                        onClick={() => setAdjustSchedule(value)}
-                        className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 text-left ${
-                          adjustSchedule === value
-                            ? "border-primary bg-primary/10"
-                            : "border-border hover:border-primary/40"
-                        }`}
-                      >
-                        <Icon className={`w-6 h-6 shrink-0 ${adjustSchedule === value ? "text-primary" : "text-muted-foreground"}`} />
-                        <div>
-                          <p className="text-sm font-body font-medium text-foreground">{title}</p>
-                          <p className="text-xs text-muted-foreground">{desc}</p>
-                        </div>
-                      </button>
-                    ))}
+                      { value: "keep" as const, icon: CheckCircle2, title: "KEEP IT AS IS", desc: "I'm on track, no changes" },
+                      { value: "lighten" as const, icon: CalendarClock, title: "LIGHTEN THE LOAD", desc: "Push non-urgent tasks back" },
+                      { value: "reschedule" as const, icon: RefreshCw, title: "REBUILD IT", desc: "Reschedule from now" },
+                    ]).map(({ value, icon: Icon, title, desc }) => {
+                      const selected = adjustSchedule === value;
+                      return (
+                        <button
+                          key={value}
+                          onClick={() => setAdjustSchedule(value)}
+                          className="w-full p-3 rounded-xl transition-all flex items-center gap-3 text-left active:translate-y-0.5"
+                          style={{
+                            background: selected ? COLORS.accent : "white",
+                            border: `3px solid ${selected ? COLORS.accent : COLORS.borderSoft}`,
+                            boxShadow: `4px 4px 0px ${selected ? COLORS.border : COLORS.borderSoft}`,
+                            color: selected ? "white" : COLORS.ink,
+                          }}
+                        >
+                          <Icon className="w-6 h-6 shrink-0" />
+                          <div className="min-w-0">
+                            <p style={PIXEL} className="text-[9px] leading-tight">{title}</p>
+                            <p style={VT} className="text-base leading-tight opacity-90">{desc}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  <Textarea
-                    placeholder="Anything else on your mind? (optional)"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    className="min-h-[80px] resize-none mt-2"
-                  />
+                  <div>
+                    <p style={VT} className="text-base mb-1" >
+                      <span style={{ color: COLORS.inkSoft }}>ANYTHING ELSE? (OPTIONAL)</span>
+                    </p>
+                    <Textarea
+                      placeholder="Spill the tea..."
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      className="min-h-[70px] resize-none"
+                      style={{
+                        ...VT,
+                        fontSize: "1.05rem",
+                        background: "white",
+                        border: `3px solid ${COLORS.borderSoft}`,
+                        boxShadow: `4px 4px 0px ${COLORS.borderSoft}`,
+                        color: COLORS.ink,
+                      }}
+                    />
+                  </div>
                 </motion.div>
               )}
 
               {step === "done" && (
                 <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4 text-center">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-body text-foreground">Vibe Check Complete!</span>
+                  <div
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
+                    style={{
+                      background: "white",
+                      border: `3px solid ${COLORS.accent}`,
+                      boxShadow: `4px 4px 0px ${COLORS.accent}`,
+                    }}
+                  >
+                    <Sparkles className="w-4 h-4" style={{ color: COLORS.accent }} />
+                    <span style={PIXEL} className="text-[9px]">
+                      <span style={{ color: COLORS.ink }}>VIBE CHECK COMPLETE!</span>
+                    </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3 py-4">
-                    <div className="p-3 rounded-lg bg-muted/50">
-                      <p className="text-xs text-muted-foreground">Mood</p>
-                      <p className="text-lg">{mood === "great" ? "🔥" : mood === "okay" ? "😐" : "😮‍💨"}</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-muted/50">
-                      <p className="text-xs text-muted-foreground">Energy</p>
-                      <p className="text-lg">{energy === "high" ? "⚡" : energy === "medium" ? "🔋" : "🪫"}</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-muted/50">
-                      <p className="text-xs text-muted-foreground">Break</p>
-                      <p className="text-lg">{needBreak ? "☕" : "💪"}</p>
-                    </div>
+                  <div className="grid grid-cols-3 gap-3 py-2">
+                    {[
+                      { label: "MOOD", val: mood === "great" ? "🔥" : mood === "okay" ? "😐" : "😮‍💨" },
+                      { label: "ENERGY", val: energy === "high" ? "⚡" : energy === "medium" ? "🔋" : "🪫" },
+                      { label: "BREAK", val: needBreak ? "☕" : "💪" },
+                    ].map((s) => (
+                      <div
+                        key={s.label}
+                        className="p-3 rounded-xl"
+                        style={{
+                          background: "white",
+                          border: `3px solid ${COLORS.borderSoft}`,
+                          boxShadow: `4px 4px 0px ${COLORS.borderSoft}`,
+                        }}
+                      >
+                        <p style={PIXEL} className="text-[8px]">
+                          <span style={{ color: COLORS.inkSoft }}>{s.label}</span>
+                        </p>
+                        <p className="text-2xl mt-1">{s.val}</p>
+                      </div>
+                    ))}
                   </div>
 
                   {adjustSchedule !== "keep" && (
-                    <p className="text-sm text-muted-foreground font-body">
-                      {adjustSchedule === "lighten"
-                        ? "We'll push non-urgent tasks out to lighten your load."
-                        : "We'll rebuild your schedule from now — hang tight!"}
+                    <p style={VT} className="text-base">
+                      <span style={{ color: COLORS.inkSoft }}>
+                        {adjustSchedule === "lighten"
+                          ? "We'll push non-urgent tasks out to lighten your load."
+                          : "We'll rebuild your schedule from now — hang tight!"}
+                      </span>
                     </p>
                   )}
                 </motion.div>
@@ -283,22 +371,56 @@ const VibeCheck = () => {
           </div>
 
           {/* Footer nav */}
-          <div className="px-6 pb-6 flex gap-3">
+          <div className="px-6 pb-6 flex gap-3 items-center">
             {step !== "mood" && step !== "done" && (
-              <Button variant="outline" onClick={goBack} className="gap-2">
-                <ArrowLeft className="w-4 h-4" /> Back
-              </Button>
+              <button
+                onClick={goBack}
+                className="px-4 py-2.5 rounded-full transition-all flex items-center gap-2 active:translate-y-0.5"
+                style={{
+                  background: "white",
+                  border: `3px solid ${COLORS.borderSoft}`,
+                  boxShadow: `4px 4px 0px ${COLORS.borderSoft}`,
+                  color: COLORS.ink,
+                  ...PIXEL,
+                  fontSize: "9px",
+                }}
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> BACK
+              </button>
             )}
             <div className="flex-1" />
             {step !== "done" ? (
-              <Button onClick={goNext} disabled={!canProceed()} className="gap-2">
-                Next <ArrowRight className="w-4 h-4" />
-              </Button>
+              <button
+                onClick={goNext}
+                disabled={!canProceed()}
+                className="px-5 py-2.5 rounded-full transition-all flex items-center gap-2 active:translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{
+                  background: COLORS.accent,
+                  border: `3px solid ${COLORS.border}`,
+                  boxShadow: `4px 4px 0px ${COLORS.border}`,
+                  color: "white",
+                  ...PIXEL,
+                  fontSize: "9px",
+                }}
+              >
+                NEXT <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             ) : (
-              <Button onClick={handleFinish} className="gap-2 w-full">
+              <button
+                onClick={handleFinish}
+                className="w-full px-5 py-3 rounded-full transition-all flex items-center justify-center gap-2 active:translate-y-0.5"
+                style={{
+                  background: COLORS.green,
+                  border: `3px solid ${COLORS.border}`,
+                  boxShadow: `4px 4px 0px ${COLORS.border}`,
+                  color: "white",
+                  ...PIXEL,
+                  fontSize: "10px",
+                }}
+              >
                 <Sparkles className="w-4 h-4" />
-                {adjustSchedule === "keep" ? "Back to Schedule" : "Update Schedule"}
-              </Button>
+                {adjustSchedule === "keep" ? "BACK TO SCHEDULE" : "UPDATE SCHEDULE"}
+              </button>
             )}
           </div>
         </motion.div>
