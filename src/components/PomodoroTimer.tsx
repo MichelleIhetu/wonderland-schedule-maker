@@ -116,6 +116,7 @@ const playCompletionDing = () => {
 };
 
 const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<TimerMode>("work");
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATIONS.work);
   const [isRunning, setIsRunning] = useState(false);
