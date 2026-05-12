@@ -27,19 +27,30 @@ const rescheduleFromNow = (items: ScheduleItem[]): ScheduleItem[] => {
   const upcoming = sorted.slice(splitAt);
 
   let cursor = nowMin;
+  const durationOf = (it: ScheduleItem): number => {
+    if (it.endTime) {
+      const [sh, sm] = it.time.split(":").map(Number);
+      const [eh, em] = it.endTime.split(":").map(Number);
+      const d = (eh * 60 + em) - (sh * 60 + sm);
+      return d > 0 ? d : 30;
+    }
+    return 30;
+  };
   const shifted = upcoming.map((it) => {
     const isFixed = it.title?.includes(FIXED_MARK);
+    const dur = durationOf(it);
     if (isFixed) {
       const [h, m] = it.time.split(":").map(Number);
-      cursor = Math.max(cursor, h * 60 + (it.duration ?? 30));
+      cursor = Math.max(cursor, h * 60 + dur);
       return it;
     }
     const start = cursor;
-    const dur = it.duration ?? 30;
     cursor = start + dur;
     const hh = String(Math.floor(start / 60) % 24).padStart(2, "0");
     const mm = String(start % 60).padStart(2, "0");
-    return { ...it, time: `${hh}:${mm}` };
+    const eh = String(Math.floor(cursor / 60) % 24).padStart(2, "0");
+    const em = String(cursor % 60).padStart(2, "0");
+    return { ...it, time: `${hh}:${mm}`, endTime: `${eh}:${em}` };
   });
 
   return [...past, ...shifted];
