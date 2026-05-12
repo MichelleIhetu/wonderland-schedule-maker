@@ -195,7 +195,7 @@ const VibeCheck = () => {
         >
           {/* Bunny header */}
           <div className="pt-6 pb-3 flex flex-col items-center">
-            <CartoonBunny mood={getBunnyMood()} size="sm" message={getBunnyMessage()} />
+            <img src={bunnyMascot} alt="Bunny mascot" className="w-32 h-32 object-contain" style={{ imageRendering: "pixelated" }} />
           </div>
 
           {/* Step content */}
