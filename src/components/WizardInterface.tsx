@@ -83,6 +83,7 @@ const SCENE_CONFIG = {
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
 const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule }: WizardInterfaceProps) => {
+  const navigate = useNavigate();
   // ─── SCENE STATE (single source of truth) ───
   const [scene, setScene] = useState<Scene>("library");
 
