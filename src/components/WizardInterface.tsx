@@ -901,6 +901,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     </button>
                   ) : null}
                   <button
+                    onClick={() => navigate("/vibe-check", { state: { fromPomodoro: true, schedule: generatedSchedule, backgroundTheme: settings.backgroundTheme } })}
+                    className="px-6 py-2 rounded-full transition-all hover:scale-105 active:scale-95 flex items-center gap-2 text-white"
+                    style={{ background: "hsl(210 90% 55%)", fontFamily: "var(--font-body)" }}
+                    title="Need a break? Feeling distracted or overwhelmed?"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Vibe Check
+                  </button>
+                  <button
                     onClick={completeCurrentTask}
                     disabled={completedTasks.has(activeTask.id)}
                     className="px-6 py-2 rounded-full transition-all hover:scale-105 active:scale-95 flex items-center gap-2 disabled:opacity-50"
