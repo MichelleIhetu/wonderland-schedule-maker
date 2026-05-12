@@ -241,10 +241,18 @@ const Index = () => {
         {/* Top bar */}
         <div className="flex items-center justify-between px-4 sm:px-8 py-4">
           <div />
-          <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)]">
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </Button>
+          {user ? (
+            <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)]">
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
+          ) : (
+            <Link to="/auth">
+              <Button variant="ghost" size="sm" className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)] glass-pill rounded-full px-4">
+                <span className="font-body font-semibold">Sign In / Sign Up</span>
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Title and Start button - centered */}
