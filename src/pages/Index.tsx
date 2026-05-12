@@ -97,7 +97,7 @@ const Index = () => {
     skipCheckIn,
   } = useHourlyCheckIn({
     enabled: generatedSchedule.length > 0,
-    intervalMinutes: 60,
+    intervalMinutes: 15,
     onCheckInDue: () => {
       navigate("/vibe-check", { state: { backgroundTheme: settings.backgroundTheme } });
     },
