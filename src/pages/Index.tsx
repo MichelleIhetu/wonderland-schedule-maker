@@ -310,7 +310,7 @@ const Index = () => {
             <span>🎯</span>
           </Link>
           <button
-            onClick={() => generatedSchedule.length > 0 ? setViewMode("schedule") : setViewMode("wizard")}
+            onClick={handleStartPomodoro}
             className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
             style={{ color: "hsl(280 40% 40%)" }}
           >
