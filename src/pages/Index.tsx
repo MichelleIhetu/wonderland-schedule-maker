@@ -318,7 +318,21 @@ const Index = () => {
             <span>🎯</span>
           </Link>
           <button
-            onClick={() => setViewMode("schedule")}
+            onClick={() => {
+              const snap = loadScheduleSnapshot();
+              if (snap && snap.schedule.length > 0) {
+                setGeneratedSchedule(snap.schedule);
+                if (snap.settings) setSettings(snap.settings);
+                setViewMode("schedule");
+                const hoursAgo = Math.max(0, Math.round((Date.now() - snap.savedAt) / 3_600_000));
+                toast.success(`Loaded your saved schedule (${hoursAgo}h ago) 🐰`);
+              } else if (generatedSchedule.length > 0) {
+                setViewMode("schedule");
+              } else {
+                toast("No saved schedule yet — let's build one!", { icon: "✨" });
+                setViewMode("wizard");
+              }
+            }}
             className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
             style={{ color: "hsl(280 40% 40%)" }}
           >
