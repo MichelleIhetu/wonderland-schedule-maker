@@ -40,16 +40,37 @@ const Auth = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: { emailRedirectTo: `${window.location.origin}/` },
         });
         if (error) throw error;
         toast.success("Account created! Welcome! 🐰");
         navigate("/");
       }
     } catch (error: any) {
-      toast.error(error.message || "Something went wrong");
+      const msg = error?.message || "Something went wrong";
+      if (msg.toLowerCase().includes("already registered")) {
+        toast.error("That email already has an account — try signing in instead.");
+        setIsLogin(true);
+      } else if (msg.toLowerCase().includes("invalid login")) {
+        toast.error('Wrong email or password. Use "Forgot password?" to reset it.');
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error("Enter your email above first, then click forgot password.");
+      return;
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    if (error) toast.error(error.message);
+    else toast.success("Password reset link sent! Check your email 📬");
   };
 
   const handleGoogleSignIn = async () => {
