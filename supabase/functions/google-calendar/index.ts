@@ -64,14 +64,15 @@ serve(async (req) => {
       if (body?.timeMax) timeMax = body.timeMax;
     } catch {}
 
-    // Fallback range if client did not provide one
+    // Fallback range: scan the next 31 days (full month horizon) so neurosymbolic
+    // reasoning can plan lead time for important upcoming tasks.
     if (!timeMin || !timeMax) {
-      const todayUtc = new Date();
-      todayUtc.setUTCHours(0, 0, 0, 0);
-      const tomorrowUtc = new Date(todayUtc);
-      tomorrowUtc.setUTCDate(tomorrowUtc.getUTCDate() + 1);
-      timeMin = todayUtc.toISOString();
-      timeMax = tomorrowUtc.toISOString();
+      const startUtc = new Date();
+      startUtc.setUTCHours(0, 0, 0, 0);
+      const endUtc = new Date(startUtc);
+      endUtc.setUTCDate(endUtc.getUTCDate() + 31);
+      timeMin = startUtc.toISOString();
+      timeMax = endUtc.toISOString();
     }
 
     console.log('Using timezone:', timezone);
