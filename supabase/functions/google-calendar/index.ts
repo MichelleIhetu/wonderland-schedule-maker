@@ -183,9 +183,25 @@ serve(async (req) => {
           endTime = toLocalHHMM(endDateTime, timezone);
         }
 
+        // Local YYYY-MM-DD for lead-time planning
+        let date = '';
+        try {
+          const d = new Date(startDateTime);
+          const parts = new Intl.DateTimeFormat('en-CA', {
+            year: 'numeric', month: '2-digit', day: '2-digit', timeZone: timezone,
+          }).formatToParts(d);
+          const y = parts.find(p => p.type === 'year')?.value;
+          const mo = parts.find(p => p.type === 'month')?.value;
+          const da = parts.find(p => p.type === 'day')?.value;
+          if (y && mo && da) date = `${y}-${mo}-${da}`;
+        } catch {
+          date = (startDateTime || '').slice(0, 10);
+        }
+
         return {
           id: `${item.id}-${item.organizer?.email || item._calendarName || 'calendar'}`,
           title: item.summary || 'Untitled Event',
+          date,
           startTime,
           endTime,
           description: item.description || '',
