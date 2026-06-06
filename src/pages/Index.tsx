@@ -402,28 +402,17 @@ const Index = () => {
             <span>🎯</span>
           </Link>
           <button
-            onClick={async () => {
-              try {
-                const { lovable } = await import("@/integrations/lovable/index");
-                const result = await lovable.auth.signInWithOAuth("google", {
-                  redirect_uri: window.location.origin,
-                });
-                if (result.error) {
-                  toast.error((result.error as Error)?.message || "Could not start Google sign-in");
-                  return;
-                }
-                // If redirected, browser handles navigation.
-              } catch (e) {
-                toast.error("Could not start Google sign-in");
-              }
-            }}
-            className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+            onClick={runCalendarAnalysis}
+            disabled={calendarAnalyzing}
+            className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105 disabled:opacity-60"
             style={{ color: "hsl(280 40% 40%)" }}
-            aria-label="Sign in with My Calendar"
-            title={`Sign in with My Calendar • ${todayDate}`}
+            aria-label="Scan and analyze my calendar for the month"
+            title={`Scan calendar (next 31 days) • ${todayDate}`}
           >
             <Calendar className="w-4 h-4" />
-            <span className="font-body font-semibold">My Calendar</span>
+            <span className="font-body font-semibold">
+              {calendarAnalyzing ? "Analyzing…" : "My Calendar"}
+            </span>
             <span>📅</span>
           </button>
         </div>
