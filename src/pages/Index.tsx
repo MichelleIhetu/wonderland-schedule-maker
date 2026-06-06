@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useClockTick } from "@/hooks/useClockTick";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ImageIcon, Clock, LogOut, Target, ArrowLeft, Calendar } from "lucide-react";
-import { getFormattedDate, getDayGreeting } from "@/lib/dayGreetings";
+import { getFormattedDate } from "@/lib/dayGreetings";
 import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
@@ -173,7 +173,6 @@ const Index = () => {
   };
 
   const todayDate = useMemo(() => getFormattedDate(), []);
-  const dayGreeting = useMemo(() => getDayGreeting(), []);
 
   const handleStart = () => { playBing(); setViewMode("wizard"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
