@@ -312,23 +312,15 @@ const Index = () => {
           <button
             onClick={async () => {
               try {
-                const { supabase } = await import("@/integrations/supabase/client");
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                  provider: "google",
-                  options: {
-                    scopes: "https://www.googleapis.com/auth/calendar.readonly",
-                    redirectTo: window.location.origin,
-                    skipBrowserRedirect: true,
-                  },
+                const { lovable } = await import("@/integrations/lovable/index");
+                const result = await lovable.auth.signInWithOAuth("google", {
+                  redirect_uri: window.location.origin,
                 });
-                if (error) {
-                  toast.error(error.message);
+                if (result.error) {
+                  toast.error((result.error as Error)?.message || "Could not start Google sign-in");
                   return;
                 }
-                if (data?.url) {
-                  const popup = window.open(data.url, "google-oauth", "width=500,height=650,left=100,top=100");
-                  if (!popup) toast.error("Popup blocked. Please allow popups.");
-                }
+                // If redirected, browser handles navigation.
               } catch (e) {
                 toast.error("Could not start Google sign-in");
               }
