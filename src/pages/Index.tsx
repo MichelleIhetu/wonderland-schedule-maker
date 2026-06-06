@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSchedulePersistence, loadScheduleSnapshot } from "@/hooks/useSchedulePersistence";
 import { UserSettings, backgroundThemes } from "@/types/schedule";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
 
@@ -265,14 +266,6 @@ const Index = () => {
               BUNNY
             </h1>
           </div>
-
-          {/* Date & Day greeting */}
-          <p className="font-body text-lg sm:text-xl mt-2" style={{ color: "hsl(280 40% 50%)" }}>
-            {todayDate}
-          </p>
-          <p className="font-body text-sm sm:text-base mt-1 opacity-80" style={{ color: "hsl(280 40% 45%)" }}>
-            {dayGreeting}
-          </p>
 
           <button
             onClick={handleStart}
