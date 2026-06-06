@@ -181,6 +181,94 @@ const Index = () => {
   const handleStart = () => { playBing(); setViewMode("wizard"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
 
+  const runCalendarAnalysis = async () => {
+    if (calendarAnalyzing) return;
+    setCalendarAnalyzing(true);
+    try {
+      // Ensure Google sign-in with calendar scope.
+      let { data: { session } } = await supabase.auth.getSession();
+      let providerToken = session?.provider_token ?? null;
+
+      if (!session || !providerToken) {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            scopes: "https://www.googleapis.com/auth/calendar.readonly",
+            redirectTo: window.location.origin,
+            skipBrowserRedirect: true,
+          },
+        });
+        if (error) {
+          toast.error(error.message);
+          setCalendarAnalyzing(false);
+          return;
+        }
+        if (data?.url) {
+          const popup = window.open(data.url, "google-oauth", "width=500,height=650,left=100,top=100");
+          if (!popup) {
+            toast.error("Popup blocked. Please allow popups.");
+            setCalendarAnalyzing(false);
+            return;
+          }
+          await new Promise<void>((resolve) => {
+            const iv = setInterval(() => {
+              if (popup.closed) { clearInterval(iv); resolve(); }
+            }, 500);
+          });
+          const refreshed = await supabase.auth.getSession();
+          session = refreshed.data.session;
+          providerToken = session?.provider_token ?? null;
+        }
+      }
+
+      if (!session || !providerToken) {
+        toast.error("Google Calendar access wasn't granted.");
+        setCalendarAnalyzing(false);
+        return;
+      }
+
+      // Scan full month (31-day horizon).
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      const end = new Date(start); end.setDate(end.getDate() + 31);
+
+      toast("Scanning the next 31 days of your calendar…", { icon: "🔍" });
+      const { data: calData, error: calErr } = await supabase.functions.invoke("google-calendar", {
+        headers: { "x-provider-token": providerToken },
+        body: {
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          timeMin: start.toISOString(),
+          timeMax: end.toISOString(),
+        },
+      });
+      if (calErr || calData?.error) {
+        toast.error(calData?.error || "Failed to fetch calendar");
+        setCalendarAnalyzing(false);
+        return;
+      }
+      const events = calData?.events ?? [];
+
+      toast("Running neurosymbolic reasoning…", { icon: "🧠" });
+      const { data: ana, error: anaErr } = await supabase.functions.invoke("analyze-calendar-tasks", {
+        body: { events, today: new Date().toISOString().slice(0, 10) },
+      });
+      if (anaErr || ana?.error) {
+        toast.error(ana?.error || "Analysis failed");
+        setCalendarAnalyzing(false);
+        return;
+      }
+
+      setAnalyzedTasks(ana?.analyzed ?? []);
+      toast.success(`Analyzed ${ana?.analyzed?.length ?? 0} events ✨`);
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not analyze calendar");
+    } finally {
+      setCalendarAnalyzing(false);
+    }
+  };
+
+
+
   // ─── LANDING PAGE ───
   if (viewMode === "landing") {
     return (
