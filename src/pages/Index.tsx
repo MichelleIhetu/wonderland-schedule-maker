@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import CalendarAnalysisModal, { AnalyzedTask } from "@/components/CalendarAnalysisModal";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
 
@@ -190,35 +191,26 @@ const Index = () => {
       let providerToken = session?.provider_token ?? null;
 
       if (!session || !providerToken) {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            scopes: "https://www.googleapis.com/auth/calendar.readonly",
-            redirectTo: window.location.origin,
-            skipBrowserRedirect: true,
+        const result = await lovable.auth.signInWithOAuth("google", {
+          redirect_uri: window.location.origin,
+          extraParams: {
+            scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly",
+            access_type: "offline",
+            prompt: "consent",
           },
         });
-        if (error) {
-          toast.error(error.message);
+        if (result.error) {
+          toast.error(result.error.message || "Sign-in failed");
           setCalendarAnalyzing(false);
           return;
         }
-        if (data?.url) {
-          const popup = window.open(data.url, "google-oauth", "width=500,height=650,left=100,top=100");
-          if (!popup) {
-            toast.error("Popup blocked. Please allow popups.");
-            setCalendarAnalyzing(false);
-            return;
-          }
-          await new Promise<void>((resolve) => {
-            const iv = setInterval(() => {
-              if (popup.closed) { clearInterval(iv); resolve(); }
-            }, 500);
-          });
-          const refreshed = await supabase.auth.getSession();
-          session = refreshed.data.session;
-          providerToken = session?.provider_token ?? null;
+        if (result.redirected) {
+          // Browser is redirecting to Google; nothing more to do here.
+          return;
         }
+        const refreshed = await supabase.auth.getSession();
+        session = refreshed.data.session;
+        providerToken = session?.provider_token ?? null;
       }
 
       if (!session || !providerToken) {
