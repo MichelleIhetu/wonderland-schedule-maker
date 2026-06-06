@@ -329,7 +329,7 @@ const Index = () => {
             style={{ color: "hsl(280 40% 40%)" }}
           >
             <ImageIcon className="w-4 h-4" />
-            <span className="font-body font-semibold">My Day</span>
+            <span className="font-body font-semibold">My Calendar</span>
             <span>📅</span>
           </button>
         </div>
