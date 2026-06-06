@@ -67,6 +67,8 @@ const Index = () => {
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [scheduleLoaded, setScheduleLoaded] = useState(false);
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
+  const [calendarAnalyzing, setCalendarAnalyzing] = useState(false);
+  const [analyzedTasks, setAnalyzedTasks] = useState<AnalyzedTask[] | null>(null);
 
   useClockTick(viewMode === "landing");
 
