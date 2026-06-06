@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useClockTick } from "@/hooks/useClockTick";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ImageIcon, Clock, LogOut, Target, ArrowLeft } from "lucide-react";
-import { getFormattedDate, getDayGreeting } from "@/lib/dayGreetings";
+import { ImageIcon, Clock, LogOut, Target, ArrowLeft, Calendar } from "lucide-react";
+import { getFormattedDate } from "@/lib/dayGreetings";
 import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import ThemeBackground from "@/components/ThemeBackground";
@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSchedulePersistence, loadScheduleSnapshot } from "@/hooks/useSchedulePersistence";
 import { UserSettings, backgroundThemes } from "@/types/schedule";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
 
@@ -172,7 +173,6 @@ const Index = () => {
   };
 
   const todayDate = useMemo(() => getFormattedDate(), []);
-  const dayGreeting = useMemo(() => getDayGreeting(), []);
 
   const handleStart = () => { playBing(); setViewMode("wizard"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
@@ -266,14 +266,6 @@ const Index = () => {
             </h1>
           </div>
 
-          {/* Date & Day greeting */}
-          <p className="font-body text-lg sm:text-xl mt-2" style={{ color: "hsl(280 40% 50%)" }}>
-            {todayDate}
-          </p>
-          <p className="font-body text-sm sm:text-base mt-1 opacity-80" style={{ color: "hsl(280 40% 45%)" }}>
-            {dayGreeting}
-          </p>
-
           <button
             onClick={handleStart}
             className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 mt-4 sm:mt-6"
@@ -340,6 +332,25 @@ const Index = () => {
             <span className="font-body font-semibold">My Day</span>
             <span>📅</span>
           </button>
+        </div>
+
+        {/* Calendar button - bottom left */}
+        <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 z-20">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className="glass-pill p-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+                aria-label="Show date"
+              >
+                <Calendar className="w-5 h-5" style={{ color: "hsl(280 40% 40%)" }} />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="start" className="w-auto">
+              <p className="font-body text-sm" style={{ color: "hsl(280 40% 40%)" }}>
+                {todayDate}
+              </p>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Bunny mascot - positioned on the right */}
