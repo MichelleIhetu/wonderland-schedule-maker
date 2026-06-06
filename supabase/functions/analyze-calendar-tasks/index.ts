@@ -275,16 +275,18 @@ Today is ${today}. Return ONLY valid JSON of the form:
         date: event.date ?? null,
         startTime: event.startTime ?? null,
         endTime: event.endTime ?? null,
-        symbolic: tag,
-        final_category: n.final_category ?? tag.category,
+        symbolic: tag, // exposed for transparency only — not used to override neural
+        final_category: (hasNeural && n.final_category) || tag.category,
         final_importance: finalImportance,
         lead_days: leadDays,
         recommended_start_date: recommendedStartDate,
-        prep_milestones: Array.isArray(n.prep_milestones) ? n.prep_milestones.slice(0, 3) : [],
+        prep_milestones: hasNeural && Array.isArray(n.prep_milestones)
+          ? n.prep_milestones.slice(0, 3)
+          : [],
         rationale:
-          typeof n.rationale === "string" && n.rationale.trim()
+          hasNeural && typeof n.rationale === "string" && n.rationale.trim()
             ? n.rationale
-            : `${tag.category} — symbolic rule (${tag.matchedKeyword || "default"}).`,
+            : "Model did not return a rationale; using fallback classification.",
       };
     });
 
