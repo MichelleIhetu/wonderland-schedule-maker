@@ -446,6 +446,12 @@ const Index = () => {
           </div>
         </div>
       </div>
+      <CalendarAnalysisModal
+        isOpen={analyzedTasks !== null}
+        onClose={() => setAnalyzedTasks(null)}
+        tasks={analyzedTasks ?? []}
+        monthLabel={new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+      />
     </div>
     );
   }
