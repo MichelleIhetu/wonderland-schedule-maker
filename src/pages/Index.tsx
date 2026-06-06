@@ -334,23 +334,41 @@ const Index = () => {
           </button>
         </div>
 
-        {/* Calendar button - bottom left */}
+        {/* Google Calendar sign-in button - bottom left */}
         <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 z-20">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                className="glass-pill p-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
-                aria-label="Show date"
-              >
-                <Calendar className="w-5 h-5" style={{ color: "hsl(280 40% 40%)" }} />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent side="top" align="start" className="w-auto">
-              <p className="font-body text-sm" style={{ color: "hsl(280 40% 40%)" }}>
-                {todayDate}
-              </p>
-            </PopoverContent>
-          </Popover>
+          <button
+            onClick={async () => {
+              try {
+                const { supabase } = await import("@/integrations/supabase/client");
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                  provider: "google",
+                  options: {
+                    scopes: "https://www.googleapis.com/auth/calendar.readonly",
+                    redirectTo: window.location.origin,
+                    skipBrowserRedirect: true,
+                  },
+                });
+                if (error) {
+                  toast.error(error.message);
+                  return;
+                }
+                if (data?.url) {
+                  const popup = window.open(data.url, "google-oauth", "width=500,height=650,left=100,top=100");
+                  if (!popup) toast.error("Popup blocked. Please allow popups.");
+                }
+              } catch (e) {
+                toast.error("Could not start Google sign-in");
+              }
+            }}
+            className="glass-pill p-5 sm:p-6 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-lg"
+            aria-label="Sign in with Google Calendar"
+            title={`Sign in with Google Calendar • ${todayDate}`}
+          >
+            <Calendar className="w-8 h-8 sm:w-10 sm:h-10" style={{ color: "hsl(280 40% 40%)" }} />
+            <span className="hidden sm:inline font-body font-semibold text-base" style={{ color: "hsl(280 40% 40%)" }}>
+              Google Calendar
+            </span>
+          </button>
         </div>
 
         {/* Bunny mascot - positioned on the right */}
