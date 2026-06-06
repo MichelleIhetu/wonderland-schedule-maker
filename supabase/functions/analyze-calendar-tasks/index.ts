@@ -159,31 +159,40 @@ serve(async (req) => {
       });
     }
 
-    // 1. Symbolic pass
+    // 1. Symbolic pass — ONLY a fallback hint. The LLM is not shown these tags,
+    //    so it cannot pattern-match on them. They're used only if the LLM omits
+    //    a field for an event.
     const symbolic = events.map((e) => ({ event: e, tag: symbolicTag(e) }));
 
-    // 2. Neural pass — ask LLM to refine, but with the symbolic seeds in context.
-    const seeds = symbolic.map(({ event, tag }) => ({
-      id: event.id,
-      title: event.title,
-      date: event.date ?? "",
-      startTime: event.startTime ?? "",
-      endTime: event.endTime ?? "",
-      description: (event.description ?? "").slice(0, 400),
-      symbolic_category: tag.category,
-      symbolic_importance: tag.importance,
-      symbolic_min_lead_days: tag.minLeadDays,
+    // 2. Neural pass — model reasons from scratch about each event using
+    //    semantic understanding of scope, stakes, deliverable size, and
+    //    audience. No keyword list, no symbolic seeds in the prompt.
+    const eventsForLLM = events.map((e) => ({
+      id: e.id,
+      title: e.title,
+      date: e.date ?? "",
+      startTime: e.startTime ?? "",
+      endTime: e.endTime ?? "",
+      description: (e.description ?? "").slice(0, 400),
+      isAllDay: !!e.isAllDay,
     }));
 
-    const systemPrompt = `You are a neurosymbolic planning assistant for TimeBunny.
-You receive calendar events that already have a SYMBOLIC seed (rule-based category + minimum lead days). 
-Refine each into a final plan. Your job:
-- Decide final importance: critical | major | moderate | minor.
-- Decide recommended_start_offset_days: how many days BEFORE the event the user should begin preparation. Must be >= symbolic_min_lead_days. Major academic/career artifacts (theses, grad apps, capstones) require 14-30 days. Minor chores require 0.
-- Suggest 1-3 short prep_milestones (e.g. "outline draft", "submit recommendation requests").
-- Write a one-sentence rationale.
-Today is ${today}.
-Return ONLY valid JSON of the form: {"analyzed":[{"id":"...","final_category":"...","final_importance":"...","recommended_start_offset_days":N,"recommended_start_date":"YYYY-MM-DD","prep_milestones":["..."],"rationale":"..."}]}`;
+    const systemPrompt = `You are a planning analyst. For each calendar event, reason from first principles about how much it matters and how much preparation it realistically needs. Do NOT rely on a fixed keyword list — judge each event by what it actually IS, in any language or phrasing.
+
+For every event decide:
+- final_category: a short noun phrase you invent that describes the event (e.g. "fellowship application", "weekly stand-up", "dentist visit", "house move", "code review").
+- final_importance: one of "critical" | "major" | "moderate" | "minor". Reason about stakes (career/academic/health consequences), reversibility, audience, and deliverable size — not about whether specific words appear.
+- recommended_start_offset_days: an integer >= 0. How many days BEFORE the event the user should realistically start preparing, based on the work involved.
+  * If the event needs no preparation at all (showing up, routine chore, casual hangout), use 0.
+  * If it requires substantial deliverables, external dependencies (recommenders, approvals), research, or compounding practice, use a larger number that reflects the actual workload — could be anywhere from 1 to 60+ days.
+  * Do NOT default to round numbers; pick what fits the event.
+- prep_milestones: 0-3 short, concrete steps. Leave empty for events that genuinely need no prep.
+- rationale: one sentence explaining WHY you chose this importance and lead time, referencing the event's content — not keywords.
+
+Be willing to assign "minor" + 0 days to anything that's truly routine, even if the title sounds formal, and "critical" + many days to anything with real stakes, even if the title is casual or uses unfamiliar wording.
+
+Today is ${today}. Return ONLY valid JSON of the form:
+{"analyzed":[{"id":"...","final_category":"...","final_importance":"...","recommended_start_offset_days":N,"recommended_start_date":"YYYY-MM-DD","prep_milestones":["..."],"rationale":"..."}]}`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -195,7 +204,7 @@ Return ONLY valid JSON of the form: {"analyzed":[{"id":"...","final_category":".
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: JSON.stringify({ events: seeds }) },
+          { role: "user", content: JSON.stringify({ events: eventsForLLM }) },
         ],
         response_format: { type: "json_object" },
       }),
@@ -235,27 +244,30 @@ Return ONLY valid JSON of the form: {"analyzed":[{"id":"...","final_category":".
       if (item?.id) neuralById.set(String(item.id), item);
     }
 
-    // 3. Fusion: prefer the stricter (longer) lead and the higher importance.
+    // 3. Fusion: neural reasoning is AUTHORITATIVE. Symbolic tag is only used
+    //    as a fallback if the model returned nothing for that event.
     const analyzed = symbolic.map(({ event, tag }) => {
-      const n = neuralById.get(event.id) ?? {};
-      const finalImportance: Importance =
-        IMPORTANCE_RANK[(n.final_importance as Importance) ?? tag.importance] >=
-        IMPORTANCE_RANK[tag.importance]
-          ? (n.final_importance as Importance) ?? tag.importance
-          : tag.importance;
+      const n = neuralById.get(event.id);
+      const hasNeural = !!n;
 
-      const neuralLead = Number.isFinite(n.recommended_start_offset_days)
+      const finalImportance: Importance = hasNeural && typeof n.final_importance === "string"
+        && ["critical", "major", "moderate", "minor"].includes(n.final_importance)
+          ? n.final_importance as Importance
+          : tag.importance; // fallback only when model omitted the event
+
+      const leadDays = hasNeural && Number.isFinite(n.recommended_start_offset_days)
         ? Math.max(0, Math.round(n.recommended_start_offset_days))
-        : tag.minLeadDays;
-      const leadDays = Math.max(tag.minLeadDays, neuralLead);
+        : (hasNeural ? 0 : tag.minLeadDays);
 
       // Compute recommended_start_date relative to event.date when present.
-      let recommendedStartDate: string | null = n.recommended_start_date ?? null;
+      let recommendedStartDate: string | null = (hasNeural && n.recommended_start_date) || null;
       if (!recommendedStartDate && event.date) {
         const d = new Date(`${event.date}T00:00:00Z`);
         d.setUTCDate(d.getUTCDate() - leadDays);
         recommendedStartDate = d.toISOString().slice(0, 10);
       }
+
+
 
       return {
         id: event.id,
