@@ -18,6 +18,8 @@ import { useSchedulePersistence, loadScheduleSnapshot } from "@/hooks/useSchedul
 import { UserSettings, backgroundThemes } from "@/types/schedule";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import CalendarAnalysisModal, { AnalyzedTask } from "@/components/CalendarAnalysisModal";
+import { supabase } from "@/integrations/supabase/client";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
 
