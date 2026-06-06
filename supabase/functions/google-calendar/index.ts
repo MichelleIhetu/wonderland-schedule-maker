@@ -64,14 +64,15 @@ serve(async (req) => {
       if (body?.timeMax) timeMax = body.timeMax;
     } catch {}
 
-    // Fallback range if client did not provide one
+    // Fallback range: scan the next 31 days (full month horizon) so neurosymbolic
+    // reasoning can plan lead time for important upcoming tasks.
     if (!timeMin || !timeMax) {
-      const todayUtc = new Date();
-      todayUtc.setUTCHours(0, 0, 0, 0);
-      const tomorrowUtc = new Date(todayUtc);
-      tomorrowUtc.setUTCDate(tomorrowUtc.getUTCDate() + 1);
-      timeMin = todayUtc.toISOString();
-      timeMax = tomorrowUtc.toISOString();
+      const startUtc = new Date();
+      startUtc.setUTCHours(0, 0, 0, 0);
+      const endUtc = new Date(startUtc);
+      endUtc.setUTCDate(endUtc.getUTCDate() + 31);
+      timeMin = startUtc.toISOString();
+      timeMax = endUtc.toISOString();
     }
 
     console.log('Using timezone:', timezone);
@@ -182,9 +183,25 @@ serve(async (req) => {
           endTime = toLocalHHMM(endDateTime, timezone);
         }
 
+        // Local YYYY-MM-DD for lead-time planning
+        let date = '';
+        try {
+          const d = new Date(startDateTime);
+          const parts = new Intl.DateTimeFormat('en-CA', {
+            year: 'numeric', month: '2-digit', day: '2-digit', timeZone: timezone,
+          }).formatToParts(d);
+          const y = parts.find(p => p.type === 'year')?.value;
+          const mo = parts.find(p => p.type === 'month')?.value;
+          const da = parts.find(p => p.type === 'day')?.value;
+          if (y && mo && da) date = `${y}-${mo}-${da}`;
+        } catch {
+          date = (startDateTime || '').slice(0, 10);
+        }
+
         return {
           id: `${item.id}-${item.organizer?.email || item._calendarName || 'calendar'}`,
           title: item.summary || 'Untitled Event',
+          date,
           startTime,
           endTime,
           description: item.description || '',

@@ -18,6 +18,8 @@ import { useSchedulePersistence, loadScheduleSnapshot } from "@/hooks/useSchedul
 import { UserSettings, backgroundThemes } from "@/types/schedule";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import CalendarAnalysisModal, { AnalyzedTask } from "@/components/CalendarAnalysisModal";
+import { supabase } from "@/integrations/supabase/client";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
 
@@ -65,6 +67,8 @@ const Index = () => {
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [scheduleLoaded, setScheduleLoaded] = useState(false);
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
+  const [calendarAnalyzing, setCalendarAnalyzing] = useState(false);
+  const [analyzedTasks, setAnalyzedTasks] = useState<AnalyzedTask[] | null>(null);
 
   useClockTick(viewMode === "landing");
 
@@ -176,6 +180,94 @@ const Index = () => {
 
   const handleStart = () => { playBing(); setViewMode("wizard"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
+
+  const runCalendarAnalysis = async () => {
+    if (calendarAnalyzing) return;
+    setCalendarAnalyzing(true);
+    try {
+      // Ensure Google sign-in with calendar scope.
+      let { data: { session } } = await supabase.auth.getSession();
+      let providerToken = session?.provider_token ?? null;
+
+      if (!session || !providerToken) {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            scopes: "https://www.googleapis.com/auth/calendar.readonly",
+            redirectTo: window.location.origin,
+            skipBrowserRedirect: true,
+          },
+        });
+        if (error) {
+          toast.error(error.message);
+          setCalendarAnalyzing(false);
+          return;
+        }
+        if (data?.url) {
+          const popup = window.open(data.url, "google-oauth", "width=500,height=650,left=100,top=100");
+          if (!popup) {
+            toast.error("Popup blocked. Please allow popups.");
+            setCalendarAnalyzing(false);
+            return;
+          }
+          await new Promise<void>((resolve) => {
+            const iv = setInterval(() => {
+              if (popup.closed) { clearInterval(iv); resolve(); }
+            }, 500);
+          });
+          const refreshed = await supabase.auth.getSession();
+          session = refreshed.data.session;
+          providerToken = session?.provider_token ?? null;
+        }
+      }
+
+      if (!session || !providerToken) {
+        toast.error("Google Calendar access wasn't granted.");
+        setCalendarAnalyzing(false);
+        return;
+      }
+
+      // Scan full month (31-day horizon).
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      const end = new Date(start); end.setDate(end.getDate() + 31);
+
+      toast("Scanning the next 31 days of your calendar…", { icon: "🔍" });
+      const { data: calData, error: calErr } = await supabase.functions.invoke("google-calendar", {
+        headers: { "x-provider-token": providerToken },
+        body: {
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          timeMin: start.toISOString(),
+          timeMax: end.toISOString(),
+        },
+      });
+      if (calErr || calData?.error) {
+        toast.error(calData?.error || "Failed to fetch calendar");
+        setCalendarAnalyzing(false);
+        return;
+      }
+      const events = calData?.events ?? [];
+
+      toast("Running neurosymbolic reasoning…", { icon: "🧠" });
+      const { data: ana, error: anaErr } = await supabase.functions.invoke("analyze-calendar-tasks", {
+        body: { events, today: new Date().toISOString().slice(0, 10) },
+      });
+      if (anaErr || ana?.error) {
+        toast.error(ana?.error || "Analysis failed");
+        setCalendarAnalyzing(false);
+        return;
+      }
+
+      setAnalyzedTasks(ana?.analyzed ?? []);
+      toast.success(`Analyzed ${ana?.analyzed?.length ?? 0} events ✨`);
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not analyze calendar");
+    } finally {
+      setCalendarAnalyzing(false);
+    }
+  };
+
+
 
   // ─── LANDING PAGE ───
   if (viewMode === "landing") {
@@ -310,28 +402,17 @@ const Index = () => {
             <span>🎯</span>
           </Link>
           <button
-            onClick={async () => {
-              try {
-                const { lovable } = await import("@/integrations/lovable/index");
-                const result = await lovable.auth.signInWithOAuth("google", {
-                  redirect_uri: window.location.origin,
-                });
-                if (result.error) {
-                  toast.error((result.error as Error)?.message || "Could not start Google sign-in");
-                  return;
-                }
-                // If redirected, browser handles navigation.
-              } catch (e) {
-                toast.error("Could not start Google sign-in");
-              }
-            }}
-            className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
+            onClick={runCalendarAnalysis}
+            disabled={calendarAnalyzing}
+            className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105 disabled:opacity-60"
             style={{ color: "hsl(280 40% 40%)" }}
-            aria-label="Sign in with My Calendar"
-            title={`Sign in with My Calendar • ${todayDate}`}
+            aria-label="Scan and analyze my calendar for the month"
+            title={`Scan calendar (next 31 days) • ${todayDate}`}
           >
             <Calendar className="w-4 h-4" />
-            <span className="font-body font-semibold">My Calendar</span>
+            <span className="font-body font-semibold">
+              {calendarAnalyzing ? "Analyzing…" : "My Calendar"}
+            </span>
             <span>📅</span>
           </button>
         </div>
@@ -339,29 +420,8 @@ const Index = () => {
         {/* Google Calendar sign-in button - bottom left */}
         <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 z-20">
           <button
-            onClick={async () => {
-              try {
-                const { supabase } = await import("@/integrations/supabase/client");
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                  provider: "google",
-                  options: {
-                    scopes: "https://www.googleapis.com/auth/calendar.readonly",
-                    redirectTo: window.location.origin,
-                    skipBrowserRedirect: true,
-                  },
-                });
-                if (error) {
-                  toast.error(error.message);
-                  return;
-                }
-                if (data?.url) {
-                  const popup = window.open(data.url, "google-oauth", "width=500,height=650,left=100,top=100");
-                  if (!popup) toast.error("Popup blocked. Please allow popups.");
-                }
-              } catch (e) {
-                toast.error("Could not start Google sign-in");
-              }
-            }}
+            onClick={runCalendarAnalysis}
+            disabled={calendarAnalyzing}
             className="glass-pill p-5 sm:p-6 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-lg"
             aria-label="Sign in with My Calendar"
             title={`Sign in with My Calendar • ${todayDate}`}
@@ -386,6 +446,12 @@ const Index = () => {
           </div>
         </div>
       </div>
+      <CalendarAnalysisModal
+        isOpen={analyzedTasks !== null}
+        onClose={() => setAnalyzedTasks(null)}
+        tasks={analyzedTasks ?? []}
+        monthLabel={new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+      />
     </div>
     );
   }
