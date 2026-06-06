@@ -310,26 +310,36 @@ const Index = () => {
             <span>🎯</span>
           </Link>
           <button
-            onClick={() => {
-              const snap = loadScheduleSnapshot();
-              if (snap && snap.schedule.length > 0) {
-                setGeneratedSchedule(snap.schedule);
-                if (snap.settings) setSettings(snap.settings);
-                setViewMode("schedule");
-                const hoursAgo = Math.max(0, Math.round((Date.now() - snap.savedAt) / 3_600_000));
-                toast.success(`Loaded your saved schedule (${hoursAgo}h ago) 🐰`);
-              } else if (generatedSchedule.length > 0) {
-                setViewMode("schedule");
-              } else {
-                toast("No saved schedule yet — let's build one!", { icon: "✨" });
-                setViewMode("wizard");
+            onClick={async () => {
+              try {
+                const { supabase } = await import("@/integrations/supabase/client");
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                  provider: "google",
+                  options: {
+                    scopes: "https://www.googleapis.com/auth/calendar.readonly",
+                    redirectTo: window.location.origin,
+                    skipBrowserRedirect: true,
+                  },
+                });
+                if (error) {
+                  toast.error(error.message);
+                  return;
+                }
+                if (data?.url) {
+                  const popup = window.open(data.url, "google-oauth", "width=500,height=650,left=100,top=100");
+                  if (!popup) toast.error("Popup blocked. Please allow popups.");
+                }
+              } catch (e) {
+                toast.error("Could not start Google sign-in");
               }
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-full glass-pill text-sm transition-all hover:scale-105"
             style={{ color: "hsl(280 40% 40%)" }}
+            aria-label="Sign in with My Calendar"
+            title={`Sign in with My Calendar • ${todayDate}`}
           >
-            <ImageIcon className="w-4 h-4" />
-            <span className="font-body font-semibold">My Day</span>
+            <Calendar className="w-4 h-4" />
+            <span className="font-body font-semibold">My Calendar</span>
             <span>📅</span>
           </button>
         </div>
