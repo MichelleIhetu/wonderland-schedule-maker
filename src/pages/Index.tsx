@@ -420,29 +420,8 @@ const Index = () => {
         {/* Google Calendar sign-in button - bottom left */}
         <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 z-20">
           <button
-            onClick={async () => {
-              try {
-                const { supabase } = await import("@/integrations/supabase/client");
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                  provider: "google",
-                  options: {
-                    scopes: "https://www.googleapis.com/auth/calendar.readonly",
-                    redirectTo: window.location.origin,
-                    skipBrowserRedirect: true,
-                  },
-                });
-                if (error) {
-                  toast.error(error.message);
-                  return;
-                }
-                if (data?.url) {
-                  const popup = window.open(data.url, "google-oauth", "width=500,height=650,left=100,top=100");
-                  if (!popup) toast.error("Popup blocked. Please allow popups.");
-                }
-              } catch (e) {
-                toast.error("Could not start Google sign-in");
-              }
-            }}
+            onClick={runCalendarAnalysis}
+            disabled={calendarAnalyzing}
             className="glass-pill p-5 sm:p-6 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-lg"
             aria-label="Sign in with My Calendar"
             title={`Sign in with My Calendar • ${todayDate}`}
