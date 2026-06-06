@@ -335,6 +335,25 @@ const Index = () => {
           </button>
         </div>
 
+        {/* Calendar button - bottom left */}
+        <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 z-20">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className="glass-pill p-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95"
+                aria-label="Show date"
+              >
+                <Calendar className="w-5 h-5" style={{ color: "hsl(280 40% 40%)" }} />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="start" className="w-auto">
+              <p className="font-body text-sm" style={{ color: "hsl(280 40% 40%)" }}>
+                {todayDate}
+              </p>
+            </PopoverContent>
+          </Popover>
+        </div>
+
         {/* Bunny mascot - positioned on the right */}
         <div className="absolute bottom-4 -right-28 sm:bottom-8 sm:-right-24 lg:-right-20 z-10">
           <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
