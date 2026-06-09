@@ -231,13 +231,14 @@ const Index = () => {
         popup.location.href = data.url;
 
         return await new Promise<typeof session | null>((resolve) => {
+          let poll = 0;
           const timeout = window.setTimeout(() => {
             window.clearInterval(poll);
             popup.close();
             resolve(null);
           }, 120000);
 
-          const poll = window.setInterval(async () => {
+          poll = window.setInterval(async () => {
             const { data: { session: nextSession } } = await supabase.auth.getSession();
             if (nextSession?.provider_token) {
               window.clearTimeout(timeout);
