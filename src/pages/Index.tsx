@@ -237,11 +237,41 @@ const Index = () => {
         setCalendarAnalyzing(false);
         return;
       }
-      const events = calData?.events ?? [];
+      const allEvents = calData?.events ?? [];
 
-      toast("Running neurosymbolic reasoning…", { icon: "🧠" });
+      // Smart fallback: try today → this week → this month
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0, 10);
+      const weekEnd = new Date(now); weekEnd.setDate(weekEnd.getDate() + 7);
+
+      const getEventDate = (ev: any): string | null => {
+        const raw = ev?.date ?? ev?.startTime ?? ev?.start ?? null;
+        if (!raw) return null;
+        try { return new Date(raw).toISOString().slice(0, 10); } catch { return null; }
+      };
+
+      const inRange = (ev: any, fromStr: string, toStr: string) => {
+        const d = getEventDate(ev);
+        return !!d && d >= fromStr && d <= toStr;
+      };
+
+      let scope: "today" | "week" | "month" = "today";
+      let events = allEvents.filter((e: any) => inRange(e, todayStr, todayStr));
+      if (events.length === 0) {
+        const weekEndStr = weekEnd.toISOString().slice(0, 10);
+        events = allEvents.filter((e: any) => inRange(e, todayStr, weekEndStr));
+        scope = "week";
+      }
+      if (events.length === 0) {
+        events = allEvents;
+        scope = "month";
+      }
+
+      const scopeLabel = scope === "today" ? "today" : scope === "week" ? "this week" : "this month";
+      toast(`Nothing ${scope === "today" ? "" : "for today — "}analyzing ${scopeLabel}…`, { icon: "🧠" });
+
       const { data: ana, error: anaErr } = await supabase.functions.invoke("analyze-calendar-tasks", {
-        body: { events, today: new Date().toISOString().slice(0, 10) },
+        body: { events, today: todayStr },
       });
       if (anaErr || ana?.error) {
         toast.error(ana?.error || "Analysis failed");
@@ -250,7 +280,8 @@ const Index = () => {
       }
 
       setAnalyzedTasks(ana?.analyzed ?? []);
-      toast.success(`Analyzed ${ana?.analyzed?.length ?? 0} events ✨`);
+      toast.success(`Analyzed ${ana?.analyzed?.length ?? 0} events from ${scopeLabel} ✨`);
+
     } catch (e) {
       console.error(e);
       toast.error("Could not analyze calendar");
