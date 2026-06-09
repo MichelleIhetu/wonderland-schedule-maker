@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import CalendarAnalysisModal, { AnalyzedTask } from "@/components/CalendarAnalysisModal";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
 
@@ -186,13 +185,79 @@ const Index = () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
     try {
-      // Ensure Google sign-in with calendar scope.
+      const width = 520;
+      const height = 700;
+      const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+      const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+      const calendarAccessPopup = window.open(
+        "about:blank",
+        "google-calendar-oauth",
+        `width=${width},height=${height},left=${left},top=${top}`,
+      );
+
+      // Ensure Google sign-in with calendar scope via direct OAuth so we receive provider_token.
       let { data: { session } } = await supabase.auth.getSession();
       let providerToken = session?.provider_token ?? null;
 
-      // If we have a session but no provider token (e.g. signed in via Google One Tap /
-      // id_token grant), the OAuth redirect will be skipped and we'll never get
-      // calendar access. Sign out first to force a fresh OAuth redirect.
+      const requestCalendarAccess = async () => {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: window.location.origin,
+            scopes: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
+            queryParams: {
+              access_type: "offline",
+              include_granted_scopes: "true",
+              prompt: "consent select_account",
+            },
+            skipBrowserRedirect: true,
+          },
+        });
+
+        if (error) {
+          calendarAccessPopup?.close();
+          throw error;
+        }
+        if (!data?.url) {
+          calendarAccessPopup?.close();
+          throw new Error("Could not start Google Calendar sign-in");
+        }
+
+        if (!calendarAccessPopup) {
+          window.location.href = data.url;
+          return null;
+        }
+
+        calendarAccessPopup.location.href = data.url;
+
+        return await new Promise<typeof session | null>((resolve) => {
+          let poll = 0;
+          const timeout = window.setTimeout(() => {
+            window.clearInterval(poll);
+            calendarAccessPopup.close();
+            resolve(null);
+          }, 120000);
+
+          poll = window.setInterval(async () => {
+            const { data: { session: nextSession } } = await supabase.auth.getSession();
+            if (nextSession?.provider_token) {
+              window.clearTimeout(timeout);
+              window.clearInterval(poll);
+              calendarAccessPopup.close();
+              resolve(nextSession);
+              return;
+            }
+            if (calendarAccessPopup.closed) {
+              window.clearTimeout(timeout);
+              window.clearInterval(poll);
+              resolve(nextSession ?? null);
+            }
+          }, 500);
+        });
+      };
+
+      // Existing sessions created through id_token/One Tap do not include the Google
+      // access token needed for Calendar, so force a fresh scoped OAuth consent.
       if (session && !providerToken) {
         toast("Requesting Google Calendar permission…", { icon: "🔐" });
         await supabase.auth.signOut();
@@ -200,27 +265,17 @@ const Index = () => {
       }
 
       if (!session || !providerToken) {
-        const result = await lovable.auth.signInWithOAuth("google", {
-          redirect_uri: window.location.origin,
-          extraParams: {
-            scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly",
-            access_type: "offline",
-            prompt: "consent",
-          },
-        });
-        if (result.error) {
-          toast.error(result.error.message || "Sign-in failed");
+        const nextSession = await requestCalendarAccess();
+        if (!nextSession) {
+          toast("Finish Google Calendar permission, then tap My Calendar again.", { icon: "📅" });
           setCalendarAnalyzing(false);
           return;
         }
-        if (result.redirected) {
-          // Browser is redirecting to Google; nothing more to do here.
-          return;
-        }
-        const refreshed = await supabase.auth.getSession();
-        session = refreshed.data.session;
+        session = nextSession;
         providerToken = session?.provider_token ?? null;
       }
+
+      calendarAccessPopup?.close();
 
       if (!session || !providerToken) {
         toast.error("Google Calendar access wasn't granted. Please try again and tick the Calendar permission.");
