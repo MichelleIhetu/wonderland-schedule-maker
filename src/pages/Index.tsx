@@ -185,21 +185,21 @@ const Index = () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
     try {
+      const width = 520;
+      const height = 700;
+      const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+      const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+      const calendarAccessPopup = window.open(
+        "about:blank",
+        "google-calendar-oauth",
+        `width=${width},height=${height},left=${left},top=${top}`,
+      );
+
       // Ensure Google sign-in with calendar scope via direct OAuth so we receive provider_token.
       let { data: { session } } = await supabase.auth.getSession();
       let providerToken = session?.provider_token ?? null;
 
       const requestCalendarAccess = async () => {
-        const width = 520;
-        const height = 700;
-        const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
-        const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
-        const popup = window.open(
-          "about:blank",
-          "google-calendar-oauth",
-          `width=${width},height=${height},left=${left},top=${top}`,
-        );
-
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: {
@@ -215,26 +215,26 @@ const Index = () => {
         });
 
         if (error) {
-          popup?.close();
+          calendarAccessPopup?.close();
           throw error;
         }
         if (!data?.url) {
-          popup?.close();
+          calendarAccessPopup?.close();
           throw new Error("Could not start Google Calendar sign-in");
         }
 
-        if (!popup) {
+        if (!calendarAccessPopup) {
           window.location.href = data.url;
           return null;
         }
 
-        popup.location.href = data.url;
+        calendarAccessPopup.location.href = data.url;
 
         return await new Promise<typeof session | null>((resolve) => {
           let poll = 0;
           const timeout = window.setTimeout(() => {
             window.clearInterval(poll);
-            popup.close();
+            calendarAccessPopup.close();
             resolve(null);
           }, 120000);
 
@@ -243,11 +243,11 @@ const Index = () => {
             if (nextSession?.provider_token) {
               window.clearTimeout(timeout);
               window.clearInterval(poll);
-              popup.close();
+              calendarAccessPopup.close();
               resolve(nextSession);
               return;
             }
-            if (popup.closed) {
+            if (calendarAccessPopup.closed) {
               window.clearTimeout(timeout);
               window.clearInterval(poll);
               resolve(nextSession ?? null);
@@ -274,6 +274,8 @@ const Index = () => {
         session = nextSession;
         providerToken = session?.provider_token ?? null;
       }
+
+      calendarAccessPopup?.close();
 
       if (!session || !providerToken) {
         toast.error("Google Calendar access wasn't granted. Please try again and tick the Calendar permission.");
