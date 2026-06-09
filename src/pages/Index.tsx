@@ -190,6 +190,15 @@ const Index = () => {
       let { data: { session } } = await supabase.auth.getSession();
       let providerToken = session?.provider_token ?? null;
 
+      // If we have a session but no provider token (e.g. signed in via Google One Tap /
+      // id_token grant), the OAuth redirect will be skipped and we'll never get
+      // calendar access. Sign out first to force a fresh OAuth redirect.
+      if (session && !providerToken) {
+        toast("Requesting Google Calendar permission…", { icon: "🔐" });
+        await supabase.auth.signOut();
+        session = null;
+      }
+
       if (!session || !providerToken) {
         const result = await lovable.auth.signInWithOAuth("google", {
           redirect_uri: window.location.origin,
@@ -214,10 +223,11 @@ const Index = () => {
       }
 
       if (!session || !providerToken) {
-        toast.error("Google Calendar access wasn't granted.");
+        toast.error("Google Calendar access wasn't granted. Please try again and tick the Calendar permission.");
         setCalendarAnalyzing(false);
         return;
       }
+
 
       // Scan full month (31-day horizon).
       const start = new Date(); start.setHours(0, 0, 0, 0);
