@@ -409,21 +409,6 @@ const Index = () => {
           </button>
         </div>
 
-        {/* Google Calendar sign-in button - bottom left */}
-        <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 z-20">
-          <button
-            onClick={runCalendarAnalysis}
-            disabled={calendarAnalyzing}
-            className="glass-pill p-5 sm:p-6 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-lg"
-            aria-label="Sign in with My Calendar"
-            title={`Sign in with My Calendar • ${todayDate}`}
-          >
-            <Calendar className="w-8 h-8 sm:w-10 sm:h-10" style={{ color: "hsl(280 40% 40%)" }} />
-            <span className="hidden sm:inline font-body font-semibold text-base" style={{ color: "hsl(280 40% 40%)" }}>
-              My Calendar
-            </span>
-          </button>
-        </div>
 
         {/* Bunny mascot - positioned on the right */}
         <div className="absolute bottom-4 -right-28 sm:bottom-8 sm:-right-24 lg:-right-20 z-10">
