@@ -372,7 +372,7 @@ const Index = () => {
         </div>
 
         {/* Nav links - at the bottom of the page */}
-        <div className="flex flex-wrap items-center justify-center gap-4 pb-8 sm:pb-12 mt-12">
+        <div className="flex flex-wrap items-center justify-center gap-8 pb-8 sm:pb-12 mt-6">
           {generatedSchedule.length > 0 && (
             <button
               onClick={handleStartPomodoro}
@@ -386,22 +386,22 @@ const Index = () => {
           )}
           <Link
             to="/goals"
-            className="flex items-center gap-2 px-6 py-3 rounded-full glass-pill text-base transition-all hover:scale-105"
+            className="flex items-center gap-2 px-7 py-3.5 rounded-full glass-pill text-lg transition-all hover:scale-105"
             style={{ color: "hsl(280 40% 40%)" }}
           >
-            <Target className="w-5 h-5" />
+            <Target className="w-6 h-6" />
             <span className="font-body font-semibold">Goals</span>
             <span>🎯</span>
           </Link>
           <button
             onClick={runCalendarAnalysis}
             disabled={calendarAnalyzing}
-            className="flex items-center gap-2 px-6 py-3 rounded-full glass-pill text-base transition-all hover:scale-105 disabled:opacity-60"
+            className="flex items-center gap-2 px-7 py-3.5 rounded-full glass-pill text-lg transition-all hover:scale-105 disabled:opacity-60"
             style={{ color: "hsl(280 40% 40%)" }}
             aria-label="Scan and analyze my calendar for the month"
             title={`Scan calendar (next 31 days) • ${todayDate}`}
           >
-            <Calendar className="w-5 h-5" />
+            <Calendar className="w-6 h-6" />
             <span className="font-body font-semibold">
               {calendarAnalyzing ? "Analyzing…" : "My Calendar"}
             </span>
