@@ -127,6 +127,17 @@ const Index = () => {
 
   useEffect(() => { setCustomColors(defaultThemeColors[settings.backgroundTheme]); }, [settings.backgroundTheme]);
 
+  // Auto-resume calendar analysis after returning from Google OAuth redirect.
+  useEffect(() => {
+    if (sessionStorage.getItem("resume_calendar_analysis") === "1") {
+      sessionStorage.removeItem("resume_calendar_analysis");
+      // Wait a tick for the auth state to settle, then resume.
+      setTimeout(() => { runCalendarAnalysis(); }, 600);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove("theme-peppy-pink", "theme-ocean-calm", "theme-sunset-warm", "theme-forest-zen");
@@ -181,47 +192,24 @@ const Index = () => {
   const handleStart = () => { playBing(); setViewMode("wizard"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
 
-  const openCalendarOAuthTab = (url: string) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  };
-
   const runCalendarAnalysis = async () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
 
-    // Detect if we're running inside an iframe (e.g. the Lovable preview).
-    // Google refuses to load accounts.google.com inside sandboxed popups
-    // spawned from iframes (ERR_BLOCKED_BY_RESPONSE), so in that case we
-    // must navigate the top-level window instead of using a popup.
-    const inIframe = (() => {
-      try { return window.self !== window.top; } catch { return true; }
-    })();
-
     try {
-      const width = 520;
-      const height = 700;
-      const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
-      const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
-      const calendarAccessPopup = inIframe
-        ? null
-        : window.open(
-            "about:blank",
-            "google-calendar-oauth",
-            `width=${width},height=${height},left=${left},top=${top}`,
-          );
-
-      // Ensure Google sign-in with calendar scope via direct OAuth so we receive provider_token.
+      // Check existing session for Google provider_token (Calendar scope).
       let { data: { session } } = await supabase.auth.getSession();
       let providerToken = session?.provider_token ?? null;
 
-      const requestCalendarAccess = async () => {
-        const { data, error } = await supabase.auth.signInWithOAuth({
+      // If we don't have a provider token, kick off Google OAuth with Calendar scope.
+      // Use a normal top-level redirect — this is what worked before. Supabase handles
+      // the redirect; on return, the session has provider_token and we re-run.
+      if (!session || !providerToken) {
+        toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
+        // Remember the user was mid-calendar-flow so we can auto-resume after redirect.
+        sessionStorage.setItem("resume_calendar_analysis", "1");
+
+        const { error } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: {
             redirectTo: window.location.origin,
@@ -229,86 +217,20 @@ const Index = () => {
             queryParams: {
               access_type: "offline",
               include_granted_scopes: "true",
-              prompt: "consent select_account",
+              prompt: "consent",
             },
-            skipBrowserRedirect: true,
           },
         });
 
         if (error) {
-          calendarAccessPopup?.close();
-          throw error;
-        }
-        if (!data?.url) {
-          calendarAccessPopup?.close();
-          throw new Error("Could not start Google Calendar sign-in");
-        }
-
-        if (!calendarAccessPopup) {
-          // In preview, Google must open in an escaped tab; navigating the iframe
-          // itself causes accounts.google.com to refuse the connection.
-          if (inIframe) {
-            openCalendarOAuthTab(data.url);
-          } else {
-            window.location.assign(data.url);
-          }
-          return null;
-        }
-
-        calendarAccessPopup.location.href = data.url;
-
-        return await new Promise<typeof session | null>((resolve) => {
-          let poll = 0;
-          const timeout = window.setTimeout(() => {
-            window.clearInterval(poll);
-            calendarAccessPopup.close();
-            resolve(null);
-          }, 120000);
-
-          poll = window.setInterval(async () => {
-            const { data: { session: nextSession } } = await supabase.auth.getSession();
-            if (nextSession?.provider_token) {
-              window.clearTimeout(timeout);
-              window.clearInterval(poll);
-              calendarAccessPopup.close();
-              resolve(nextSession);
-              return;
-            }
-            if (calendarAccessPopup.closed) {
-              window.clearTimeout(timeout);
-              window.clearInterval(poll);
-              resolve(nextSession ?? null);
-            }
-          }, 500);
-        });
-      };
-
-      // Existing sessions created through id_token/One Tap do not include the Google
-      // access token needed for Calendar, so force a fresh scoped OAuth consent.
-      if (session && !providerToken) {
-        toast("Requesting Google Calendar permission…", { icon: "🔐" });
-        await supabase.auth.signOut();
-        session = null;
-      }
-
-      if (!session || !providerToken) {
-        const nextSession = await requestCalendarAccess();
-        if (!nextSession) {
-          toast("Finish Google Calendar permission, then tap My Calendar again.", { icon: "📅" });
+          toast.error(error.message || "Could not start Google sign-in");
           setCalendarAnalyzing(false);
-          return;
         }
-        session = nextSession;
-        providerToken = session?.provider_token ?? null;
-      }
-
-      calendarAccessPopup?.close();
-
-      if (!session || !providerToken) {
-        toast.error("Google Calendar access wasn't granted. Please try again and tick the Calendar permission.");
-        setCalendarAnalyzing(false);
+        // Browser is now redirecting to Google. Nothing else to do here.
         return;
       }
+
+
 
 
       // Scan full month (31-day horizon).
