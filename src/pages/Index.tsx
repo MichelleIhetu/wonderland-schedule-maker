@@ -224,7 +224,13 @@ const Index = () => {
         }
 
         if (!calendarAccessPopup) {
-          window.location.href = data.url;
+          // Popup blocked — break out of the Lovable preview iframe so Google
+          // isn't loaded inside an iframe (it refuses with ERR_BLOCKED_BY_RESPONSE).
+          try {
+            (window.top ?? window).location.href = data.url;
+          } catch {
+            window.open(data.url, "_blank", "noopener,noreferrer");
+          }
           return null;
         }
 
