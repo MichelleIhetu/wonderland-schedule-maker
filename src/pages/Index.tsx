@@ -127,6 +127,17 @@ const Index = () => {
 
   useEffect(() => { setCustomColors(defaultThemeColors[settings.backgroundTheme]); }, [settings.backgroundTheme]);
 
+  // Auto-resume calendar analysis after returning from Google OAuth redirect.
+  useEffect(() => {
+    if (sessionStorage.getItem("resume_calendar_analysis") === "1") {
+      sessionStorage.removeItem("resume_calendar_analysis");
+      // Wait a tick for the auth state to settle, then resume.
+      setTimeout(() => { runCalendarAnalysis(); }, 600);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove("theme-peppy-pink", "theme-ocean-calm", "theme-sunset-warm", "theme-forest-zen");
