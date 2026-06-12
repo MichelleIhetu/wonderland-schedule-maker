@@ -184,16 +184,27 @@ const Index = () => {
   const runCalendarAnalysis = async () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
+
+    // Detect if we're running inside an iframe (e.g. the Lovable preview).
+    // Google refuses to load accounts.google.com inside sandboxed popups
+    // spawned from iframes (ERR_BLOCKED_BY_RESPONSE), so in that case we
+    // must navigate the top-level window instead of using a popup.
+    const inIframe = (() => {
+      try { return window.self !== window.top; } catch { return true; }
+    })();
+
     try {
       const width = 520;
       const height = 700;
       const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
       const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
-      const calendarAccessPopup = window.open(
-        "about:blank",
-        "google-calendar-oauth",
-        `width=${width},height=${height},left=${left},top=${top}`,
-      );
+      const calendarAccessPopup = inIframe
+        ? null
+        : window.open(
+            "about:blank",
+            "google-calendar-oauth",
+            `width=${width},height=${height},left=${left},top=${top}`,
+          );
 
       // Ensure Google sign-in with calendar scope via direct OAuth so we receive provider_token.
       let { data: { session } } = await supabase.auth.getSession();
