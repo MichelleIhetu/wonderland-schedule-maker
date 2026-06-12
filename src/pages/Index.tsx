@@ -181,6 +181,16 @@ const Index = () => {
   const handleStart = () => { playBing(); setViewMode("wizard"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
 
+  const openCalendarOAuthTab = (url: string) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
   const runCalendarAnalysis = async () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
@@ -235,12 +245,12 @@ const Index = () => {
         }
 
         if (!calendarAccessPopup) {
-          // Popup blocked — break out of the Lovable preview iframe so Google
-          // isn't loaded inside an iframe (it refuses with ERR_BLOCKED_BY_RESPONSE).
-          try {
-            (window.top ?? window).location.href = data.url;
-          } catch {
-            window.open(data.url, "_blank", "noopener,noreferrer");
+          // In preview, Google must open in an escaped tab; navigating the iframe
+          // itself causes accounts.google.com to refuse the connection.
+          if (inIframe) {
+            openCalendarOAuthTab(data.url);
+          } else {
+            window.location.assign(data.url);
           }
           return null;
         }
