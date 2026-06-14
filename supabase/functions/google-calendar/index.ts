@@ -88,6 +88,66 @@ serve(async (req) => {
       timeMax = endUtc.toISOString();
     }
 
+    // Cache-only fast path: just return what we have, no Google call.
+    if (cacheOnly) {
+      const { data: cached } = await admin
+        .from('cached_calendar_events')
+        .select('events, fetched_at')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      return new Response(
+        JSON.stringify({ events: cached?.events || [], fromCache: true, fetchedAt: cached?.fetched_at || null }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Resolve a Google access token: prefer header from current session, else stored refresh token.
+    let providerToken = req.headers.get('x-provider-token') || '';
+
+    if (!providerToken) {
+      const { data: stored } = await admin
+        .from('google_oauth_tokens')
+        .select('refresh_token, access_token, expires_at')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!stored?.refresh_token) {
+        const { data: cached } = await admin
+          .from('cached_calendar_events')
+          .select('events, fetched_at')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        return new Response(
+          JSON.stringify({
+            error: 'No Google credentials. Sign in with Google to refresh.',
+            needsAuth: true,
+            events: cached?.events || [],
+            fromCache: !!cached,
+            fetchedAt: cached?.fetched_at || null,
+          }),
+          { status: cached ? 200 : 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const stillValid = stored.access_token && stored.expires_at && new Date(stored.expires_at) > new Date();
+      if (stillValid) {
+        providerToken = stored.access_token!;
+      } else {
+        const refreshed = await refreshGoogleToken(stored.refresh_token);
+        if (!refreshed?.access_token) {
+          return new Response(
+            JSON.stringify({ error: 'Failed to refresh Google access. Please sign in again.', needsAuth: true }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        providerToken = refreshed.access_token;
+        await admin.from('google_oauth_tokens').update({
+          access_token: refreshed.access_token,
+          expires_at: new Date(Date.now() + (refreshed.expires_in - 60) * 1000).toISOString(),
+        }).eq('user_id', user.id);
+      }
+    }
+
     console.log('Using timezone:', timezone);
     console.log('Fetching events from', timeMin, 'to', timeMax);
 
