@@ -34,20 +34,37 @@ const CalendarAnalysisModal = ({ isOpen, onClose, tasks, monthLabel }: Props) =>
   const critical = tasks.filter((t) => t.final_importance === "critical").length;
   const major = tasks.filter((t) => t.final_importance === "major").length;
 
+  // Count events happening within the next 7 days (immediate/urgent)
+  const now = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  const immediateCount = tasks.filter((t) => {
+    if (!t.date) return false;
+    const ts = new Date(t.date).getTime();
+    return ts >= now - 24 * 60 * 60 * 1000 && ts <= now + sevenDaysMs;
+  }).length;
+
+  const isBusy = immediateCount >= 3;
+  const titleText = isBusy
+    ? "Some Bunny's Been Busy!"
+    : `Monthly Debrief · Hop to It — ${monthLabel} Debrief`;
+
   return (
     <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl bg-card border-primary/20">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl text-foreground flex items-center gap-2">
+          <DialogTitle className="font-display text-xl text-foreground flex items-center gap-2 flex-wrap">
             <Sparkles className="w-5 h-5 text-primary" />
-            Neurosymbolic Calendar Plan · {monthLabel}
+            {titleText}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="text-sm text-muted-foreground mb-3 flex items-center gap-4">
+        <div className="text-sm text-muted-foreground mb-3 flex items-center gap-4 flex-wrap">
           <span className="flex items-center gap-1"><AlertTriangle className="w-4 h-4 text-red-500" /> {critical} critical</span>
           <span className="flex items-center gap-1"><Clock className="w-4 h-4 text-orange-500" /> {major} major</span>
           <span>· {tasks.length} events scanned</span>
+          {isBusy && (
+            <span className="text-primary font-semibold">· {immediateCount} in the next 7 days</span>
+          )}
         </div>
 
         {tasks.length === 0 ? (
