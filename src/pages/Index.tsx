@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useClockTick } from "@/hooks/useClockTick";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ImageIcon, Clock, LogOut, Target, ArrowLeft, Calendar } from "lucide-react";
+import { ImageIcon, Clock, LogOut, Target, ArrowLeft, ArrowRight, Calendar } from "lucide-react";
 import { getFormattedDate } from "@/lib/dayGreetings";
 import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
@@ -451,6 +451,15 @@ const Index = () => {
               {calendarAnalyzing ? "Analyzing…" : "My Calendar"}
             </span>
             <span>📅</span>
+          </button>
+          <button
+            onClick={() => { playBing(); setViewMode("wizard"); }}
+            className="flex items-center gap-2 px-7 py-3.5 rounded-full text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+            style={{ background: "hsl(280 70% 50%)" }}
+            aria-label="Skip calendar and continue to build a fresh schedule"
+          >
+            <span>Next</span>
+            <ArrowRight className="w-5 h-5" />
           </button>
         </div>
 
