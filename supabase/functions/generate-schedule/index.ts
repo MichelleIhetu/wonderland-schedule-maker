@@ -62,8 +62,6 @@ TIMEZONE & CURRENT TIME (CRITICAL)
 - Never schedule tasks in the past: the FIRST task's "time" must be ≥ ${currentLocalTime || settings.wakeTime}.
 - Any deadlines the user mentions (e.g. "due at 5 PM") are LOCAL TIME in ${tz}.
 - For [FIXED] calendar events, the provided start/end times are already converted to ${tz} — copy them exactly.
-`;
-
 
 ═══════════════════════════════════════
 DEADLINE OPTIMIZATION ENGINE — CORE RULES
