@@ -611,12 +611,12 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     {importedEvents.length === 0 && (
                       <button
                         onClick={() => handleCalendarImport([])}
-                        className="w-full mt-2 flex items-center justify-center gap-2 px-6 py-3 rounded-full text-base font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+                        className="w-full mt-2 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-white shadow-md transition-all hover:scale-105 active:scale-95"
                         style={{ background: "hsl(280 70% 50%)" }}
                         aria-label="Skip calendar import and continue"
                       >
                         <span>Next</span>
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-3 h-3" />
                       </button>
                     )}
                   </motion.div>
