@@ -469,7 +469,7 @@ const Index = () => {
 
         {/* Bunny mascot - positioned on the right */}
         <div className="absolute bottom-4 -right-28 sm:bottom-8 sm:-right-24 lg:-right-20 z-10">
-          <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
+          <div role="button" tabIndex={0} aria-label="Toggle TimeBunny mascot speech bubble" className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setShowSpeechBubble(!showSpeechBubble); }}>
             {/* Bunny mascot */}
             <img
               src={bunnyMascot}
