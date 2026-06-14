@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, Sparkles, AlertTriangle, Clock } from "lucide-react";
+import { Calendar, Sparkles, AlertTriangle, Clock, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export interface AnalyzedTask {
   id: string;
@@ -26,6 +27,7 @@ const importanceStyles: Record<AnalyzedTask["final_importance"], string> = {
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onNext?: () => void;
   tasks: AnalyzedTask[];
   monthLabel: string;
 }
