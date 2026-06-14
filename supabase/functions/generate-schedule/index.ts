@@ -19,19 +19,29 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, settings } = await req.json() as { 
+    const { messages, settings, timezone, currentTime, currentLocalTime, currentLocalDate, utcOffsetMinutes } = await req.json() as {
       messages: Array<{ role: string; content: string }>;
       settings: UserSettings;
+      timezone?: string;
+      currentTime?: string;
+      currentLocalTime?: string;
+      currentLocalDate?: string;
+      utcOffsetMinutes?: number;
     };
-    
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       console.error("LOVABLE_API_KEY is not configured");
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Generating schedule with settings:", settings);
+    console.log("Generating schedule with settings:", settings, "tz:", timezone);
     console.log("Messages count:", messages.length);
+
+    const tz = timezone || "UTC";
+    const offsetStr = typeof utcOffsetMinutes === "number"
+      ? `UTC${utcOffsetMinutes >= 0 ? "+" : "-"}${String(Math.floor(Math.abs(utcOffsetMinutes) / 60)).padStart(2, "0")}:${String(Math.abs(utcOffsetMinutes) % 60).padStart(2, "0")}`
+      : "UTC";
 
     const systemPrompt = `You are a ruthlessly effective schedule optimizer for college students. You disguise your precision behind a whimsical Wonderland personality (${settings.theme} suit), but your PRIMARY MISSION is helping students meet every deadline.
 
@@ -40,6 +50,18 @@ User's current state:
 - Stress Level: ${settings.stressLevel}
 - Wake Time: ${settings.wakeTime}
 - Bed Time: ${settings.bedTime}
+
+═══════════════════════════════════════
+TIMEZONE & CURRENT TIME (CRITICAL)
+═══════════════════════════════════════
+- User timezone: ${tz} (${offsetStr})
+- Current local date: ${currentLocalDate || "unknown"}
+- Current local time: ${currentLocalTime || "unknown"} (24-hour, user local)
+- ALL "time" / "endTime" fields in your output MUST be in this LOCAL timezone (${tz}), never UTC.
+- Wake Time (${settings.wakeTime}) and Bed Time (${settings.bedTime}) are already in the user's local timezone.
+- Never schedule tasks in the past: the FIRST task's "time" must be ≥ ${currentLocalTime || settings.wakeTime}.
+- Any deadlines the user mentions (e.g. "due at 5 PM") are LOCAL TIME in ${tz}.
+- For [FIXED] calendar events, the provided start/end times are already converted to ${tz} — copy them exactly.
 
 ═══════════════════════════════════════
 DEADLINE OPTIMIZATION ENGINE — CORE RULES

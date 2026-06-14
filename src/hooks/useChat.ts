@@ -51,6 +51,11 @@ export function useChat(settings: UserSettings) {
             content: m.content,
           })),
           settings,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          currentTime: new Date().toISOString(),
+          currentLocalTime: new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false }),
+          currentLocalDate: new Date().toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" }),
+          utcOffsetMinutes: -new Date().getTimezoneOffset(),
         }),
       });
 
