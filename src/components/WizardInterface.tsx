@@ -30,6 +30,7 @@ interface WizardInterfaceProps {
   isLoading: boolean;
   generatedSchedule: ScheduleItem[];
   initialScene?: Scene;
+  onBackFromInitial?: () => void;
 }
 
 // ─── SCENE DEFINITIONS ───
