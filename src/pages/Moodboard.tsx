@@ -267,6 +267,7 @@ const Moodboard = () => {
           {onSave && (
             <button
               onClick={onSave}
+              aria-label="Save image to board"
               className="p-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/80 transition-colors"
               title="Save to board"
             >
@@ -276,6 +277,7 @@ const Moodboard = () => {
           {onRemove && (
             <button
               onClick={onRemove}
+              aria-label="Remove image from board"
               className="p-2 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-colors"
               title="Remove"
             >
@@ -307,8 +309,8 @@ const Moodboard = () => {
         {/* Header */}
         <header className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="icon">
+            <Link to="/" aria-label="Back to home">
+              <Button variant="ghost" size="icon" aria-label="Back to home">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
