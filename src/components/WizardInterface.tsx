@@ -1135,6 +1135,19 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
         onClose={() => setIsCalendarModalOpen(false)}
         onImport={handleCalendarImport}
       />
+
+      {/* Next button — fixed bottom-right, library scene only, when no imported events */}
+      {scene === "library" && importedEvents.length === 0 && (
+        <button
+          onClick={() => handleCalendarImport([])}
+          className="fixed bottom-4 right-4 z-50 flex items-center justify-center gap-1 px-4 py-1.5 rounded-full text-xs font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+          style={{ background: "hsl(280 70% 50%)" }}
+          aria-label="Skip calendar import and continue"
+        >
+          <span>Next</span>
+          <ArrowRight className="w-3 h-3" />
+        </button>
+      )}
     </div>
   );
 };
