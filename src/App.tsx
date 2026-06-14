@@ -11,6 +11,7 @@ import Goals from "./pages/Goals";
 import Auth from "./pages/Auth";
 import Pomodoro from "./pages/Pomodoro";
 import NotFound from "./pages/NotFound";
+import WelcomeBack from "./pages/WelcomeBack";
 
 const queryClient = new QueryClient();
 
