@@ -6,6 +6,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-provider-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+async function refreshGoogleToken(refreshToken: string): Promise<{ access_token: string; expires_in: number } | null> {
+  const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+  const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+  if (!clientId || !clientSecret) {
+    console.error('Missing GOOGLE_CLIENT_ID/SECRET');
+    return null;
+  }
+  const resp = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token',
+    }),
+  });
+  if (!resp.ok) {
+    console.error('Google refresh failed:', resp.status, await resp.text());
+    return null;
+  }
+  return await resp.json();
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -14,7 +38,8 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
@@ -24,14 +49,9 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-
-    // Create client and explicitly validate the JWT token
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
-
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    
+
     if (userError || !user) {
       console.error('User not authenticated:', userError);
       return new Response(
@@ -42,24 +62,17 @@ serve(async (req) => {
 
     console.log('Fetching calendar for user:', user.id);
 
-    // Try to get provider token from custom header (passed by client)
-    const providerToken = req.headers.get('x-provider-token');
-    
-    if (!providerToken) {
-      console.error('No Google provider token found');
-      return new Response(
-        JSON.stringify({ error: 'No Google provider token. Please sign out and sign in again with Google to grant calendar access.' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    const admin = createClient(supabaseUrl, serviceKey);
 
-    // Parse body for timezone and day range from client
+    // Parse body first (so we can also check for cacheOnly flag)
     let timezone = 'UTC';
     let timeMin = '';
     let timeMax = '';
+    let cacheOnly = false;
     try {
       const body = await req.json();
       if (body?.timezone) timezone = body.timezone;
+      if (body?.cacheOnly) cacheOnly = true;
       if (body?.timeMin) timeMin = body.timeMin;
       if (body?.timeMax) timeMax = body.timeMax;
     } catch {}
