@@ -195,14 +195,6 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
       return;
     }
 
-    // If no provider token, we need to re-auth to get calendar access
-    if (!providerToken) {
-      setHasFetchedGoogle(false);
-      setError(null);
-      handleGoogleSignIn();
-      return;
-    }
-
     setIsGoogleLoading(true);
     setError(null);
 
@@ -212,10 +204,11 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
       const localEnd = new Date(localStart);
       localEnd.setDate(localEnd.getDate() + 1);
 
+      const headers: Record<string, string> = {};
+      if (providerToken) headers['x-provider-token'] = providerToken;
+
       const { data, error } = await supabase.functions.invoke('google-calendar', {
-        headers: {
-          'x-provider-token': providerToken,
-        },
+        headers,
         body: {
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           timeMin: localStart.toISOString(),
@@ -229,7 +222,14 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
         return;
       }
 
-      if (data.error) {
+      if (data?.needsAuth && (!data.events || data.events.length === 0)) {
+        // Need fresh sign-in
+        setError(null);
+        handleGoogleSignIn();
+        return;
+      }
+
+      if (data?.error && (!data.events || data.events.length === 0)) {
         console.error('Calendar API error:', data.error);
         setError(data.error);
         return;
