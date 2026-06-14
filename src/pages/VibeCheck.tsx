@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SEO from "@/components/SEO";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -140,6 +141,8 @@ const VibeCheck = () => {
       className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
       style={{ background: COLORS.bg }}
     >
+      <SEO title="Vibe Check — TimeBunny" description="Hourly motivation check-in that adjusts the rest of your TimeBunny schedule." path="/vibe-check" />
+
       {/* Decorative clock tick marks like the active timer scene */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-50">
         <div className="relative" style={{ width: "min(140vw, 140vh)", height: "min(140vw, 140vh)" }}>

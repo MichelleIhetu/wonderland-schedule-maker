@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import SEO from "@/components/SEO";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ScheduleItem } from "@/types/schedule";
@@ -136,6 +137,8 @@ const Pomodoro = () => {
 
   return (
     <div className="min-h-screen bg-background p-4">
+      <SEO title="Focus Timer — TimeBunny Pomodoro" description="Run the current task on a full-screen Pomodoro focus timer with an Up Next queue from your TimeBunny schedule." path="/pomodoro" />
+
       <PomodoroTimer
         key={schedule.map((i) => `${i.id}-${i.time}`).join("|")}
         schedule={schedule}

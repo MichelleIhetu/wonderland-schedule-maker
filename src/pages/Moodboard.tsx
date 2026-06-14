@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SEO from "@/components/SEO";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Heart, Bookmark, Search, Sparkles, ExternalLink, Link2, X, Check, Loader2, Plus, Trash2, FolderHeart } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -298,7 +299,9 @@ const Moodboard = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      <SEO title="Moodboard — TimeBunny" description="Curate a Pinterest-style aesthetic moodboard to inspire your focus and motivation in TimeBunny." path="/moodboard" />
       <SpiderWebBackground />
+
 
       <div className="container max-w-6xl mx-auto px-4 py-6 relative z-10 min-h-screen">
         {/* Header */}

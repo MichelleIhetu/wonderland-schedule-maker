@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import SEO from "@/components/SEO";
 import { useClockTick } from "@/hooks/useClockTick";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ImageIcon, Clock, LogOut, Target, ArrowLeft, ArrowRight, Calendar } from "lucide-react";
