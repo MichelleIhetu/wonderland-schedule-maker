@@ -608,17 +608,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                         {isLoading ? "Generating..." : "Generate Schedule"}
                       </Button>
                     )}
-                    {importedEvents.length === 0 && (
-                      <button
-                        onClick={() => handleCalendarImport([])}
-                        className="w-full mt-2 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-white shadow-md transition-all hover:scale-105 active:scale-95"
-                        style={{ background: "hsl(280 70% 50%)" }}
-                        aria-label="Skip calendar import and continue"
-                      >
-                        <span>Next</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
-                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
