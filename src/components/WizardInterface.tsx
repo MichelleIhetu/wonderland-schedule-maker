@@ -29,6 +29,7 @@ interface WizardInterfaceProps {
   onComplete: (tasks: string) => void;
   isLoading: boolean;
   generatedSchedule: ScheduleItem[];
+  initialScene?: Scene;
 }
 
 // ─── SCENE DEFINITIONS ───
