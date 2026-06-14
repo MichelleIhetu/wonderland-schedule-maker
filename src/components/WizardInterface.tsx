@@ -1148,6 +1148,25 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
           <ArrowRight className="w-3 h-3" />
         </button>
       )}
+
+      {/* Skip button — fixed bottom-right, cozy scene only, square green, jumps to energy */}
+      {scene === "cozy" && (
+        <button
+          onClick={() => {
+            setIsJournalFocused(false);
+            setIsAutoAdvancePending(false);
+            setScene("energy");
+            setBubbleClickCount(1);
+            setShowSpeechBubble(true);
+            typeMessage("How is your energy level?");
+          }}
+          className="fixed bottom-4 right-4 z-50 flex items-center justify-center w-12 h-12 rounded-md text-xs font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+          style={{ background: "hsl(140 60% 45%)" }}
+          aria-label="Skip journal and continue to energy"
+        >
+          Skip
+        </button>
+      )}
     </div>
   );
 };
