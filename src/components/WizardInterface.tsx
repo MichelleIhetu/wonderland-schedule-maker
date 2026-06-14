@@ -87,7 +87,7 @@ const SCENE_CONFIG = {
 
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
-const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library" }: WizardInterfaceProps) => {
+const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library", onBackFromInitial }: WizardInterfaceProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { saveJournal, loadTodaySchedule } = useSchedulePersistence(user?.id);
