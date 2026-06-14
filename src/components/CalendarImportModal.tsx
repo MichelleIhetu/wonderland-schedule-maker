@@ -51,52 +51,92 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
   const [selectedGoogleEvents, setSelectedGoogleEvents] = useState<Set<string>>(new Set());
   const [hasFetchedGoogle, setHasFetchedGoogle] = useState(false);
 
+  // Persist provider tokens (access + refresh) on the backend so the user doesn't
+  // have to re-sign-in every session.
+  const persistProviderTokens = async (sess: Session | null) => {
+    if (!sess) return;
+    const refresh = (sess as any).provider_refresh_token as string | undefined;
+    const access = sess.provider_token || undefined;
+    if (!refresh) return; // Without refresh token we can't persist long-term.
+    try {
+      await supabase.functions.invoke('google-token-save', {
+        body: {
+          refresh_token: refresh,
+          access_token: access,
+          // Google access tokens are typically valid for 3600s
+          expires_in: 3600,
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
+        },
+      });
+    } catch (e) {
+      console.error('Failed to persist Google tokens:', e);
+    }
+  };
+
   useEffect(() => {
-    // Set up auth state listener — capture provider_token if available
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        if (session?.provider_token) {
-          setProviderToken(session.provider_token);
+        if (session?.provider_token) setProviderToken(session.provider_token);
+        if (event === 'SIGNED_IN' || (session as any)?.provider_refresh_token) {
+          persistProviderTokens(session);
         }
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.provider_token) {
-        setProviderToken(session.provider_token);
-      }
+      if (session?.provider_token) setProviderToken(session.provider_token);
+      persistProviderTokens(session);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auto-fetch Google events when modal opens and provider token is available
+  // Load cached events instantly when modal opens
   useEffect(() => {
-    if (isOpen && providerToken && session && !hasFetchedGoogle && googleEvents.length === 0) {
+    if (!isOpen || !session) return;
+    (async () => {
+      try {
+        const { data } = await supabase.functions.invoke('google-calendar', {
+          body: { cacheOnly: true },
+        });
+        if (data?.events?.length && googleEvents.length === 0) {
+          setGoogleEvents(data.events);
+          setSelectedGoogleEvents(new Set(data.events.map((e: CalendarEvent) => e.id)));
+        }
+      } catch {}
+    })();
+  }, [isOpen, session]);
+
+  // Auto-fetch fresh Google events when modal opens (uses session token OR stored refresh token)
+  useEffect(() => {
+    if (isOpen && session && !hasFetchedGoogle) {
       fetchGoogleCalendarEvents();
     }
-  }, [isOpen, providerToken, session]);
+  }, [isOpen, session, providerToken]);
 
   const handleGoogleSignIn = async () => {
     setError(null);
     setIsGoogleLoading(true);
-    
+
     try {
-      // Use direct OAuth (not managed OIDC) so we get provider_token for Calendar API
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           scopes: 'https://www.googleapis.com/auth/calendar.readonly',
           redirectTo: window.location.origin,
           skipBrowserRedirect: true,
+          // Request offline access + force consent so Google returns a refresh_token
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
-      
+
       if (error) {
         console.error('Google sign in error:', error);
         setError(error.message);
@@ -106,14 +146,13 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
 
       if (data?.url) {
         const popup = window.open(data.url, 'google-oauth', 'width=500,height=650,left=100,top=100');
-        
+
         if (!popup) {
           setError('Popup was blocked. Please allow popups for this site and try again.');
           setIsGoogleLoading(false);
           return;
         }
 
-        // Poll until popup closes, then capture session + provider_token
         const pollInterval = setInterval(async () => {
           if (popup.closed) {
             clearInterval(pollInterval);
@@ -123,7 +162,9 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
               setUser(newSession.user);
               if (newSession.provider_token) {
                 setProviderToken(newSession.provider_token);
-              } else {
+              }
+              await persistProviderTokens(newSession);
+              if (!newSession.provider_token && !(newSession as any).provider_refresh_token) {
                 setError('Calendar access not granted. Please try signing in again.');
               }
             } else {
