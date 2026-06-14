@@ -471,6 +471,7 @@ const Index = () => {
       <CalendarAnalysisModal
         isOpen={analyzedTasks !== null}
         onClose={() => setAnalyzedTasks(null)}
+        onNext={() => { playBing(); setViewMode("wizard"); }}
         tasks={analyzedTasks ?? []}
         monthLabel={new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" })}
       />

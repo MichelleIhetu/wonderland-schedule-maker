@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, Sparkles, AlertTriangle, Clock } from "lucide-react";
+import { Calendar, Sparkles, AlertTriangle, Clock, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export interface AnalyzedTask {
   id: string;
@@ -26,11 +27,12 @@ const importanceStyles: Record<AnalyzedTask["final_importance"], string> = {
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onNext?: () => void;
   tasks: AnalyzedTask[];
   monthLabel: string;
 }
 
-const CalendarAnalysisModal = ({ isOpen, onClose, tasks, monthLabel }: Props) => {
+const CalendarAnalysisModal = ({ isOpen, onClose, onNext, tasks, monthLabel }: Props) => {
   const critical = tasks.filter((t) => t.final_importance === "critical").length;
   const major = tasks.filter((t) => t.final_importance === "major").length;
 
@@ -68,9 +70,20 @@ const CalendarAnalysisModal = ({ isOpen, onClose, tasks, monthLabel }: Props) =>
         </div>
 
         {tasks.length === 0 ? (
-          <div className="py-12 text-center text-muted-foreground">
+          <div className="py-10 text-center text-muted-foreground">
             <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
-            No upcoming events found in the next 31 days.
+            <p>No upcoming events found in the next 31 days.</p>
+            <p className="text-sm mt-1 opacity-80">Your calendar is clear — let's build a fresh schedule!</p>
+            {onNext && (
+              <Button
+                onClick={() => { onClose(); onNext(); }}
+                className="mt-6 gap-2 text-white font-semibold px-6 py-3 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all"
+                style={{ background: "hsl(280 70% 50%)" }}
+              >
+                Next
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         ) : (
           <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-2">
