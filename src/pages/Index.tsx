@@ -310,6 +310,8 @@ const Index = () => {
   if (viewMode === "landing") {
     return (
       <div className="min-h-screen relative overflow-hidden" style={{ background: "hsl(300 50% 88%)" }}>
+      <SEO title="TimeBunny — AI Schedule Builder & Atomic Habits Companion" description="Build a focused daily plan from your calendar, energy, and long-term goals with a kawaii bunny mascot and built-in Pomodoro timer." path="/" />
+
       {/* Clock outline background - FULL PAGE */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
         <div
@@ -490,8 +492,12 @@ const Index = () => {
 
   // ─── APP VIEW ───
   return (
-    <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} generatedSchedule={generatedSchedule} />
+    <>
+      <SEO title="Build Your Schedule — TimeBunny" description="Walk through the TimeBunny wizard to capture energy, stress, and tasks, then generate today's focused schedule." path="/" />
+      <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} generatedSchedule={generatedSchedule} />
+    </>
   );
+
 };
 
 export default Index;
