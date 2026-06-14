@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper, ArrowRight } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
@@ -30,6 +30,7 @@ interface WizardInterfaceProps {
   isLoading: boolean;
   generatedSchedule: ScheduleItem[];
   initialScene?: Scene;
+  onBackFromInitial?: () => void;
 }
 
 // ─── SCENE DEFINITIONS ───
@@ -86,7 +87,7 @@ const SCENE_CONFIG = {
 
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
-const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library" }: WizardInterfaceProps) => {
+const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library", onBackFromInitial }: WizardInterfaceProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { saveJournal, loadTodaySchedule } = useSchedulePersistence(user?.id);
@@ -1168,6 +1169,41 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
           Skip
         </button>
       )}
+
+      {/* Back button — fixed top-left, navigates to previous scene */}
+      {(() => {
+        const prevMap: Record<Scene, Scene | null> = {
+          library: null,
+          cozy: "library",
+          energy: "cozy",
+          stress: "energy",
+          schedule: "stress",
+        };
+        const prev = prevMap[scene];
+        const atInitial = scene === initialScene;
+        const canGoBack = atInitial ? !!onBackFromInitial : !!prev;
+        if (!canGoBack) return null;
+        return (
+          <button
+            onClick={() => {
+              if (atInitial && onBackFromInitial) { onBackFromInitial(); return; }
+              if (!prev) return;
+              setScene(prev);
+              setShowSpeechBubble(false);
+              setTypedText("");
+              setBubbleClickCount(0);
+              setIsAutoAdvancePending(false);
+              setIsJournalFocused(false);
+            }}
+            className="fixed top-4 left-4 z-50 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+            style={{ background: "hsl(280 40% 40%)" }}
+            aria-label="Go back"
+          >
+            <ArrowLeft className="w-3 h-3" />
+            <span>Back</span>
+          </button>
+        );
+      })()}
     </div>
   );
 };

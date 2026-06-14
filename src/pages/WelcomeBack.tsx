@@ -124,7 +124,7 @@ const WelcomeBack = () => {
   if (view === "wizard") {
     return (
       <>
-        <SEO title="Welcome Back — TimeBunny" description="Pick up where you left off: journal, energy, stress, schedule, focus." path="/welcome-back" />
+        <SEO title="Welcome Back — TimeBunny" description="Pick up where you left off: journal, energy, stress, focus." path="/welcome-back" />
         <WizardInterface
           settings={settings}
           onSettingsChange={setSettings}
@@ -132,6 +132,7 @@ const WelcomeBack = () => {
           isLoading={isLoading}
           generatedSchedule={generatedSchedule}
           initialScene="cozy"
+          onBackFromInitial={() => setView("landing")}
         />
       </>
     );
