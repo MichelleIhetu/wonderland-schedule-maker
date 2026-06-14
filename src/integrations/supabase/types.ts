@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      cached_calendar_events: {
+        Row: {
+          created_at: string
+          events: Json
+          fetched_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          events: Json
+          fetched_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          events?: Json
+          fetched_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       goal_logs: {
         Row: {
           created_at: string
@@ -95,6 +122,36 @@ export type Database = {
           target_hours?: number
           target_unit?: string
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      google_oauth_tokens: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          expires_at: string | null
+          refresh_token: string
+          scope: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          refresh_token: string
+          scope?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          expires_at?: string | null
+          refresh_token?: string
+          scope?: string | null
           updated_at?: string
           user_id?: string
         }
