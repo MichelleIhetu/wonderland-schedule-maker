@@ -32,7 +32,7 @@ interface Props {
   monthLabel: string;
 }
 
-const CalendarAnalysisModal = ({ isOpen, onClose, tasks, monthLabel }: Props) => {
+const CalendarAnalysisModal = ({ isOpen, onClose, onNext, tasks, monthLabel }: Props) => {
   const critical = tasks.filter((t) => t.final_importance === "critical").length;
   const major = tasks.filter((t) => t.final_importance === "major").length;
 
