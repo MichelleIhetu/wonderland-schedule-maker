@@ -11,6 +11,7 @@ import Goals from "./pages/Goals";
 import Auth from "./pages/Auth";
 import Pomodoro from "./pages/Pomodoro";
 import NotFound from "./pages/NotFound";
+import WelcomeBack from "./pages/WelcomeBack";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/vibe-check" element={<ProtectedRoute><VibeCheck /></ProtectedRoute>} />
           <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
           <Route path="/pomodoro" element={<ProtectedRoute><Pomodoro /></ProtectedRoute>} />
+          <Route path="/welcome-back" element={<ProtectedRoute><WelcomeBack /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

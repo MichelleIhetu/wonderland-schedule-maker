@@ -29,6 +29,7 @@ interface WizardInterfaceProps {
   onComplete: (tasks: string) => void;
   isLoading: boolean;
   generatedSchedule: ScheduleItem[];
+  initialScene?: Scene;
 }
 
 // ─── SCENE DEFINITIONS ───
@@ -85,12 +86,12 @@ const SCENE_CONFIG = {
 
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
-const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule }: WizardInterfaceProps) => {
+const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library" }: WizardInterfaceProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { saveJournal, loadTodaySchedule } = useSchedulePersistence(user?.id);
   // ─── SCENE STATE (single source of truth) ───
-  const [scene, setScene] = useState<Scene>("library");
+  const [scene, setScene] = useState<Scene>(initialScene);
 
   const [step, setStep] = useState<WizardStep>("tasks");
   const [breakFrequency, setBreakFrequency] = useState<"minimal" | "moderate" | "frequent">("moderate");
