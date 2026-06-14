@@ -282,8 +282,19 @@ serve(async (req) => {
         };
       });
 
+    // Cache the fetched events for fast subsequent loads
+    try {
+      await admin.from('cached_calendar_events').upsert({
+        user_id: user.id,
+        events,
+        fetched_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+    } catch (e) {
+      console.error('Failed to cache events:', e);
+    }
+
     return new Response(
-      JSON.stringify({ events }),
+      JSON.stringify({ events, fromCache: false }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
