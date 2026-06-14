@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
@@ -607,6 +607,17 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                         <PlayCircle className="w-4 h-4" />
                         {isLoading ? "Generating..." : "Generate Schedule"}
                       </Button>
+                    )}
+                    {importedEvents.length === 0 && (
+                      <button
+                        onClick={() => handleCalendarImport([])}
+                        className="w-full mt-2 flex items-center justify-center gap-2 px-6 py-3 rounded-full text-base font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+                        style={{ background: "hsl(280 70% 50%)" }}
+                        aria-label="Skip calendar import and continue"
+                      >
+                        <span>Next</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
                     )}
                   </motion.div>
                 )}

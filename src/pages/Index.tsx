@@ -455,15 +455,6 @@ const Index = () => {
             </span>
             <span>📅</span>
           </button>
-          <button
-            onClick={() => { playBing(); setViewMode("wizard"); }}
-            className="flex items-center gap-2 px-7 py-3.5 rounded-full text-lg font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
-            style={{ background: "hsl(280 70% 50%)" }}
-            aria-label="Skip calendar and continue to build a fresh schedule"
-          >
-            <span>Next</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
         </div>
 
 
