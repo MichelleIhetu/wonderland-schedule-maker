@@ -1,0 +1,15 @@
+# TimeBunny
+
+> A kawaii AI schedule builder and Atomic Habits companion that turns your calendar, energy, and long-term goals into a focused daily plan with a built-in Pomodoro timer.
+
+TimeBunny helps users design productive days using a retro-pixel bunny mascot. It pulls fixed events from Google Calendar, asks about current energy and stress, and generates a schedule aligned with long-term goals. Hourly vibe checks adjust the plan, and a Pomodoro timer powers each focus block.
+
+## Pages
+- [Home — schedule builder](/): Build today's AI-assisted schedule from your calendar, energy, stress, and goals.
+- [Pomodoro Timer](/pomodoro): Full-screen focus timer for the current task with an Up Next panel.
+- [Long-Term Goals](/goals): Atomic-Habits-style goal tracker with AI suggestions for filling schedule gaps.
+- [Moodboard](/moodboard): Aesthetic moodboard powered by Pinterest-style image search.
+- [Vibe Check](/vibe-check): Hourly motivation check-in that adjusts the rest of the day.
+
+## Optional
+- [Sign in](/auth): Account access for saving schedules and goals.

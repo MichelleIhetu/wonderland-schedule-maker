@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import SEO from "@/components/SEO";
 import { useClockTick } from "@/hooks/useClockTick";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ImageIcon, Clock, LogOut, Target, ArrowLeft, ArrowRight, Calendar } from "lucide-react";
@@ -310,6 +311,8 @@ const Index = () => {
   if (viewMode === "landing") {
     return (
       <div className="min-h-screen relative overflow-hidden" style={{ background: "hsl(300 50% 88%)" }}>
+      <SEO title="TimeBunny — AI Schedule Builder & Atomic Habits Companion" description="Build a focused daily plan from your calendar, energy, and long-term goals with a kawaii bunny mascot and built-in Pomodoro timer." path="/" />
+
       {/* Clock outline background - FULL PAGE */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
         <div
@@ -466,7 +469,7 @@ const Index = () => {
 
         {/* Bunny mascot - positioned on the right */}
         <div className="absolute bottom-4 -right-28 sm:bottom-8 sm:-right-24 lg:-right-20 z-10">
-          <div className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)}>
+          <div role="button" tabIndex={0} aria-label="Toggle TimeBunny mascot speech bubble" className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setShowSpeechBubble(!showSpeechBubble); }}>
             {/* Bunny mascot */}
             <img
               src={bunnyMascot}
@@ -490,8 +493,12 @@ const Index = () => {
 
   // ─── APP VIEW ───
   return (
-    <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} generatedSchedule={generatedSchedule} />
+    <>
+      <SEO title="Build Your Schedule — TimeBunny" description="Walk through the TimeBunny wizard to capture energy, stress, and tasks, then generate today's focused schedule." path="/" />
+      <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} generatedSchedule={generatedSchedule} />
+    </>
   );
+
 };
 
 export default Index;

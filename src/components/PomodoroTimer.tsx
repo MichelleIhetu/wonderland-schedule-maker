@@ -497,15 +497,16 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
 
         {/* Controls */}
         <div className="flex gap-4 items-center">
-          <Button variant="outline" size="icon" onClick={resetTimer} className="w-12 h-12 rounded-full">
+          <Button variant="outline" size="icon" onClick={resetTimer} aria-label="Reset timer" className="w-12 h-12 rounded-full">
             <RotateCcw className="w-5 h-5" />
           </Button>
-          <Button onClick={toggleTimer} size="icon" className="w-16 h-16 rounded-full shadow-lg">
+          <Button onClick={toggleTimer} size="icon" aria-label={isRunning ? "Pause timer" : "Start timer"} className="w-16 h-16 rounded-full shadow-lg">
             {isRunning ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}
           </Button>
           <Button
             onClick={() => navigate("/vibe-check", { state: { fromPomodoro: true, schedule } })}
             size="icon"
+            aria-label="Open vibe check"
             className="w-14 h-14 rounded-full shadow-lg bg-blue-500 hover:bg-blue-600 text-white"
             title="Need a break? Feeling distracted or overwhelmed?"
           >
@@ -514,6 +515,7 @@ const PomodoroTimer = ({ schedule, onBack }: PomodoroTimerProps) => {
           <Button
             onClick={completeCurrentTask}
             size="icon"
+            aria-label="Complete current task"
             disabled={!currentTask || completedTasks.has(currentTaskIndex)}
             className="w-14 h-14 rounded-full shadow-lg bg-green-500 hover:bg-green-600 text-white"
             title="Complete current task"

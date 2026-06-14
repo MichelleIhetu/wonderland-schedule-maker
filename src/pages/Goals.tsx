@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SEO from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Flame, Target, TrendingUp, Archive, Clock, Sparkles, Wand2, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -393,6 +394,8 @@ export default function Goals() {
 
   return (
     <div className="min-h-screen w-full bg-[#fdfaff] p-4 md:p-8">
+      <SEO title="Long-Term Goals — TimeBunny" description="Track Atomic-Habits-style long-term goals and let TimeBunny suggest tasks that fill the gaps in your day." path="/goals" />
+
       <div className="max-w-2xl w-full mx-auto space-y-8">
         {/* Top nav */}
         <div className="flex items-center justify-between">
