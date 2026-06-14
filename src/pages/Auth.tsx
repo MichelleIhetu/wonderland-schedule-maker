@@ -114,7 +114,9 @@ const Auth = () => {
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
       <SpiderWebBackground />
+      <h1 className="sr-only">Sign in to TimeBunny</h1>
       <Card className="w-full max-w-md mx-4 relative z-10 bg-card/90 backdrop-blur-md border-primary/20">
+
         <CardHeader className="text-center">
           <div className="flex justify-center mb-3">
             <div className="p-3 rounded-full bg-primary/10 border border-primary/20">
