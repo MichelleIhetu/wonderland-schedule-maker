@@ -33,6 +33,13 @@ interface Props {
 const CalendarAnalysisModal = ({ isOpen, onClose, tasks, monthLabel }: Props) => {
   const critical = tasks.filter((t) => t.final_importance === "critical").length;
   const major = tasks.filter((t) => t.final_importance === "major").length;
+  // "Immediate" events = critical, or anything that needs prep starting within 3 days
+  const immediateCount = tasks.filter(
+    (t) => t.final_importance === "critical" || (typeof t.lead_days === "number" && t.lead_days <= 3)
+  ).length;
+  const title = immediateCount >= 3
+    ? "Hop to It — Monthly Debrief Time!"
+    : `Hop to It — ${monthLabel} Debrief`;
 
   return (
     <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
@@ -40,7 +47,7 @@ const CalendarAnalysisModal = ({ isOpen, onClose, tasks, monthLabel }: Props) =>
         <DialogHeader>
           <DialogTitle className="font-display text-xl text-foreground flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            Neurosymbolic Calendar Plan · {monthLabel}
+            {title}
           </DialogTitle>
         </DialogHeader>
 
