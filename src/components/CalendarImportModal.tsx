@@ -615,7 +615,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
                 
                 <div className="flex flex-col gap-2">
                   <Button
-                    onClick={fetchGoogleCalendarEvents}
+                    onClick={() => fetchGoogleCalendarEvents()}
                     disabled={isGoogleLoading}
                     className="w-full bg-primary hover:bg-primary/90 gap-2"
                   >
