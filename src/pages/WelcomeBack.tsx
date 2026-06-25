@@ -169,10 +169,31 @@ const WelcomeBack = () => {
           Sync your calendar, then we'll jump straight into journaling and a fresh focus session.
         </p>
 
+        {/* Scope selector */}
+        <div className="mt-8 flex items-center gap-2 glass-pill rounded-full p-1" role="group" aria-label="Calendar scope">
+          {(["day", "week", "month"] as const).map((s) => {
+            const active = scope === s;
+            return (
+              <button
+                key={s}
+                onClick={() => setScope(s)}
+                className="px-4 py-1.5 rounded-full text-sm font-body font-semibold capitalize transition-all"
+                style={{
+                  background: active ? "hsl(280 60% 60%)" : "transparent",
+                  color: active ? "white" : "hsl(280 40% 40%)",
+                }}
+                aria-pressed={active}
+              >
+                {s}
+              </button>
+            );
+          })}
+        </div>
+
         <button
-          onClick={runCalendarAnalysis}
+          onClick={() => runCalendarAnalysis(scope)}
           disabled={calendarAnalyzing}
-          className="mt-10 flex items-center gap-3 px-8 py-4 rounded-full glass-pill text-lg transition-all hover:scale-105 disabled:opacity-60"
+          className="mt-6 flex items-center gap-3 px-8 py-4 rounded-full glass-pill text-lg transition-all hover:scale-105 disabled:opacity-60"
           style={{ color: "hsl(280 40% 40%)" }}
           aria-label="Sync my calendar"
         >
