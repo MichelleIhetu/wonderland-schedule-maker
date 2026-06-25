@@ -30,6 +30,12 @@ async function refreshGoogleToken(refreshToken: string): Promise<{ access_token:
   return await resp.json();
 }
 
+type StoredGoogleToken = {
+  refresh_token: string | null;
+  access_token: string | null;
+  expires_at: string | null;
+};
+
 function isCalendarAuthError(status: number, errorText: string): boolean {
   const normalized = errorText.toLowerCase();
   return status === 401 || status === 403 ||
@@ -115,90 +121,101 @@ serve(async (req) => {
       );
     }
 
-    // Resolve a Google access token: prefer header from current session, else stored refresh token.
+    const authRequiredResponse = async (message = 'Google Calendar access needs a fresh permission grant.') => {
+      const cached = await getCachedCalendar();
+      return new Response(
+        JSON.stringify({
+          error: message,
+          needsAuth: true,
+          calendarScopeMissing: true,
+          events: cached?.events || [],
+          fromCache: !!cached,
+          fetchedAt: cached?.fetched_at || null,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    };
+
+    const { data: storedTokens } = await admin
+      .from('google_oauth_tokens')
+      .select('refresh_token, access_token, expires_at')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    let stored = (storedTokens || null) as StoredGoogleToken | null;
+
+    const refreshAndStoreProviderToken = async (): Promise<string | null> => {
+      if (!stored?.refresh_token) return null;
+      const refreshed = await refreshGoogleToken(stored.refresh_token);
+      if (!refreshed?.access_token) return null;
+
+      const expiresAt = new Date(Date.now() + (refreshed.expires_in - 60) * 1000).toISOString();
+      await admin.from('google_oauth_tokens').update({
+        access_token: refreshed.access_token,
+        expires_at: expiresAt,
+      }).eq('user_id', user.id);
+
+      stored = {
+        ...stored,
+        access_token: refreshed.access_token,
+        expires_at: expiresAt,
+      };
+
+      return refreshed.access_token;
+    };
+
+    // Resolve a Google access token: prefer the current session header, then a
+    // saved valid access token, then silently refresh with the saved refresh token.
     let providerToken = req.headers.get('x-provider-token') || '';
 
     if (!providerToken) {
-      const { data: stored } = await admin
-        .from('google_oauth_tokens')
-        .select('refresh_token, access_token, expires_at')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
       if (!stored?.refresh_token) {
-        const cached = await getCachedCalendar();
-        return new Response(
-          JSON.stringify({
-            error: 'No Google credentials. Sign in with Google to refresh.',
-            needsAuth: true,
-            events: cached?.events || [],
-            fromCache: !!cached,
-            fetchedAt: cached?.fetched_at || null,
-          }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        return await authRequiredResponse('No Google credentials. Sign in with Google to refresh.');
       }
 
       const stillValid = stored.access_token && stored.expires_at && new Date(stored.expires_at) > new Date();
       if (stillValid) {
         providerToken = stored.access_token!;
       } else {
-        const refreshed = await refreshGoogleToken(stored.refresh_token);
-        if (!refreshed?.access_token) {
-          const cached = await getCachedCalendar();
-          return new Response(
-            JSON.stringify({
-              error: 'Google Calendar access needs a fresh permission grant.',
-              needsAuth: true,
-              events: cached?.events || [],
-              fromCache: !!cached,
-              fetchedAt: cached?.fetched_at || null,
-            }),
-            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        providerToken = refreshed.access_token;
-        await admin.from('google_oauth_tokens').update({
-          access_token: refreshed.access_token,
-          expires_at: new Date(Date.now() + (refreshed.expires_in - 60) * 1000).toISOString(),
-        }).eq('user_id', user.id);
+        providerToken = await refreshAndStoreProviderToken() || '';
+        if (!providerToken) return await authRequiredResponse();
       }
     }
 
     console.log('Using timezone:', timezone);
     console.log('Fetching events from', timeMin, 'to', timeMax);
 
-    // Fetch all visible calendars first (not only "primary")
-    const calendarsResponse = await fetch(
+    const fetchCalendarList = (tokenToUse: string) => fetch(
       'https://www.googleapis.com/calendar/v3/users/me/calendarList',
-      {
-        headers: {
-          Authorization: `Bearer ${providerToken}`,
-        },
-      }
+      { headers: { Authorization: `Bearer ${tokenToUse}` } }
     );
+
+    // Fetch all visible calendars first (not only "primary"). If the access
+    // token is expired/revoked, silently refresh once and retry before asking
+    // the user to re-consent.
+    let calendarsResponse = await fetchCalendarList(providerToken);
 
     if (!calendarsResponse.ok) {
       const errorText = await calendarsResponse.text();
       console.error('Google Calendar list API error:', calendarsResponse.status, errorText);
       if (isCalendarAuthError(calendarsResponse.status, errorText)) {
-        const cached = await getCachedCalendar();
+        const refreshedToken = await refreshAndStoreProviderToken();
+        if (refreshedToken) {
+          providerToken = refreshedToken;
+          calendarsResponse = await fetchCalendarList(providerToken);
+        }
+
+        if (!refreshedToken || !calendarsResponse.ok) {
+          return await authRequiredResponse('Google Calendar permission is missing or expired. Please reconnect Calendar access.');
+        }
+      }
+
+      if (!calendarsResponse.ok) {
         return new Response(
-          JSON.stringify({
-            error: 'Google Calendar permission is missing or expired. Please reconnect Calendar access.',
-            needsAuth: true,
-            calendarScopeMissing: true,
-            events: cached?.events || [],
-            fromCache: !!cached,
-            fetchedAt: cached?.fetched_at || null,
-          }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Failed to fetch calendar list', details: errorText }),
+          { status: calendarsResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      return new Response(
-        JSON.stringify({ error: 'Failed to fetch calendar list', details: errorText }),
-        { status: calendarsResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
 
     const calendarsData = await calendarsResponse.json();
@@ -211,34 +228,42 @@ serve(async (req) => {
       ? calendars
       : [{ id: 'primary', summary: 'Primary Calendar' }];
 
-    const eventResponses = await Promise.all(
-      calendarIds.map(async (calendar) => {
-        const response = await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendar.id)}/events?` +
-          `timeMin=${encodeURIComponent(timeMin)}&` +
-          `timeMax=${encodeURIComponent(timeMax)}&` +
-          `timeZone=${encodeURIComponent(timezone)}&` +
-          `singleEvents=true&` +
-          `orderBy=startTime`,
-          {
-            headers: {
-              Authorization: `Bearer ${providerToken}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          const err = await response.text();
-          console.error(`Google Calendar API error for ${calendar.id}:`, response.status, err);
-          return [];
-        }
-
-        const data = await response.json();
-        return (data.items || []).map((item: any) => ({ ...item, _calendarName: calendar.summary }));
-      })
+    const fetchCalendarEvents = (calendarId: string, tokenToUse: string) => fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?` +
+      `timeMin=${encodeURIComponent(timeMin)}&` +
+      `timeMax=${encodeURIComponent(timeMax)}&` +
+      `timeZone=${encodeURIComponent(timezone)}&` +
+      `singleEvents=true&` +
+      `orderBy=startTime`,
+      { headers: { Authorization: `Bearer ${tokenToUse}` } }
     );
 
-    const mergedItems = eventResponses.flat();
+    const mergedItems: any[] = [];
+    for (const calendar of calendarIds) {
+      let response = await fetchCalendarEvents(calendar.id, providerToken);
+
+      if (!response.ok) {
+        const err = await response.text();
+        console.error(`Google Calendar API error for ${calendar.id}:`, response.status, err);
+
+        if (isCalendarAuthError(response.status, err)) {
+          const refreshedToken = await refreshAndStoreProviderToken();
+          if (refreshedToken) {
+            providerToken = refreshedToken;
+            response = await fetchCalendarEvents(calendar.id, providerToken);
+          }
+
+          if (!refreshedToken || !response.ok) {
+            return await authRequiredResponse('Google Calendar permission is missing or expired. Please reconnect Calendar access.');
+          }
+        } else {
+          continue;
+        }
+      }
+
+      const data = await response.json();
+      mergedItems.push(...(data.items || []).map((item: any) => ({ ...item, _calendarName: calendar.summary })));
+    }
     console.log('Fetched', mergedItems.length || 0, 'events across', calendarIds.length, 'calendars');
 
     // Helper: format a date-time string to HH:MM in the user's timezone
