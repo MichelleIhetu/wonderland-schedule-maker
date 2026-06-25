@@ -11,6 +11,7 @@ import { useChat } from "@/hooks/useChat";
 import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import { UserSettings } from "@/types/schedule";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 
 const defaultSettings: UserSettings = {
@@ -64,12 +65,13 @@ const WelcomeBack = () => {
       if (!session || !providerToken) {
         toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
         sessionStorage.setItem("resume_calendar_analysis_wb", "1");
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo: window.location.origin + "/welcome-back",
-            scopes: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
-            queryParams: { access_type: "offline", include_granted_scopes: "true", prompt: "consent" },
+        const { error } = await lovable.auth.signInWithOAuth("google", {
+          redirect_uri: window.location.origin + "/welcome-back",
+          extraParams: {
+            prompt: "consent",
+            access_type: "offline",
+            include_granted_scopes: "true",
+            scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
           },
         });
         if (error) { toast.error(error.message || "Could not start Google sign-in"); setCalendarAnalyzing(false); }

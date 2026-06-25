@@ -210,16 +210,14 @@ const Index = () => {
         // Remember the user was mid-calendar-flow so we can auto-resume after redirect.
         sessionStorage.setItem("resume_calendar_analysis", "1");
 
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo: window.location.origin,
-            scopes: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
-            queryParams: {
-              access_type: "offline",
-              include_granted_scopes: "true",
-              prompt: "consent",
-            },
+        const { lovable } = await import("@/integrations/lovable");
+        const { error } = await lovable.auth.signInWithOAuth("google", {
+          redirect_uri: window.location.origin,
+          extraParams: {
+            prompt: "consent",
+            access_type: "offline",
+            include_granted_scopes: "true",
+            scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
           },
         });
 
