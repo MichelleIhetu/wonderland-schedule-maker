@@ -56,7 +56,7 @@ const WelcomeBack = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const runCalendarAnalysis = async () => {
+  const runCalendarAnalysis = async (chosenScope: "day" | "week" | "month" = scope) => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
     try {
@@ -80,27 +80,19 @@ const WelcomeBack = () => {
       }
 
       const start = new Date(); start.setHours(0, 0, 0, 0);
-      const end = new Date(start); end.setDate(end.getDate() + 31);
-      toast("Scanning the next 31 days of your calendar…", { icon: "🔍" });
+      const end = new Date(start);
+      const scopeDays = chosenScope === "day" ? 1 : chosenScope === "week" ? 7 : 31;
+      end.setDate(end.getDate() + scopeDays);
+      const scopeLabel = chosenScope === "day" ? "today" : chosenScope === "week" ? "this week" : "the next 31 days";
+      toast(`Scanning ${scopeLabel} of your calendar…`, { icon: "🔍" });
       const { data: calData, error: calErr } = await supabase.functions.invoke("google-calendar", {
         headers: { "x-provider-token": providerToken },
         body: { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, timeMin: start.toISOString(), timeMax: end.toISOString() },
       });
       if (calErr || calData?.error) { toast.error(calData?.error || "Failed to fetch calendar"); setCalendarAnalyzing(false); return; }
 
-      const allEvents = calData?.events ?? [];
-      const now = new Date();
-      const todayStr = now.toISOString().slice(0, 10);
-      const weekEnd = new Date(now); weekEnd.setDate(weekEnd.getDate() + 7);
-      const getDate = (ev: any): string | null => {
-        const raw = ev?.date ?? ev?.startTime ?? ev?.start ?? null;
-        if (!raw) return null;
-        try { return new Date(raw).toISOString().slice(0, 10); } catch { return null; }
-      };
-      const inRange = (ev: any, from: string, to: string) => { const d = getDate(ev); return !!d && d >= from && d <= to; };
-      let events = allEvents.filter((e: any) => inRange(e, todayStr, todayStr));
-      if (events.length === 0) events = allEvents.filter((e: any) => inRange(e, todayStr, weekEnd.toISOString().slice(0, 10)));
-      if (events.length === 0) events = allEvents;
+      const events = calData?.events ?? [];
+      const todayStr = new Date().toISOString().slice(0, 10);
 
       const { data: ana, error: anaErr } = await supabase.functions.invoke("analyze-calendar-tasks", {
         body: { events, today: todayStr },
