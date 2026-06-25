@@ -119,7 +119,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
     }
   }, [isOpen, session, providerToken]);
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (): Promise<boolean> => {
     setError(null);
     setIsGoogleLoading(true);
 
@@ -138,7 +138,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
         console.error('Google sign in error:', error);
         setError(error.message);
         setIsGoogleLoading(false);
-        return;
+        return false;
       }
       const { data: { session: newSession } } = await supabase.auth.getSession();
       if (newSession) {
@@ -147,12 +147,15 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
         if (newSession.provider_token) setProviderToken(newSession.provider_token);
         await persistProviderTokens(newSession);
         setHasFetchedGoogle(false);
-        await fetchGoogleCalendarEvents(newSession.provider_token ?? null);
+        return true;
       }
+
+      return false;
     } catch (err) {
       console.error('Error signing in with Google:', err);
       setError('Failed to sign in with Google');
       setIsGoogleLoading(false);
+      return false;
     }
   };
 
@@ -200,7 +203,11 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
 
       if (data?.needsAuth) {
         setError(null);
-        handleGoogleSignIn();
+        const reconnected = await handleGoogleSignIn();
+        if (reconnected) {
+          const { data: { session: newSession } } = await supabase.auth.getSession();
+          await fetchGoogleCalendarEvents(newSession?.provider_token ?? null);
+        }
         return;
       }
 
