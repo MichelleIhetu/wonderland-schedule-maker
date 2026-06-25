@@ -76,6 +76,20 @@ const Index = () => {
   const { isLoading, sendMessage, generatedSchedule, setGeneratedSchedule } = useChat(settings);
   const { saveSchedule, loadTodaySchedule } = useSchedulePersistence(user?.id);
 
+  const persistGoogleTokens = async (activeSession: any) => {
+    const refreshToken = activeSession?.provider_refresh_token as string | undefined;
+    if (!refreshToken) return;
+
+    await supabase.functions.invoke("google-token-save", {
+      body: {
+        refresh_token: refreshToken,
+        access_token: activeSession?.provider_token || null,
+        expires_in: 3600,
+        scope: "https://www.googleapis.com/auth/calendar.readonly",
+      },
+    });
+  };
+
   // Load today's schedule on mount (works with or without auth via localStorage fallback)
   useEffect(() => {
     if (scheduleLoaded) return;
@@ -196,11 +210,11 @@ const Index = () => {
   const runCalendarAnalysis = async () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
-    const requestCalendarConsent = async () => {
+    const requestCalendarConsent = async (): Promise<boolean> => {
       toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
       sessionStorage.setItem("resume_calendar_analysis", "1");
       const { lovable } = await import("@/integrations/lovable");
-      const { error } = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
         extraParams: {
           prompt: "consent",
@@ -210,20 +224,26 @@ const Index = () => {
         },
       });
 
-      if (error) toast.error(error.message || "Could not start Google sign-in");
+      if (result.error) {
+        toast.error(result.error.message || "Could not start Google sign-in");
+        return false;
+      }
+
+      if (result.redirected) return false;
+
+      const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+      await persistGoogleTokens(refreshedSession);
+      return !!refreshedSession;
     };
 
     try {
-      // Check existing session for Google provider_token (Calendar scope).
+      // Check existing session. The backend can use saved refresh tokens even
+      // when the current session no longer has a provider_token.
       let { data: { session } } = await supabase.auth.getSession();
-      let providerToken = session?.provider_token ?? null;
+      await persistGoogleTokens(session);
 
-      // If we don't have a provider token, kick off Google OAuth with Calendar scope.
-      // Use a normal top-level redirect — this is what worked before. Supabase handles
-      // the redirect; on return, the session has provider_token and we re-run.
-      if (!session || !providerToken) {
+      if (!session) {
         await requestCalendarConsent();
-        // Browser is now redirecting to Google. Nothing else to do here.
         return;
       }
 
@@ -235,22 +255,38 @@ const Index = () => {
       const end = new Date(start); end.setDate(end.getDate() + 31);
 
       toast("Scanning the next 31 days of your calendar…", { icon: "🔍" });
-      const { data: calData, error: calErr } = await supabase.functions.invoke("google-calendar", {
-        headers: { "x-provider-token": providerToken },
-        body: {
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          timeMin: start.toISOString(),
-          timeMax: end.toISOString(),
-        },
-      });
+
+      const fetchCalendar = async () => {
+        const { data: { session: latestSession } } = await supabase.auth.getSession();
+        await persistGoogleTokens(latestSession);
+        const headers: Record<string, string> = {};
+        if (latestSession?.provider_token) headers["x-provider-token"] = latestSession.provider_token;
+
+        return supabase.functions.invoke("google-calendar", {
+          headers,
+          body: {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timeMin: start.toISOString(),
+            timeMax: end.toISOString(),
+          },
+        });
+      };
+
+      let { data: calData, error: calErr } = await fetchCalendar();
       if (calData?.needsAuth) {
         if (calData?.events?.length) {
           toast("Using your saved calendar while refreshing permissions…", { icon: "📅" });
         } else {
           toast("Calendar permission needs to be refreshed.", { icon: "📅" });
         }
-        await requestCalendarConsent();
-        return;
+        const reconnected = await requestCalendarConsent();
+        if (!reconnected) return;
+
+        ({ data: calData, error: calErr } = await fetchCalendar());
+        if (calData?.needsAuth) {
+          toast.error(calData?.error || "Calendar permission still needs approval");
+          return;
+        }
       }
       if (calErr || calData?.error) {
         toast.error(calData?.error || "Failed to fetch calendar");
