@@ -33,6 +33,7 @@ const WelcomeBack = () => {
   const [calendarAnalyzing, setCalendarAnalyzing] = useState(false);
   const [analyzedTasks, setAnalyzedTasks] = useState<AnalyzedTask[] | null>(null);
   const [calendarImported, setCalendarImported] = useState(false);
+  const [scope, setScope] = useState<"day" | "week" | "month">("month");
 
   const { isLoading, sendMessage, generatedSchedule } = useChat(settings);
   const { saveSchedule } = useSchedulePersistence(user?.id);
@@ -50,12 +51,12 @@ const WelcomeBack = () => {
   useEffect(() => {
     if (sessionStorage.getItem("resume_calendar_analysis_wb") === "1") {
       sessionStorage.removeItem("resume_calendar_analysis_wb");
-      setTimeout(() => { runCalendarAnalysis(); }, 600);
+      setTimeout(() => { runCalendarAnalysis(scope); }, 600);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const runCalendarAnalysis = async () => {
+  const runCalendarAnalysis = async (chosenScope: "day" | "week" | "month" = scope) => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
     try {
@@ -79,27 +80,19 @@ const WelcomeBack = () => {
       }
 
       const start = new Date(); start.setHours(0, 0, 0, 0);
-      const end = new Date(start); end.setDate(end.getDate() + 31);
-      toast("Scanning the next 31 days of your calendar…", { icon: "🔍" });
+      const end = new Date(start);
+      const scopeDays = chosenScope === "day" ? 1 : chosenScope === "week" ? 7 : 31;
+      end.setDate(end.getDate() + scopeDays);
+      const scopeLabel = chosenScope === "day" ? "today" : chosenScope === "week" ? "this week" : "the next 31 days";
+      toast(`Scanning ${scopeLabel} of your calendar…`, { icon: "🔍" });
       const { data: calData, error: calErr } = await supabase.functions.invoke("google-calendar", {
         headers: { "x-provider-token": providerToken },
         body: { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, timeMin: start.toISOString(), timeMax: end.toISOString() },
       });
       if (calErr || calData?.error) { toast.error(calData?.error || "Failed to fetch calendar"); setCalendarAnalyzing(false); return; }
 
-      const allEvents = calData?.events ?? [];
-      const now = new Date();
-      const todayStr = now.toISOString().slice(0, 10);
-      const weekEnd = new Date(now); weekEnd.setDate(weekEnd.getDate() + 7);
-      const getDate = (ev: any): string | null => {
-        const raw = ev?.date ?? ev?.startTime ?? ev?.start ?? null;
-        if (!raw) return null;
-        try { return new Date(raw).toISOString().slice(0, 10); } catch { return null; }
-      };
-      const inRange = (ev: any, from: string, to: string) => { const d = getDate(ev); return !!d && d >= from && d <= to; };
-      let events = allEvents.filter((e: any) => inRange(e, todayStr, todayStr));
-      if (events.length === 0) events = allEvents.filter((e: any) => inRange(e, todayStr, weekEnd.toISOString().slice(0, 10)));
-      if (events.length === 0) events = allEvents;
+      const events = calData?.events ?? [];
+      const todayStr = new Date().toISOString().slice(0, 10);
 
       const { data: ana, error: anaErr } = await supabase.functions.invoke("analyze-calendar-tasks", {
         body: { events, today: todayStr },
@@ -176,10 +169,31 @@ const WelcomeBack = () => {
           Sync your calendar, then we'll jump straight into journaling and a fresh focus session.
         </p>
 
+        {/* Scope selector */}
+        <div className="mt-8 flex items-center gap-2 glass-pill rounded-full p-1" role="group" aria-label="Calendar scope">
+          {(["day", "week", "month"] as const).map((s) => {
+            const active = scope === s;
+            return (
+              <button
+                key={s}
+                onClick={() => setScope(s)}
+                className="px-4 py-1.5 rounded-full text-sm font-body font-semibold capitalize transition-all"
+                style={{
+                  background: active ? "hsl(280 60% 60%)" : "transparent",
+                  color: active ? "white" : "hsl(280 40% 40%)",
+                }}
+                aria-pressed={active}
+              >
+                {s}
+              </button>
+            );
+          })}
+        </div>
+
         <button
-          onClick={runCalendarAnalysis}
+          onClick={() => runCalendarAnalysis(scope)}
           disabled={calendarAnalyzing}
-          className="mt-10 flex items-center gap-3 px-8 py-4 rounded-full glass-pill text-lg transition-all hover:scale-105 disabled:opacity-60"
+          className="mt-6 flex items-center gap-3 px-8 py-4 rounded-full glass-pill text-lg transition-all hover:scale-105 disabled:opacity-60"
           style={{ color: "hsl(280 40% 40%)" }}
           aria-label="Sync my calendar"
         >
