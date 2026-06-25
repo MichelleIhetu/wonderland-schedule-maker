@@ -147,7 +147,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
         if (newSession.provider_token) setProviderToken(newSession.provider_token);
         await persistProviderTokens(newSession);
         setHasFetchedGoogle(false);
-        await fetchGoogleCalendarEvents();
+        await fetchGoogleCalendarEvents(newSession.provider_token ?? null);
       }
     } catch (err) {
       console.error('Error signing in with Google:', err);
@@ -164,7 +164,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
   };
 
 
-  const fetchGoogleCalendarEvents = async () => {
+  const fetchGoogleCalendarEvents = async (tokenOverride?: string | null) => {
     if (!session) {
       setError('Please sign in with Google first');
       return;
@@ -180,7 +180,8 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
       localEnd.setDate(localEnd.getDate() + 1);
 
       const headers: Record<string, string> = {};
-      if (providerToken) headers['x-provider-token'] = providerToken;
+      const tokenToUse = tokenOverride ?? providerToken;
+      if (tokenToUse) headers['x-provider-token'] = tokenToUse;
 
       const { data, error } = await supabase.functions.invoke('google-calendar', {
         headers,
