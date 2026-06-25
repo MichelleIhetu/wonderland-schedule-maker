@@ -196,6 +196,22 @@ const Index = () => {
   const runCalendarAnalysis = async () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
+    const requestCalendarConsent = async () => {
+      toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
+      sessionStorage.setItem("resume_calendar_analysis", "1");
+      const { lovable } = await import("@/integrations/lovable");
+      const { error } = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+        extraParams: {
+          prompt: "consent",
+          access_type: "offline",
+          include_granted_scopes: "true",
+          scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
+        },
+      });
+
+      if (error) toast.error(error.message || "Could not start Google sign-in");
+    };
 
     try {
       // Check existing session for Google provider_token (Calendar scope).
@@ -206,25 +222,7 @@ const Index = () => {
       // Use a normal top-level redirect — this is what worked before. Supabase handles
       // the redirect; on return, the session has provider_token and we re-run.
       if (!session || !providerToken) {
-        toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
-        // Remember the user was mid-calendar-flow so we can auto-resume after redirect.
-        sessionStorage.setItem("resume_calendar_analysis", "1");
-
-        const { lovable } = await import("@/integrations/lovable");
-        const { error } = await lovable.auth.signInWithOAuth("google", {
-          redirect_uri: window.location.origin,
-          extraParams: {
-            prompt: "consent",
-            access_type: "offline",
-            include_granted_scopes: "true",
-            scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
-          },
-        });
-
-        if (error) {
-          toast.error(error.message || "Could not start Google sign-in");
-          setCalendarAnalyzing(false);
-        }
+        await requestCalendarConsent();
         // Browser is now redirecting to Google. Nothing else to do here.
         return;
       }
@@ -245,6 +243,15 @@ const Index = () => {
           timeMax: end.toISOString(),
         },
       });
+      if (calData?.needsAuth) {
+        if (calData?.events?.length) {
+          toast("Using your saved calendar while refreshing permissions…", { icon: "📅" });
+        } else {
+          toast("Calendar permission needs to be refreshed.", { icon: "📅" });
+        }
+        await requestCalendarConsent();
+        return;
+      }
       if (calErr || calData?.error) {
         toast.error(calData?.error || "Failed to fetch calendar");
         setCalendarAnalyzing(false);

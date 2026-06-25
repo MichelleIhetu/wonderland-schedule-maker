@@ -30,6 +30,15 @@ async function refreshGoogleToken(refreshToken: string): Promise<{ access_token:
   return await resp.json();
 }
 
+function isCalendarAuthError(status: number, errorText: string): boolean {
+  const normalized = errorText.toLowerCase();
+  return status === 401 || status === 403 ||
+    normalized.includes('insufficient authentication scopes') ||
+    normalized.includes('access_token_scope_insufficient') ||
+    normalized.includes('insufficient permission') ||
+    normalized.includes('invalid credentials');
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -64,6 +73,15 @@ serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceKey);
 
+    const getCachedCalendar = async () => {
+      const { data: cached } = await admin
+        .from('cached_calendar_events')
+        .select('events, fetched_at')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      return cached;
+    };
+
     // Parse body first (so we can also check for cacheOnly flag)
     let timezone = 'UTC';
     let timeMin = '';
@@ -90,11 +108,7 @@ serve(async (req) => {
 
     // Cache-only fast path: just return what we have, no Google call.
     if (cacheOnly) {
-      const { data: cached } = await admin
-        .from('cached_calendar_events')
-        .select('events, fetched_at')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const cached = await getCachedCalendar();
       return new Response(
         JSON.stringify({ events: cached?.events || [], fromCache: true, fetchedAt: cached?.fetched_at || null }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -112,11 +126,7 @@ serve(async (req) => {
         .maybeSingle();
 
       if (!stored?.refresh_token) {
-        const { data: cached } = await admin
-          .from('cached_calendar_events')
-          .select('events, fetched_at')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        const cached = await getCachedCalendar();
         return new Response(
           JSON.stringify({
             error: 'No Google credentials. Sign in with Google to refresh.',
@@ -125,7 +135,7 @@ serve(async (req) => {
             fromCache: !!cached,
             fetchedAt: cached?.fetched_at || null,
           }),
-          { status: cached ? 200 : 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
@@ -135,9 +145,16 @@ serve(async (req) => {
       } else {
         const refreshed = await refreshGoogleToken(stored.refresh_token);
         if (!refreshed?.access_token) {
+          const cached = await getCachedCalendar();
           return new Response(
-            JSON.stringify({ error: 'Failed to refresh Google access. Please sign in again.', needsAuth: true }),
-            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            JSON.stringify({
+              error: 'Google Calendar access needs a fresh permission grant.',
+              needsAuth: true,
+              events: cached?.events || [],
+              fromCache: !!cached,
+              fetchedAt: cached?.fetched_at || null,
+            }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }
         providerToken = refreshed.access_token;
@@ -164,6 +181,20 @@ serve(async (req) => {
     if (!calendarsResponse.ok) {
       const errorText = await calendarsResponse.text();
       console.error('Google Calendar list API error:', calendarsResponse.status, errorText);
+      if (isCalendarAuthError(calendarsResponse.status, errorText)) {
+        const cached = await getCachedCalendar();
+        return new Response(
+          JSON.stringify({
+            error: 'Google Calendar permission is missing or expired. Please reconnect Calendar access.',
+            needsAuth: true,
+            calendarScopeMissing: true,
+            events: cached?.events || [],
+            fromCache: !!cached,
+            fetchedAt: cached?.fetched_at || null,
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       return new Response(
         JSON.stringify({ error: 'Failed to fetch calendar list', details: errorText }),
         { status: calendarsResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

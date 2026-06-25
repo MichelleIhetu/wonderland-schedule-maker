@@ -59,23 +59,27 @@ const WelcomeBack = () => {
   const runCalendarAnalysis = async (chosenScope: "day" | "week" | "month" = scope) => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
+    const requestCalendarConsent = async () => {
+      toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
+      sessionStorage.setItem("resume_calendar_analysis_wb", "1");
+      const { error } = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin + "/welcome-back",
+        extraParams: {
+          prompt: "consent",
+          access_type: "offline",
+          include_granted_scopes: "true",
+          scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
+        },
+      });
+      if (error) toast.error(error.message || "Could not start Google sign-in");
+    };
+
     try {
       let { data: { session } } = await supabase.auth.getSession();
       let providerToken = session?.provider_token ?? null;
 
       if (!session || !providerToken) {
-        toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
-        sessionStorage.setItem("resume_calendar_analysis_wb", "1");
-        const { error } = await lovable.auth.signInWithOAuth("google", {
-          redirect_uri: window.location.origin + "/welcome-back",
-          extraParams: {
-            prompt: "consent",
-            access_type: "offline",
-            include_granted_scopes: "true",
-            scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
-          },
-        });
-        if (error) { toast.error(error.message || "Could not start Google sign-in"); setCalendarAnalyzing(false); }
+        await requestCalendarConsent();
         return;
       }
 
@@ -89,6 +93,15 @@ const WelcomeBack = () => {
         headers: { "x-provider-token": providerToken },
         body: { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, timeMin: start.toISOString(), timeMax: end.toISOString() },
       });
+      if (calData?.needsAuth) {
+        if (calData?.events?.length) {
+          toast("Using your saved calendar while refreshing permissions…", { icon: "📅" });
+        } else {
+          toast("Calendar permission needs to be refreshed.", { icon: "📅" });
+        }
+        await requestCalendarConsent();
+        return;
+      }
       if (calErr || calData?.error) { toast.error(calData?.error || "Failed to fetch calendar"); setCalendarAnalyzing(false); return; }
 
       const events = calData?.events ?? [];
