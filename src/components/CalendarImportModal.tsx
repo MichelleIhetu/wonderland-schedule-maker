@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { User, Session } from "@supabase/supabase-js";
 
 export interface CalendarEvent {
@@ -123,17 +124,13 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
     setIsGoogleLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          scopes: 'https://www.googleapis.com/auth/calendar.readonly',
-          redirectTo: window.location.origin,
-          skipBrowserRedirect: true,
-          // Request offline access + force consent so Google returns a refresh_token
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
+      const { error } = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
+        extraParams: {
+          prompt: 'consent',
+          access_type: 'offline',
+          include_granted_scopes: 'true',
+          scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly',
         },
       });
 
@@ -143,36 +140,14 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
         setIsGoogleLoading(false);
         return;
       }
-
-      if (data?.url) {
-        const popup = window.open(data.url, 'google-oauth', 'width=500,height=650,left=100,top=100');
-
-        if (!popup) {
-          setError('Popup was blocked. Please allow popups for this site and try again.');
-          setIsGoogleLoading(false);
-          return;
-        }
-
-        const pollInterval = setInterval(async () => {
-          if (popup.closed) {
-            clearInterval(pollInterval);
-            const { data: { session: newSession } } = await supabase.auth.getSession();
-            if (newSession) {
-              setSession(newSession);
-              setUser(newSession.user);
-              if (newSession.provider_token) {
-                setProviderToken(newSession.provider_token);
-              }
-              await persistProviderTokens(newSession);
-              if (!newSession.provider_token && !(newSession as any).provider_refresh_token) {
-                setError('Calendar access not granted. Please try signing in again.');
-              }
-            } else {
-              setError('Sign-in was not completed. Please try again.');
-            }
-            setIsGoogleLoading(false);
-          }
-        }, 500);
+      const { data: { session: newSession } } = await supabase.auth.getSession();
+      if (newSession) {
+        setSession(newSession);
+        setUser(newSession.user);
+        if (newSession.provider_token) setProviderToken(newSession.provider_token);
+        await persistProviderTokens(newSession);
+        setHasFetchedGoogle(false);
+        await fetchGoogleCalendarEvents();
       }
     } catch (err) {
       console.error('Error signing in with Google:', err);
@@ -222,8 +197,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
         return;
       }
 
-      if (data?.needsAuth && (!data.events || data.events.length === 0)) {
-        // Need fresh sign-in
+      if (data?.needsAuth) {
         setError(null);
         handleGoogleSignIn();
         return;
