@@ -6,12 +6,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-provider-token, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-async function refreshGoogleToken(refreshToken: string): Promise<{ access_token: string; expires_in: number } | null> {
+type GoogleRefreshSuccess = { access_token: string; expires_in: number };
+type GoogleRefreshFailure = { error: string; code: string; status: number };
+type GoogleRefreshResult = GoogleRefreshSuccess | GoogleRefreshFailure;
+
+const isGoogleRefreshFailure = (result: GoogleRefreshResult): result is GoogleRefreshFailure => 'error' in result;
+
+async function refreshGoogleToken(refreshToken: string): Promise<GoogleRefreshResult> {
   const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
   const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
   if (!clientId || !clientSecret) {
     console.error('Missing GOOGLE_CLIENT_ID/SECRET');
-    return null;
+    return {
+      error: 'Calendar refresh is not configured. Add Google OAuth credentials in the backend settings.',
+      code: 'missing_google_oauth_credentials',
+      status: 500,
+    };
   }
   const resp = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -24,8 +34,40 @@ async function refreshGoogleToken(refreshToken: string): Promise<{ access_token:
     }),
   });
   if (!resp.ok) {
-    console.error('Google refresh failed:', resp.status, await resp.text());
-    return null;
+    const rawText = await resp.text();
+    console.error('Google refresh failed:', resp.status, rawText);
+
+    let googleError = '';
+    let googleDescription = '';
+    try {
+      const parsed = JSON.parse(rawText);
+      googleError = parsed?.error || '';
+      googleDescription = parsed?.error_description || '';
+    } catch {
+      googleDescription = rawText;
+    }
+
+    if (googleError === 'invalid_client') {
+      return {
+        error: 'Calendar refresh is misconfigured: the saved Google client secret is invalid. Update the Google OAuth credentials in the backend, then reconnect Calendar once.',
+        code: 'invalid_google_oauth_client',
+        status: 500,
+      };
+    }
+
+    if (googleError === 'invalid_grant') {
+      return {
+        error: 'Saved Google Calendar permission expired. Please reconnect Calendar access once.',
+        code: 'expired_google_refresh_token',
+        status: 401,
+      };
+    }
+
+    return {
+      error: googleDescription || 'Google Calendar token refresh failed.',
+      code: 'google_refresh_failed',
+      status: resp.status,
+    };
   }
   return await resp.json();
 }
@@ -136,6 +178,23 @@ serve(async (req) => {
       );
     };
 
+    const calendarConfigErrorResponse = async (message: string, code: string) => {
+      const cached = await getCachedCalendar();
+      return new Response(
+        JSON.stringify({
+          error: message,
+          code,
+          needsAuth: false,
+          retryable: false,
+          configurationError: true,
+          events: cached?.events || [],
+          fromCache: !!cached,
+          fetchedAt: cached?.fetched_at || null,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    };
+
     const { data: storedTokens } = await admin
       .from('google_oauth_tokens')
       .select('refresh_token, access_token, expires_at')
@@ -144,10 +203,11 @@ serve(async (req) => {
 
     let stored = (storedTokens || null) as StoredGoogleToken | null;
 
-    const refreshAndStoreProviderToken = async (): Promise<string | null> => {
-      if (!stored?.refresh_token) return null;
+    const refreshAndStoreProviderToken = async (): Promise<{ token: string | null; failure: GoogleRefreshFailure | null }> => {
+      if (!stored?.refresh_token) return { token: null, failure: null };
       const refreshed = await refreshGoogleToken(stored.refresh_token);
-      if (!refreshed?.access_token) return null;
+      if (isGoogleRefreshFailure(refreshed)) return { token: null, failure: refreshed };
+      if (!refreshed?.access_token) return { token: null, failure: null };
 
       const expiresAt = new Date(Date.now() + (refreshed.expires_in - 60) * 1000).toISOString();
       await admin.from('google_oauth_tokens').update({
@@ -161,7 +221,7 @@ serve(async (req) => {
         expires_at: expiresAt,
       };
 
-      return refreshed.access_token;
+      return { token: refreshed.access_token, failure: null };
     };
 
     // Resolve a Google access token: prefer the current session header, then a
@@ -177,8 +237,14 @@ serve(async (req) => {
       if (stillValid) {
         providerToken = stored.access_token!;
       } else {
-        providerToken = await refreshAndStoreProviderToken() || '';
-        if (!providerToken) return await authRequiredResponse();
+        const refreshAttempt = await refreshAndStoreProviderToken();
+        providerToken = refreshAttempt.token || '';
+        if (!providerToken) {
+          if (refreshAttempt.failure?.code === 'invalid_google_oauth_client' || refreshAttempt.failure?.code === 'missing_google_oauth_credentials') {
+            return await calendarConfigErrorResponse(refreshAttempt.failure.error, refreshAttempt.failure.code);
+          }
+          return await authRequiredResponse(refreshAttempt.failure?.error);
+        }
       }
     }
 
@@ -199,13 +265,16 @@ serve(async (req) => {
       const errorText = await calendarsResponse.text();
       console.error('Google Calendar list API error:', calendarsResponse.status, errorText);
       if (isCalendarAuthError(calendarsResponse.status, errorText)) {
-        const refreshedToken = await refreshAndStoreProviderToken();
-        if (refreshedToken) {
-          providerToken = refreshedToken;
+        const refreshAttempt = await refreshAndStoreProviderToken();
+        if (refreshAttempt.token) {
+          providerToken = refreshAttempt.token;
           calendarsResponse = await fetchCalendarList(providerToken);
         }
 
-        if (!refreshedToken || !calendarsResponse.ok) {
+        if (!refreshAttempt.token || !calendarsResponse.ok) {
+          if (refreshAttempt.failure?.code === 'invalid_google_oauth_client' || refreshAttempt.failure?.code === 'missing_google_oauth_credentials') {
+            return await calendarConfigErrorResponse(refreshAttempt.failure.error, refreshAttempt.failure.code);
+          }
           return await authRequiredResponse('Google Calendar permission is missing or expired. Please reconnect Calendar access.');
         }
       }
@@ -247,13 +316,16 @@ serve(async (req) => {
         console.error(`Google Calendar API error for ${calendar.id}:`, response.status, err);
 
         if (isCalendarAuthError(response.status, err)) {
-          const refreshedToken = await refreshAndStoreProviderToken();
-          if (refreshedToken) {
-            providerToken = refreshedToken;
+          const refreshAttempt = await refreshAndStoreProviderToken();
+          if (refreshAttempt.token) {
+            providerToken = refreshAttempt.token;
             response = await fetchCalendarEvents(calendar.id, providerToken);
           }
 
-          if (!refreshedToken || !response.ok) {
+          if (!refreshAttempt.token || !response.ok) {
+            if (refreshAttempt.failure?.code === 'invalid_google_oauth_client' || refreshAttempt.failure?.code === 'missing_google_oauth_credentials') {
+              return await calendarConfigErrorResponse(refreshAttempt.failure.error, refreshAttempt.failure.code);
+            }
             return await authRequiredResponse('Google Calendar permission is missing or expired. Please reconnect Calendar access.');
           }
         } else {

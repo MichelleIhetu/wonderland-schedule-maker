@@ -24,6 +24,8 @@ const defaultSettings: UserSettings = {
 };
 
 type View = "landing" | "wizard" | "schedule";
+const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis_wb";
+const CALENDAR_AUTH_ATTEMPTED_KEY = "calendar_auth_attempted_wb";
 
 const WelcomeBack = () => {
   const navigate = useNavigate();
@@ -63,8 +65,8 @@ const WelcomeBack = () => {
 
   // Resume calendar analysis after Google OAuth round-trip.
   useEffect(() => {
-    if (sessionStorage.getItem("resume_calendar_analysis_wb") === "1") {
-      sessionStorage.removeItem("resume_calendar_analysis_wb");
+    if (sessionStorage.getItem(RESUME_CALENDAR_ANALYSIS_KEY) === "1") {
+      sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
       setTimeout(() => { runCalendarAnalysis(scope); }, 600);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,8 +76,14 @@ const WelcomeBack = () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
     const requestCalendarConsent = async (): Promise<boolean> => {
+      if (sessionStorage.getItem(CALENDAR_AUTH_ATTEMPTED_KEY) === "1") {
+        toast.error("Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.");
+        return false;
+      }
+
       toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
-      sessionStorage.setItem("resume_calendar_analysis_wb", "1");
+      sessionStorage.setItem(CALENDAR_AUTH_ATTEMPTED_KEY, "1");
+      sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin + "/welcome-back",
         extraParams: {
@@ -87,6 +95,8 @@ const WelcomeBack = () => {
       });
 
       if (result.error) {
+        sessionStorage.removeItem(CALENDAR_AUTH_ATTEMPTED_KEY);
+        sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
         toast.error(result.error.message || "Could not start Google sign-in");
         return false;
       }
@@ -143,6 +153,7 @@ const WelcomeBack = () => {
         }
       }
       if (calErr || calData?.error) { toast.error(calData?.error || "Failed to fetch calendar"); setCalendarAnalyzing(false); return; }
+      sessionStorage.removeItem(CALENDAR_AUTH_ATTEMPTED_KEY);
 
       const events = calData?.events ?? [];
       const todayStr = new Date().toISOString().slice(0, 10);

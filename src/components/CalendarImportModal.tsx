@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { User, Session } from "@supabase/supabase-js";
 
+const CALENDAR_MODAL_AUTH_ATTEMPTED_KEY = 'calendar_modal_auth_attempted';
+
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -112,10 +114,17 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
   }, [isOpen, session, providerToken]);
 
   const handleGoogleSignIn = async (): Promise<boolean> => {
+    if (sessionStorage.getItem(CALENDAR_MODAL_AUTH_ATTEMPTED_KEY) === '1') {
+      setError("Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.");
+      setIsGoogleLoading(false);
+      return false;
+    }
+
     setError(null);
     setIsGoogleLoading(true);
 
     try {
+      sessionStorage.setItem(CALENDAR_MODAL_AUTH_ATTEMPTED_KEY, '1');
       const { error } = await lovable.auth.signInWithOAuth('google', {
         redirect_uri: window.location.origin,
         extraParams: {
@@ -127,6 +136,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
       });
 
       if (error) {
+        sessionStorage.removeItem(CALENDAR_MODAL_AUTH_ATTEMPTED_KEY);
         console.error('Google sign in error:', error);
         setError(error.message);
         setIsGoogleLoading(false);
@@ -215,6 +225,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
       setGoogleEvents(events);
       setSelectedGoogleEvents(new Set(events.map((e: CalendarEvent) => e.id)));
       setHasFetchedGoogle(true);
+      sessionStorage.removeItem(CALENDAR_MODAL_AUTH_ATTEMPTED_KEY);
     } catch (err) {
       console.error('Error:', err);
       setError('Failed to fetch calendar events');
