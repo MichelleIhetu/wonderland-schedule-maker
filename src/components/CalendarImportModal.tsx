@@ -147,6 +147,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
         if (newSession.provider_token) setProviderToken(newSession.provider_token);
         await persistProviderTokens(newSession);
         setHasFetchedGoogle(false);
+        await fetchGoogleCalendarEvents(newSession.provider_token ?? null);
         return true;
       }
 
@@ -203,11 +204,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
 
       if (data?.needsAuth) {
         setError(null);
-        const reconnected = await handleGoogleSignIn();
-        if (reconnected) {
-          const { data: { session: newSession } } = await supabase.auth.getSession();
-          await fetchGoogleCalendarEvents(newSession?.provider_token ?? null);
-        }
+        await handleGoogleSignIn();
         return;
       }
 
