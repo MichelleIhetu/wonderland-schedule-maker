@@ -34,6 +34,8 @@ const defaultSettings: UserSettings = {
 };
 
 type ViewMode = "landing" | "wizard" | "schedule";
+const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis";
+const CALENDAR_AUTH_ATTEMPTED_KEY = "calendar_auth_attempted";
 
 const hexToHsl = (hex: string): string => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -144,8 +146,8 @@ const Index = () => {
 
   // Auto-resume calendar analysis after returning from Google OAuth redirect.
   useEffect(() => {
-    if (sessionStorage.getItem("resume_calendar_analysis") === "1") {
-      sessionStorage.removeItem("resume_calendar_analysis");
+    if (sessionStorage.getItem(RESUME_CALENDAR_ANALYSIS_KEY) === "1") {
+      sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
       // Wait a tick for the auth state to settle, then resume.
       setTimeout(() => { runCalendarAnalysis(); }, 600);
     }
@@ -211,8 +213,14 @@ const Index = () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
     const requestCalendarConsent = async (): Promise<boolean> => {
+      if (sessionStorage.getItem(CALENDAR_AUTH_ATTEMPTED_KEY) === "1") {
+        toast.error("Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.");
+        return false;
+      }
+
       toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
-      sessionStorage.setItem("resume_calendar_analysis", "1");
+      sessionStorage.setItem(CALENDAR_AUTH_ATTEMPTED_KEY, "1");
+      sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
       const { lovable } = await import("@/integrations/lovable");
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
@@ -225,6 +233,8 @@ const Index = () => {
       });
 
       if (result.error) {
+        sessionStorage.removeItem(CALENDAR_AUTH_ATTEMPTED_KEY);
+        sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
         toast.error(result.error.message || "Could not start Google sign-in");
         return false;
       }
@@ -293,6 +303,7 @@ const Index = () => {
         setCalendarAnalyzing(false);
         return;
       }
+      sessionStorage.removeItem(CALENDAR_AUTH_ATTEMPTED_KEY);
       const allEvents = calData?.events ?? [];
 
       // Smart fallback: try today → this week → this month
