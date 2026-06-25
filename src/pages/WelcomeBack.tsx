@@ -51,7 +51,7 @@ const WelcomeBack = () => {
   useEffect(() => {
     if (sessionStorage.getItem("resume_calendar_analysis_wb") === "1") {
       sessionStorage.removeItem("resume_calendar_analysis_wb");
-      setTimeout(() => { runCalendarAnalysis(); }, 600);
+      setTimeout(() => { runCalendarAnalysis(scope); }, 600);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
