@@ -139,7 +139,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
         if (newSession.provider_token) setProviderToken(newSession.provider_token);
         await persistProviderTokens(newSession);
         setHasFetchedGoogle(false);
-        await fetchGoogleCalendarEvents(newSession.provider_token ?? null);
+        await fetchGoogleCalendarEvents(newSession.provider_token ?? null, true);
         return true;
       }
 
@@ -160,7 +160,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
   };
 
 
-  const fetchGoogleCalendarEvents = async (tokenOverride?: string | null) => {
+  const fetchGoogleCalendarEvents = async (tokenOverride?: string | null, reauthAttempted = false) => {
     if (!session) {
       setError('Please sign in with Google first');
       return;
@@ -196,6 +196,11 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
 
       if (data?.needsAuth) {
         setError(null);
+        if (reauthAttempted) {
+          setError(data?.error || 'Calendar permission still needs approval');
+          setHasFetchedGoogle(true);
+          return;
+        }
         await handleGoogleSignIn();
         return;
       }
