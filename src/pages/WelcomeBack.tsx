@@ -11,6 +11,7 @@ import { useChat } from "@/hooks/useChat";
 import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import { UserSettings } from "@/types/schedule";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 
 const defaultSettings: UserSettings = {
