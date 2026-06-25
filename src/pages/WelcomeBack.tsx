@@ -33,6 +33,7 @@ const WelcomeBack = () => {
   const [calendarAnalyzing, setCalendarAnalyzing] = useState(false);
   const [analyzedTasks, setAnalyzedTasks] = useState<AnalyzedTask[] | null>(null);
   const [calendarImported, setCalendarImported] = useState(false);
+  const [scope, setScope] = useState<"day" | "week" | "month">("month");
 
   const { isLoading, sendMessage, generatedSchedule } = useChat(settings);
   const { saveSchedule } = useSchedulePersistence(user?.id);
