@@ -65,7 +65,7 @@ const hexToHsl = (hex: string): string => {
 const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [viewMode, setViewMode] = useState<ViewMode>("landing");
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -225,16 +225,18 @@ const Index = () => {
 
   // Auto-resume calendar analysis after returning from Google OAuth redirect.
   useEffect(() => {
+    if (authLoading) return;
     if (sessionStorage.getItem(RESUME_CALENDAR_ANALYSIS_KEY) === "1") {
       sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
       // Wait a tick for the auth state to settle, then resume.
       setTimeout(() => { runCalendarAnalysis(); }, 600);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading]);
 
   useEffect(() => {
     if (!user) return;
+    sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
     const redirectTo = sessionStorage.getItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
     if (!redirectTo) return;
     sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
@@ -299,6 +301,16 @@ const Index = () => {
     setCalendarAnalyzing(true);
     let calendarConsentAttempted = false;
 
+    const waitForAuthSession = async (timeoutMs = 6000) => {
+      const started = Date.now();
+      while (Date.now() - started < timeoutMs) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) return session;
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      return null;
+    };
+
     const requestCalendarConsent = async (): Promise<string | null> => {
       if (calendarConsentAttempted) {
         toast.error("Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.");
@@ -320,6 +332,13 @@ const Index = () => {
       // Guard against an infinite redirect loop when Supabase never finishes
       // establishing a session after Google sign-in (bad_jwt / missing sub).
       if (sessionStorage.getItem(CALENDAR_OAUTH_ATTEMPT_KEY) === "1") {
+        const settledSession = await waitForAuthSession();
+        if (settledSession) {
+          await persistGoogleTokens(settledSession);
+          sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+          sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
+          return settledSession.provider_token ?? null;
+        }
         sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
         toast.error("Google sign-in didn't complete. Please try again.");
         return null;
@@ -351,10 +370,14 @@ const Index = () => {
 
       if (result.redirected) return null;
 
-      const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+      const refreshedSession = await waitForAuthSession();
       await persistGoogleTokens(refreshedSession);
+      if (refreshedSession) {
+        sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
+        sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+      }
       sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
-      return null;
+      return refreshedSession?.provider_token ?? null;
     };
 
     try {
@@ -368,7 +391,11 @@ const Index = () => {
 
       if (!session) {
         await requestCalendarConsent();
-        return;
+        const resumedSession = await waitForAuthSession();
+        if (!resumedSession) return;
+        session = resumedSession;
+        await persistGoogleTokens(session);
+        sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
       }
 
 
