@@ -97,6 +97,12 @@ const WelcomeBack = () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
     let calendarConsentAttempted = false;
+    // Watchdog: never let the spinner hang forever.
+    const watchdog = window.setTimeout(() => {
+      console.warn("[calendar] watchdog timeout — releasing spinner");
+      setCalendarAnalyzing(false);
+      toast.error("Calendar scan timed out. Tap My Calendar to try again or Skip to continue.");
+    }, 30000);
 
     const waitForAuthSession = async (timeoutMs = 6000) => {
       const started = Date.now();
@@ -228,14 +234,22 @@ const WelcomeBack = () => {
           return;
         }
       }
-      if (calErr || calData?.error) { toast.error(calData?.error || "Failed to fetch calendar"); setCalendarAnalyzing(false); return; }
+      if (calErr || calData?.error) { toast.error(calData?.error || "Failed to fetch calendar"); setCalendarAnalyzing(false); window.clearTimeout(watchdog); return; }
       const events = calData?.events ?? [];
+      console.log("[calendar] fetched events:", events.length, calData);
       const todayStr = new Date().toISOString().slice(0, 10);
+
+      if (events.length === 0) {
+        toast("No upcoming events found — tap Next to continue ✨", { icon: "📭" });
+        setAnalyzedTasks([]);
+        setCalendarImported(true);
+        return;
+      }
 
       const { data: ana, error: anaErr } = await supabase.functions.invoke("analyze-calendar-tasks", {
         body: { events, today: todayStr },
       });
-      if (anaErr || ana?.error) { toast.error(ana?.error || "Analysis failed"); setCalendarAnalyzing(false); return; }
+      if (anaErr || ana?.error) { toast.error(ana?.error || "Analysis failed"); setCalendarAnalyzing(false); window.clearTimeout(watchdog); return; }
 
       setAnalyzedTasks(ana?.analyzed ?? []);
       setCalendarImported(true);
@@ -244,6 +258,7 @@ const WelcomeBack = () => {
       console.error(e);
       toast.error("Could not analyze calendar");
     } finally {
+      window.clearTimeout(watchdog);
       setCalendarAnalyzing(false);
     }
   };
@@ -353,6 +368,14 @@ const WelcomeBack = () => {
             ✓ Calendar synced — tap Next to continue
           </p>
         )}
+
+        <button
+          onClick={() => { setCalendarAnalyzing(false); setView("wizard"); }}
+          className="mt-3 text-sm font-body underline opacity-70 hover:opacity-100"
+          style={{ color: "hsl(280 40% 40%)" }}
+        >
+          Skip calendar →
+        </button>
       </div>
 
       {/* Bunny mascot */}
