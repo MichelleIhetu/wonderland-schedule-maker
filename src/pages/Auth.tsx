@@ -12,6 +12,8 @@ import { Sparkles, LogIn, UserPlus, Calendar } from "lucide-react";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
 import { useAuth } from "@/hooks/useAuth";
 
+const WIZARD_SKIP_REQUEST_KEY = "timebunny_skip_to_wizard_requested";
+
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -251,7 +253,10 @@ const Auth = () => {
             type="button"
             variant="secondary"
             className="w-full gap-2"
-            onClick={() => navigate("/", { state: { skipToWizard: true } })}
+            onClick={() => {
+              sessionStorage.setItem(WIZARD_SKIP_REQUEST_KEY, "1");
+              navigate("/", { state: { skipToWizard: true } });
+            }}
           >
             Skip for now →
           </Button>

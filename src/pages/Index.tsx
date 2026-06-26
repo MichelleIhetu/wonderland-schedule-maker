@@ -36,6 +36,7 @@ const defaultSettings: UserSettings = {
 
 type ViewMode = "landing" | "wizard" | "schedule";
 const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis";
+const WIZARD_SKIP_REQUEST_KEY = "timebunny_skip_to_wizard_requested";
 
 const hexToHsl = (hex: string): string => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -145,8 +146,13 @@ const Index = () => {
   // Skip flow from Auth page: jump directly to the wizard (library scene).
   useEffect(() => {
     const state = location.state as any;
-    if (state?.skipToWizard) {
+    const skipWasJustRequested = state?.skipToWizard && sessionStorage.getItem(WIZARD_SKIP_REQUEST_KEY) === "1";
+    if (skipWasJustRequested) {
+      sessionStorage.removeItem(WIZARD_SKIP_REQUEST_KEY);
       setViewMode("wizard");
+      window.history.replaceState({}, document.title);
+    } else if (state?.skipToWizard) {
+      setViewMode("landing");
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
