@@ -156,6 +156,16 @@ const Index = () => {
     }
   }, [location.state]);
 
+  // Forwarded from the retired /pomodoro route — drop straight into the
+  // in-app schedule view (with Up Next + active task timer).
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.openScheduleView) {
+      setViewMode("schedule");
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   useEffect(() => { setCustomColors(defaultThemeColors[settings.backgroundTheme]); }, [settings.backgroundTheme]);
 
   // Auto-resume calendar analysis after returning from Google OAuth redirect.
