@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, Calendar, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import SEO from "@/components/SEO";
@@ -29,6 +29,7 @@ const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis_wb";
 
 const WelcomeBack = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, signOut } = useAuth();
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [view, setView] = useState<View>("landing");
@@ -39,6 +40,16 @@ const WelcomeBack = () => {
 
   const { isLoading, sendMessage, generatedSchedule } = useChat(settings);
   const { saveSchedule } = useSchedulePersistence(user?.id);
+
+  // Auth returns should always land on the Welcome Back screen, not an in-progress wizard scene.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const forceLanding = params.get("landing") === "1" || (location.state as any)?.forceLanding;
+    if (forceLanding) {
+      setView("landing");
+      window.history.replaceState({}, document.title, "/welcome-back");
+    }
+  }, [location.search, location.state]);
 
   const persistGoogleTokens = async (activeSession: any) => {
     const refreshToken = activeSession?.provider_refresh_token as string | undefined;
