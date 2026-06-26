@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Pomodoro from "./pages/Pomodoro";
 import NotFound from "./pages/NotFound";
 import WelcomeBack from "./pages/WelcomeBack";
+import FloatingNav from "./components/FloatingNav";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <FloatingNav />
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
