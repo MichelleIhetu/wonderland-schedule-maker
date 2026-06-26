@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Moodboard from "./pages/Moodboard";
@@ -20,6 +20,24 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * Route guard: authenticated users hitting the library entry (`/`) are
+ * redirected to `/welcome-back` unless they explicitly arrived via the
+ * Back button from Welcome Back (state.fromLibraryBack) or chose to skip
+ * sign-in from /auth (state.skipToWizard).
+ */
+const LibraryEntryGuard = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  if (loading) return null;
+  const state = (location.state ?? {}) as { fromLibraryBack?: boolean; skipToWizard?: boolean };
+  const explicitlyAllowed = state.fromLibraryBack === true || state.skipToWizard === true;
+  if (user && !explicitlyAllowed) {
+    return <Navigate to="/welcome-back" replace />;
+  }
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -28,7 +46,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
-          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/" element={<ProtectedRoute><LibraryEntryGuard><Index /></LibraryEntryGuard></ProtectedRoute>} />
           <Route path="/moodboard" element={<ProtectedRoute><Moodboard /></ProtectedRoute>} />
           <Route path="/vibe-check" element={<ProtectedRoute><VibeCheck /></ProtectedRoute>} />
           <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
