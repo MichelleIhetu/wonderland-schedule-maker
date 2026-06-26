@@ -161,23 +161,57 @@ const Index = () => {
   useEffect(() => {
     const state = location.state as any;
     if (state?.openScheduleView) {
-      // Restore last saved schedule if nothing is currently loaded.
-      if (generatedSchedule.length === 0) {
-        const snap = loadScheduleSnapshot();
-        if (snap && snap.schedule.length > 0) {
-          setGeneratedSchedule(snap.schedule);
-          if (snap.settings) setSettings(snap.settings);
-        } else {
-          loadTodaySchedule().then((result) => {
+      // Prefer the most recent Google Calendar pull (today's events) so the
+      // Pomodoro view reflects what's actually on the user's calendar now.
+      (async () => {
+        try {
+          const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+          const { data } = await supabase.functions.invoke("google-calendar", {
+            body: { cacheOnly: true, timezone },
+          });
+          const events: Array<any> = data?.events || [];
+          const todayLocal = new Intl.DateTimeFormat("en-CA", {
+            year: "numeric", month: "2-digit", day: "2-digit", timeZone: timezone,
+          }).format(new Date());
+          const todays = events
+            .filter((e) => e.date === todayLocal && !e.isAllDay && e.startTime)
+            .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
+          if (todays.length > 0) {
+            const suits: Array<"hearts" | "diamonds" | "clubs" | "spades"> = ["hearts", "diamonds", "clubs", "spades"];
+            const schedule = todays.map((e, i) => ({
+              id: e.id || `cal-${i}`,
+              title: e.title || "Calendar Event",
+              time: e.startTime,
+              endTime: e.endTime,
+              description: e.description || "",
+              suit: suits[i % suits.length],
+            }));
+            setGeneratedSchedule(schedule);
+            setViewMode("schedule");
+            window.history.replaceState({}, document.title);
+            return;
+          }
+        } catch (err) {
+          console.warn("Calendar cache unavailable, falling back to saved schedule", err);
+        }
+
+        // Fallback: last saved schedule.
+        if (generatedSchedule.length === 0) {
+          const snap = loadScheduleSnapshot();
+          if (snap && snap.schedule.length > 0) {
+            setGeneratedSchedule(snap.schedule);
+            if (snap.settings) setSettings(snap.settings);
+          } else {
+            const result = await loadTodaySchedule();
             if (result && result.schedule.length > 0) {
               setGeneratedSchedule(result.schedule);
               if (result.settings) setSettings(result.settings);
             }
-          });
+          }
         }
-      }
-      setViewMode("schedule");
-      window.history.replaceState({}, document.title);
+        setViewMode("schedule");
+        window.history.replaceState({}, document.title);
+      })();
     }
   }, [location.state]);
 
