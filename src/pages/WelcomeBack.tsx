@@ -32,7 +32,7 @@ const POST_GOOGLE_AUTH_REDIRECT_KEY = "timebunny_post_google_auth_redirect";
 const WelcomeBack = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [view, setView] = useState<View>("landing");
   const [calendarAnalyzing, setCalendarAnalyzing] = useState(false);
@@ -77,6 +77,7 @@ const WelcomeBack = () => {
 
   // Resume calendar analysis after Google OAuth round-trip, or auto-scan when arriving via nav.
   useEffect(() => {
+    if (authLoading) return;
     const autoScan = (location.state as any)?.autoScan === true;
     if (sessionStorage.getItem(RESUME_CALENDAR_ANALYSIS_KEY) === "1") {
       sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
@@ -86,12 +87,26 @@ const WelcomeBack = () => {
       setTimeout(() => { runCalendarAnalysis(scope); }, 200);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading]);
+
+  useEffect(() => {
+    if (user) sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+  }, [user]);
 
   const runCalendarAnalysis = async (chosenScope: "day" | "week" | "month" = scope) => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
     let calendarConsentAttempted = false;
+
+    const waitForAuthSession = async (timeoutMs = 6000) => {
+      const started = Date.now();
+      while (Date.now() - started < timeoutMs) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) return session;
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      return null;
+    };
 
     const requestCalendarConsent = async (): Promise<string | null> => {
       if (calendarConsentAttempted) {
@@ -114,6 +129,13 @@ const WelcomeBack = () => {
       // Guard: if we already attempted a Google redirect once and still have
       // no session, don't bounce the user into another redirect (infinite loop).
       if (sessionStorage.getItem(CALENDAR_OAUTH_ATTEMPT_KEY) === "1") {
+        const settledSession = await waitForAuthSession();
+        if (settledSession) {
+          await persistGoogleTokens(settledSession);
+          sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+          sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
+          return settledSession.provider_token ?? null;
+        }
         sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
         toast.error("Google sign-in didn't complete. Please try again.");
         return null;
@@ -144,10 +166,14 @@ const WelcomeBack = () => {
 
       if (result.redirected) return null;
 
-      const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+      const refreshedSession = await waitForAuthSession();
       await persistGoogleTokens(refreshedSession);
+      if (refreshedSession) {
+        sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
+        sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+      }
       sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
-      return null;
+      return refreshedSession?.provider_token ?? null;
     };
 
     try {
@@ -159,7 +185,11 @@ const WelcomeBack = () => {
 
       if (!session) {
         await requestCalendarConsent();
-        return;
+        const resumedSession = await waitForAuthSession();
+        if (!resumedSession) return;
+        session = resumedSession;
+        await persistGoogleTokens(session);
+        sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
       }
 
       const start = new Date(); start.setHours(0, 0, 0, 0);
