@@ -97,6 +97,12 @@ const WelcomeBack = () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
     let calendarConsentAttempted = false;
+    // Watchdog: never let the spinner hang forever.
+    const watchdog = window.setTimeout(() => {
+      console.warn("[calendar] watchdog timeout — releasing spinner");
+      setCalendarAnalyzing(false);
+      toast.error("Calendar scan timed out. Tap My Calendar to try again or Skip to continue.");
+    }, 30000);
 
     const waitForAuthSession = async (timeoutMs = 6000) => {
       const started = Date.now();
