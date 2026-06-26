@@ -146,6 +146,9 @@ const WelcomeBack = () => {
       let { data: { session } } = await supabase.auth.getSession();
       await persistGoogleTokens(session);
 
+      // Got a session: clear the redirect-attempt guard so future re-auths work.
+      if (session) sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+
       if (!session) {
         await requestCalendarConsent();
         return;
