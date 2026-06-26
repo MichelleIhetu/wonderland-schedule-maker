@@ -586,7 +586,7 @@ const Index = () => {
   return (
     <>
       <SEO title="Build Your Schedule — TimeBunny" description="Walk through the TimeBunny wizard to capture energy, stress, and tasks, then generate today's focused schedule." path="/" />
-      <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} generatedSchedule={generatedSchedule} initialScene={viewMode === "schedule" ? "schedule" : "library"} />
+      <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} generatedSchedule={generatedSchedule} initialScene={viewMode === "schedule" ? "schedule" : "library"} onUpdateSchedule={() => { setGeneratedSchedule([]); setViewMode("wizard"); }} />
     </>
   );
 
