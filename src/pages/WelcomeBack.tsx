@@ -75,11 +75,15 @@ const WelcomeBack = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [generatedSchedule]);
 
-  // Resume calendar analysis after Google OAuth round-trip.
+  // Resume calendar analysis after Google OAuth round-trip, or auto-scan when arriving via nav.
   useEffect(() => {
+    const autoScan = (location.state as any)?.autoScan === true;
     if (sessionStorage.getItem(RESUME_CALENDAR_ANALYSIS_KEY) === "1") {
       sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
       setTimeout(() => { runCalendarAnalysis(scope); }, 600);
+    } else if (autoScan) {
+      window.history.replaceState({}, document.title, "/welcome-back");
+      setTimeout(() => { runCalendarAnalysis(scope); }, 200);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
