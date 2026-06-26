@@ -206,7 +206,7 @@ const Index = () => {
 
   const todayDate = useMemo(() => getFormattedDate(), []);
 
-  const handleStart = () => { playBing(); setViewMode("wizard"); };
+  const handleStart = () => { playBing(); navigate("/welcome-back"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
 
   const runCalendarAnalysis = async () => {
