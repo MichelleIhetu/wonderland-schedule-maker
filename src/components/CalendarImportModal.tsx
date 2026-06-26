@@ -44,7 +44,6 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
   const [googleEvents, setGoogleEvents] = useState<CalendarEvent[]>([]);
   const [selectedGoogleEvents, setSelectedGoogleEvents] = useState<Set<string>>(new Set());
   const [hasFetchedGoogle, setHasFetchedGoogle] = useState(false);
-  const [calendarAuthAttempted, setCalendarAuthAttempted] = useState(false);
 
   // Persist provider tokens (access + refresh) on the backend so the user doesn't
   // have to re-sign-in every session.
@@ -114,18 +113,11 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
   }, [isOpen, session, providerToken]);
 
   const handleGoogleSignIn = async (): Promise<boolean> => {
-    if (calendarAuthAttempted) {
-      setError("Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.");
-      setIsGoogleLoading(false);
-      return false;
-    }
-
     setError(null);
     setIsGoogleLoading(true);
 
     try {
       if (session) {
-        setCalendarAuthAttempted(true);
         const tokenResult = await requestGoogleCalendarAccessToken();
         if (!tokenResult.accessToken) {
           setError(tokenResult.error || 'Google Calendar access was not granted.');
@@ -138,7 +130,6 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
         return true;
       }
 
-      setCalendarAuthAttempted(true);
       const { error } = await lovable.auth.signInWithOAuth('google', {
         redirect_uri: window.location.origin,
         extraParams: {
@@ -238,7 +229,6 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
       setGoogleEvents(events);
       setSelectedGoogleEvents(new Set(events.map((e: CalendarEvent) => e.id)));
       setHasFetchedGoogle(true);
-      setCalendarAuthAttempted(false);
     } catch (err) {
       console.error('Error:', err);
       setError('Failed to fetch calendar events');
