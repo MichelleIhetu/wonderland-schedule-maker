@@ -446,7 +446,13 @@ const Index = () => {
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Top bar */}
         <div className="flex items-center justify-between px-4 sm:px-8 py-4">
-          <div />
+        <div className="flex items-center gap-2">
+          <Link to="/auth">
+            <Button variant="ghost" size="sm" className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)] glass-pill rounded-full px-4">
+              <span className="font-body font-semibold">New user?</span>
+            </Button>
+          </Link>
+        </div>
           {user ? (
             <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)]">
               <LogOut className="w-4 h-4" />
