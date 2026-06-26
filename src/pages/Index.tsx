@@ -492,13 +492,6 @@ const Index = () => {
             </button>
           )}
 
-          <Link
-            to="/welcome-back"
-            className="mt-4 text-sm font-body font-semibold underline-offset-4 hover:underline"
-            style={{ color: "hsl(280 40% 40%)" }}
-          >
-            Returning? Welcome back →
-          </Link>
         </div>
 
         {/* Nav links - at the bottom of the page */}
