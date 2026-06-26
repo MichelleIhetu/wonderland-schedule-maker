@@ -19,7 +19,7 @@ const items: NavItem[] = [
   {
     label: "Calendar",
     icon: Calendar,
-    onClick: (nav) => nav("/welcome-back"),
+    onClick: (nav) => nav("/welcome-back", { state: { autoScan: true } }),
     match: (p) => p === "/welcome-back",
   },
   {
