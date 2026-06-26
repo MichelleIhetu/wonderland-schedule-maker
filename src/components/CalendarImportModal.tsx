@@ -11,6 +11,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { requestGoogleCalendarAccessToken } from "@/lib/googleCalendarAccess";
 import { User, Session } from "@supabase/supabase-js";
 
 const CALENDAR_MODAL_AUTH_ATTEMPTED_KEY = 'calendar_modal_auth_attempted';
@@ -124,6 +125,21 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
     setIsGoogleLoading(true);
 
     try {
+      if (session) {
+        sessionStorage.setItem(CALENDAR_MODAL_AUTH_ATTEMPTED_KEY, '1');
+        const tokenResult = await requestGoogleCalendarAccessToken();
+        if (!tokenResult.accessToken) {
+          sessionStorage.removeItem(CALENDAR_MODAL_AUTH_ATTEMPTED_KEY);
+          setError(tokenResult.error || 'Google Calendar access was not granted.');
+          setIsGoogleLoading(false);
+          return false;
+        }
+        setProviderToken(tokenResult.accessToken);
+        setHasFetchedGoogle(false);
+        await fetchGoogleCalendarEvents(tokenResult.accessToken, true);
+        return true;
+      }
+
       sessionStorage.setItem(CALENDAR_MODAL_AUTH_ATTEMPTED_KEY, '1');
       const { error } = await lovable.auth.signInWithOAuth('google', {
         redirect_uri: window.location.origin,
