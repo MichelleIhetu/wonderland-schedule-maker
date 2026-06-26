@@ -26,6 +26,7 @@ const defaultSettings: UserSettings = {
 
 type View = "landing" | "wizard" | "schedule";
 const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis_wb";
+const CALENDAR_OAUTH_ATTEMPT_KEY = "calendar_oauth_attempt";
 
 const WelcomeBack = () => {
   const navigate = useNavigate();
