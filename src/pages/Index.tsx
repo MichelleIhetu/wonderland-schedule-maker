@@ -142,6 +142,15 @@ const Index = () => {
     }
   }, [location.state]);
 
+  // Skip flow from Auth page: jump directly to the wizard (library scene).
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.skipToWizard) {
+      setViewMode("wizard");
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   useEffect(() => { setCustomColors(defaultThemeColors[settings.backgroundTheme]); }, [settings.backgroundTheme]);
 
   // Auto-resume calendar analysis after returning from Google OAuth redirect.
