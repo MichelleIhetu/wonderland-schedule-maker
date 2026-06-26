@@ -54,11 +54,10 @@ const WelcomeBack = () => {
     });
   };
 
-  // Save schedule once generated, then jump to focus timer.
+  // Save schedule once generated; user reviews it then taps Start Focus Timer.
   useEffect(() => {
     if (generatedSchedule.length > 0) {
       saveSchedule(generatedSchedule, settings);
-      navigate("/pomodoro", { state: { schedule: generatedSchedule } });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [generatedSchedule]);
@@ -204,6 +203,7 @@ const WelcomeBack = () => {
           generatedSchedule={generatedSchedule}
           initialScene="cozy"
           onBackFromInitial={() => setView("landing")}
+          onStartFocus={() => navigate("/pomodoro", { state: { schedule: generatedSchedule } })}
         />
       </>
     );
