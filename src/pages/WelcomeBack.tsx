@@ -347,7 +347,14 @@ const WelcomeBack = () => {
               </button>
             );
           })}
-        </div>
+        <button
+          onClick={() => setView("wizard")}
+          className="mt-3 text-sm font-body underline opacity-70 hover:opacity-100"
+          style={{ color: "hsl(280 40% 40%)" }}
+        >
+          Skip calendar →
+        </button>
+      </div>
 
         <button
           onClick={() => runCalendarAnalysis(scope)}
