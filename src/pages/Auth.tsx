@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -22,10 +23,21 @@ const Auth = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
 
+  // Where to send the user after a successful sign-in. Defaults to home,
+  // but Welcome Back is preserved when they arrived from there or via ?returnTo.
+  const params = new URLSearchParams(location.search);
+  const returnToParam = params.get("returnTo");
+  const returnTo =
+    returnToParam === "/welcome-back"
+      ? "/welcome-back"
+      : (location.state as any)?.returnTo === "/welcome-back"
+      ? "/welcome-back"
+      : "/";
+
   // Redirect if already logged in
   useEffect(() => {
-    if (user) navigate("/");
-  }, [user, navigate]);
+    if (user) navigate(returnTo);
+  }, [user, navigate, returnTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,16 +48,16 @@ const Auth = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back! 🐰");
-        navigate("/");
+        navigate(returnTo);
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
+          options: { emailRedirectTo: `${window.location.origin}${returnTo}` },
         });
         if (error) throw error;
         toast.success("Account created! Welcome! 🐰");
-        navigate("/");
+        navigate(returnTo);
       }
     } catch (error: any) {
       const msg = error?.message || "Something went wrong";
