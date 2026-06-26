@@ -94,7 +94,7 @@ const Auth = () => {
     setGoogleLoading(true);
     try {
       sessionStorage.setItem(POST_GOOGLE_AUTH_REDIRECT_KEY, returnTo);
-      const { error } = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
         extraParams: {
           prompt: "consent",
@@ -103,9 +103,12 @@ const Auth = () => {
           scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
         },
       });
-      if (error) {
+
+      if (result.redirected) return;
+
+      if (result.error) {
         sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
-        toast.error(error.message || "Google sign-in failed");
+        toast.error(result.error.message || "Google sign-in failed");
       } else {
         navigateAfterAuth();
       }
