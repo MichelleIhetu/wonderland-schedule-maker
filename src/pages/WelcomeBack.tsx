@@ -139,11 +139,12 @@ const WelcomeBack = () => {
       const scopeLabel = chosenScope === "day" ? "today" : chosenScope === "week" ? "this week" : "the next 31 days";
       toast(`Scanning ${scopeLabel} of your calendar…`, { icon: "🔍" });
 
-      const fetchCalendar = async () => {
+      const fetchCalendar = async (calendarAccessToken?: string) => {
         const { data: { session: latestSession } } = await supabase.auth.getSession();
         await persistGoogleTokens(latestSession);
         const headers: Record<string, string> = {};
-        if (latestSession?.provider_token) headers["x-provider-token"] = latestSession.provider_token;
+        const tokenToUse = calendarAccessToken || latestSession?.provider_token;
+        if (tokenToUse) headers["x-provider-token"] = tokenToUse;
 
         return supabase.functions.invoke("google-calendar", {
           headers,
