@@ -50,11 +50,21 @@ const CalendarAnalysisModal = ({ isOpen, onClose, onNext, tasks, monthLabel }: P
     ? "Some Bunny's Been Busy!"
     : `Monthly Debrief · Hop to It — ${monthLabel} Debrief`;
 
+  const handleNext = () => { onClose(); onNext?.(); };
+
   return (
     <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl bg-card border-primary/20">
+      <DialogContent className="max-w-2xl bg-card border-primary/20 [&>button]:hidden">
+        <button
+          onClick={handleNext}
+          aria-label="Next"
+          className="absolute right-4 top-4 z-10 flex items-center justify-center w-8 h-8 rounded-full text-white shadow-md hover:scale-110 active:scale-95 transition-all"
+          style={{ background: "hsl(280 70% 50%)" }}
+        >
+          <ArrowRight className="w-4 h-4" />
+        </button>
         <DialogHeader>
-          <DialogTitle className="font-display text-xl text-foreground flex items-center gap-2 flex-wrap">
+          <DialogTitle className="font-display text-xl text-foreground flex items-center gap-2 flex-wrap pr-10">
             <Sparkles className="w-5 h-5 text-primary" />
             {titleText}
           </DialogTitle>
