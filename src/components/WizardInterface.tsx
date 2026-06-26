@@ -31,6 +31,7 @@ interface WizardInterfaceProps {
   generatedSchedule: ScheduleItem[];
   initialScene?: Scene;
   onBackFromInitial?: () => void;
+  onStartFocus?: () => void;
 }
 
 // ─── SCENE DEFINITIONS ───
