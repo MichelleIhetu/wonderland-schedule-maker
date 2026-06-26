@@ -46,7 +46,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
-          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/" element={<ProtectedRoute><LibraryEntryGuard><Index /></LibraryEntryGuard></ProtectedRoute>} />
           <Route path="/moodboard" element={<ProtectedRoute><Moodboard /></ProtectedRoute>} />
           <Route path="/vibe-check" element={<ProtectedRoute><VibeCheck /></ProtectedRoute>} />
           <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
