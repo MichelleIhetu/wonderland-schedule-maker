@@ -38,6 +38,7 @@ type ViewMode = "landing" | "wizard" | "schedule";
 const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis";
 const CALENDAR_OAUTH_ATTEMPT_KEY = "calendar_oauth_attempt";
 const WIZARD_SKIP_REQUEST_KEY = "timebunny_skip_to_wizard_requested";
+const POST_GOOGLE_AUTH_REDIRECT_KEY = "timebunny_post_google_auth_redirect";
 
 const hexToHsl = (hex: string): string => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -166,31 +167,34 @@ const Index = () => {
       // Pomodoro view reflects what's actually on the user's calendar now.
       (async () => {
         try {
-          const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-          const { data } = await supabase.functions.invoke("google-calendar", {
-            body: { cacheOnly: true, timezone },
-          });
-          const events: Array<any> = data?.events || [];
-          const todayLocal = new Intl.DateTimeFormat("en-CA", {
-            year: "numeric", month: "2-digit", day: "2-digit", timeZone: timezone,
-          }).format(new Date());
-          const todays = events
-            .filter((e) => e.date === todayLocal && !e.isAllDay && e.startTime)
-            .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
-          if (todays.length > 0) {
-            const suits: Array<"hearts" | "diamonds" | "clubs" | "spades"> = ["hearts", "diamonds", "clubs", "spades"];
-            const schedule = todays.map((e, i) => ({
-              id: e.id || `cal-${i}`,
-              title: e.title || "Calendar Event",
-              time: e.startTime,
-              endTime: e.endTime,
-              description: e.description || "",
-              suit: suits[i % suits.length],
-            }));
-            setGeneratedSchedule(schedule);
-            setViewMode("schedule");
-            window.history.replaceState({}, document.title);
-            return;
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+            const { data } = await supabase.functions.invoke("google-calendar", {
+              body: { cacheOnly: true, timezone },
+            });
+            const events: Array<any> = data?.events || [];
+            const todayLocal = new Intl.DateTimeFormat("en-CA", {
+              year: "numeric", month: "2-digit", day: "2-digit", timeZone: timezone,
+            }).format(new Date());
+            const todays = events
+              .filter((e) => e.date === todayLocal && !e.isAllDay && e.startTime)
+              .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
+            if (todays.length > 0) {
+              const suits: Array<"hearts" | "diamonds" | "clubs" | "spades"> = ["hearts", "diamonds", "clubs", "spades"];
+              const schedule = todays.map((e, i) => ({
+                id: e.id || `cal-${i}`,
+                title: e.title || "Calendar Event",
+                time: e.startTime,
+                endTime: e.endTime,
+                description: e.description || "",
+                suit: suits[i % suits.length],
+              }));
+              setGeneratedSchedule(schedule);
+              setViewMode("schedule");
+              window.history.replaceState({}, document.title);
+              return;
+            }
           }
         } catch (err) {
           console.warn("Calendar cache unavailable, falling back to saved schedule", err);
@@ -228,6 +232,14 @@ const Index = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const redirectTo = sessionStorage.getItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
+    if (!redirectTo) return;
+    sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
+    navigate(redirectTo, { replace: true, state: redirectTo === "/welcome-back" ? { forceLanding: true } : undefined });
+  }, [user, navigate]);
 
 
   useEffect(() => {
@@ -317,6 +329,7 @@ const Index = () => {
       calendarConsentAttempted = true;
       sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
       sessionStorage.setItem(CALENDAR_OAUTH_ATTEMPT_KEY, "1");
+      sessionStorage.setItem(POST_GOOGLE_AUTH_REDIRECT_KEY, "/");
       const { lovable } = await import("@/integrations/lovable");
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
@@ -331,6 +344,7 @@ const Index = () => {
       if (result.error) {
         sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
         sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+        sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
         toast.error(result.error.message || "Could not start Google sign-in");
         return null;
       }
@@ -339,6 +353,7 @@ const Index = () => {
 
       const { data: { session: refreshedSession } } = await supabase.auth.getSession();
       await persistGoogleTokens(refreshedSession);
+      sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
       return null;
     };
 

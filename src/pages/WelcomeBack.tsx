@@ -27,6 +27,7 @@ const defaultSettings: UserSettings = {
 type View = "landing" | "wizard" | "schedule";
 const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis_wb";
 const CALENDAR_OAUTH_ATTEMPT_KEY = "calendar_oauth_attempt";
+const POST_GOOGLE_AUTH_REDIRECT_KEY = "timebunny_post_google_auth_redirect";
 
 const WelcomeBack = () => {
   const navigate = useNavigate();
@@ -118,8 +119,9 @@ const WelcomeBack = () => {
       calendarConsentAttempted = true;
       sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
       sessionStorage.setItem(CALENDAR_OAUTH_ATTEMPT_KEY, "1");
+      sessionStorage.setItem(POST_GOOGLE_AUTH_REDIRECT_KEY, "/welcome-back");
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + "/welcome-back",
+        redirect_uri: window.location.origin,
         extraParams: {
           prompt: "consent",
           access_type: "offline",
@@ -131,6 +133,7 @@ const WelcomeBack = () => {
       if (result.error) {
         sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
         sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+        sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
         toast.error(result.error.message || "Could not start Google sign-in");
         return null;
       }
@@ -139,6 +142,7 @@ const WelcomeBack = () => {
 
       const { data: { session: refreshedSession } } = await supabase.auth.getSession();
       await persistGoogleTokens(refreshedSession);
+      sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
       return null;
     };
 

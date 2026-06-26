@@ -24,6 +24,23 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const token = authHeader.replace('Bearer ', '');
+    try {
+      const payload = token.split('.')[1];
+      const normalized = payload?.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(payload.length / 4) * 4, '=');
+      const decoded = normalized ? JSON.parse(atob(normalized)) : null;
+      if (!decoded?.sub) {
+        return new Response(
+          JSON.stringify({ error: 'Please sign in before connecting Calendar.' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    } catch {
+      return new Response(
+        JSON.stringify({ error: 'Please sign in before connecting Calendar.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
     if (userError || !user) {
