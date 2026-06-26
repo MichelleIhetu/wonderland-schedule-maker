@@ -27,17 +27,18 @@ const Auth = () => {
   // but Welcome Back is preserved when they arrived from there or via ?returnTo.
   const params = new URLSearchParams(location.search);
   const returnToParam = params.get("returnTo");
-  const returnTo =
-    returnToParam === "/"
-      ? "/"
-      : (location.state as any)?.returnTo === "/"
-      ? "/"
-      : "/welcome-back";
+  const returnTo = returnToParam === "/" || (location.state as any)?.returnTo === "/" ? "/" : "/welcome-back";
+  const navigateAfterAuth = () => {
+    navigate(returnTo, {
+      replace: true,
+      state: returnTo === "/welcome-back" ? { forceLanding: true } : undefined,
+    });
+  };
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) navigate(returnTo);
-  }, [user, navigate, returnTo]);
+    if (user) navigateAfterAuth();
+  }, [user, returnTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +49,7 @@ const Auth = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back! 🐰");
-        navigate(returnTo);
+        navigateAfterAuth();
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -57,7 +58,7 @@ const Auth = () => {
         });
         if (error) throw error;
         toast.success("Account created! Welcome! 🐰");
-        navigate(returnTo);
+        navigateAfterAuth();
       }
     } catch (error: any) {
       const msg = error?.message || "Something went wrong";
@@ -90,7 +91,7 @@ const Auth = () => {
     setGoogleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + returnTo,
+        redirect_uri: window.location.origin + returnTo + (returnTo === "/welcome-back" ? "?landing=1" : ""),
         extraParams: {
           prompt: "consent",
           access_type: "offline",
@@ -112,7 +113,7 @@ const Auth = () => {
     setAppleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("apple", {
-        redirect_uri: window.location.origin + returnTo,
+        redirect_uri: window.location.origin + returnTo + (returnTo === "/welcome-back" ? "?landing=1" : ""),
       });
       if (error) {
         toast.error(error.message || "Apple sign-in failed");
