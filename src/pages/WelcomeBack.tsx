@@ -198,14 +198,16 @@ const WelcomeBack = () => {
         sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
       }
 
-      const start = new Date(); start.setHours(0, 0, 0, 0);
-      const end = new Date(start);
-      const scopeDays = chosenScope === "day" ? 1 : chosenScope === "week" ? 7 : 31;
-      end.setDate(end.getDate() + scopeDays);
-      const scopeLabel = chosenScope === "day" ? "today" : chosenScope === "week" ? "this week" : "the next 31 days";
-      toast(`Scanning ${scopeLabel} of your calendar…`, { icon: "🔍" });
+      const scopeOrder: Array<"day" | "week" | "month"> = ["day", "week", "month"];
+      const startIdx = scopeOrder.indexOf(chosenScope);
+      const tryOrder = scopeOrder.slice(startIdx);
 
-      const fetchCalendar = async (calendarAccessToken?: string) => {
+      const fetchCalendar = async (scopeKey: "day" | "week" | "month", calendarAccessToken?: string) => {
+        const start = new Date(); start.setHours(0, 0, 0, 0);
+        const end = new Date(start);
+        const scopeDays = scopeKey === "day" ? 1 : scopeKey === "week" ? 7 : 31;
+        end.setDate(end.getDate() + scopeDays);
+
         const { data: { session: latestSession } } = await supabase.auth.getSession();
         await persistGoogleTokens(latestSession);
         const headers: Record<string, string> = {};
@@ -218,33 +220,58 @@ const WelcomeBack = () => {
         });
       };
 
-      let { data: calData, error: calErr } = await fetchCalendar();
-      if (calData?.needsAuth) {
-        if (calData?.events?.length) {
-          toast("Using your saved calendar while refreshing permissions…", { icon: "📅" });
-        } else {
-          toast("Calendar permission needs to be refreshed.", { icon: "📅" });
-        }
-        const calendarAccessToken = await requestCalendarConsent();
-        if (!calendarAccessToken) return;
+      let events: any[] = [];
+      let calData: any = null;
+      let calErr: any = null;
+      let usedScope: "day" | "week" | "month" = chosenScope;
 
-        ({ data: calData, error: calErr } = await fetchCalendar(calendarAccessToken));
-        if (calData?.needsAuth) {
-          toast.error(calData?.error || "Calendar permission still needs approval");
-          return;
+      for (const scopeKey of tryOrder) {
+        const label = scopeKey === "day" ? "today" : scopeKey === "week" ? "this week" : "the next 31 days";
+        toast(`Scanning ${label} of your calendar…`, { icon: "🔍" });
+
+        let res = await fetchCalendar(scopeKey);
+        if (res.data?.needsAuth) {
+          if (res.data?.events?.length) {
+            toast("Using your saved calendar while refreshing permissions…", { icon: "📅" });
+          } else {
+            toast("Calendar permission needs to be refreshed.", { icon: "📅" });
+          }
+          const calendarAccessToken = await requestCalendarConsent();
+          if (!calendarAccessToken) { setCalendarAnalyzing(false); window.clearTimeout(watchdog); return; }
+          res = await fetchCalendar(scopeKey, calendarAccessToken);
+          if (res.data?.needsAuth) {
+            toast.error(res.data?.error || "Calendar permission still needs approval");
+            setCalendarAnalyzing(false); window.clearTimeout(watchdog); return;
+          }
+        }
+
+        calData = res.data; calErr = res.error;
+        if (calErr || calData?.error) {
+          toast.error(calData?.error || "Failed to fetch calendar");
+          setCalendarAnalyzing(false); window.clearTimeout(watchdog); return;
+        }
+
+        const fetched = calData?.events ?? [];
+        console.log(`[calendar] scope=${scopeKey} fetched ${fetched.length} events`);
+        if (fetched.length > 0) {
+          events = fetched;
+          usedScope = scopeKey;
+          if (scopeKey !== chosenScope) {
+            toast(`No events in ${chosenScope === "day" ? "today" : "this week"} — widened to ${label}`, { icon: "🔭" });
+          }
+          break;
         }
       }
-      if (calErr || calData?.error) { toast.error(calData?.error || "Failed to fetch calendar"); setCalendarAnalyzing(false); window.clearTimeout(watchdog); return; }
-      const events = calData?.events ?? [];
-      console.log("[calendar] fetched events:", events.length, calData);
+
       const todayStr = new Date().toISOString().slice(0, 10);
 
       if (events.length === 0) {
-        toast("No upcoming events found — tap Next to continue ✨", { icon: "📭" });
+        toast.error("Still no upcoming events found across the next 31 days. Double-check the Google account you signed in with has events on its calendar.");
         setAnalyzedTasks([]);
         setCalendarImported(true);
         return;
       }
+
 
       const { data: ana, error: anaErr } = await supabase.functions.invoke("analyze-calendar-tasks", {
         body: { events, today: todayStr },
