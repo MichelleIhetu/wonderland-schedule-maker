@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Target, ImageIcon, Sparkles, Clock, Home, Menu, X } from "lucide-react";
+import { Target, ImageIcon, Sparkles, Clock, Home, Menu, X, Calendar } from "lucide-react";
 
 type NavItem = {
   label: string;
@@ -15,6 +15,12 @@ const items: NavItem[] = [
     icon: Home,
     onClick: (nav) => nav("/"),
     match: (p) => p === "/",
+  },
+  {
+    label: "Calendar",
+    icon: Calendar,
+    onClick: (nav) => nav("/welcome-back"),
+    match: (p) => p === "/welcome-back",
   },
   {
     label: "Schedule",
