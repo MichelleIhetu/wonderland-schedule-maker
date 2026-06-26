@@ -161,10 +161,26 @@ const Index = () => {
   useEffect(() => {
     const state = location.state as any;
     if (state?.openScheduleView) {
+      // Restore last saved schedule if nothing is currently loaded.
+      if (generatedSchedule.length === 0) {
+        const snap = loadScheduleSnapshot();
+        if (snap && snap.schedule.length > 0) {
+          setGeneratedSchedule(snap.schedule);
+          if (snap.settings) setSettings(snap.settings);
+        } else {
+          loadTodaySchedule().then((result) => {
+            if (result && result.schedule.length > 0) {
+              setGeneratedSchedule(result.schedule);
+              if (result.settings) setSettings(result.settings);
+            }
+          });
+        }
+      }
       setViewMode("schedule");
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+
 
   useEffect(() => { setCustomColors(defaultThemeColors[settings.backgroundTheme]); }, [settings.backgroundTheme]);
 
