@@ -254,8 +254,9 @@ const Auth = () => {
             variant="secondary"
             className="w-full gap-2"
             onClick={() => {
-              sessionStorage.setItem(WIZARD_SKIP_REQUEST_KEY, "1");
-              navigate("/", { state: { skipToWizard: true } });
+              const skipNonce = String(Date.now());
+              sessionStorage.setItem(WIZARD_SKIP_REQUEST_KEY, skipNonce);
+              navigate("/", { state: { skipToWizard: true, skipToWizardNonce: skipNonce } });
             }}
           >
             Skip for now →
