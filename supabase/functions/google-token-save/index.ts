@@ -36,14 +36,35 @@ serve(async (req) => {
     const admin = createClient(supabaseUrl, serviceKey);
 
     if (!refresh_token && access_token) {
-      const { error: updateErr } = await admin
+      const { data: existing, error: readErr } = await admin
+        .from('google_oauth_tokens')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (readErr) {
+        console.error('Read token row error:', readErr);
+        return new Response(JSON.stringify({ error: readErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const payload = {
+        user_id: user.id,
+        refresh_token: null,
+        access_token,
+        expires_at: expiresAt,
+        scope: scope || null,
+      };
+
+      const { error: updateErr } = existing ? await admin
         .from('google_oauth_tokens')
         .update({
           access_token,
           expires_at: expiresAt,
           scope: scope || null,
         })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id) : await admin
+        .from('google_oauth_tokens')
+        .insert(payload);
 
       if (updateErr) {
         console.error('Save access token error:', updateErr);
