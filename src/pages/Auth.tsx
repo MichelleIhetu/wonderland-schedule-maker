@@ -255,6 +255,15 @@ const Auth = () => {
             Skip for now →
           </Button>
 
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full gap-2"
+            onClick={() => navigate("/welcome-back")}
+          >
+            Return to Welcome Back →
+          </Button>
+
           <p className="text-xs text-center text-muted-foreground/60">
             <Calendar className="w-3 h-3 inline mr-1" />
             Google sign-in connects your calendar · Apple Calendar users can sync to Google Calendar
