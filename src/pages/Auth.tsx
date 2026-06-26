@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import SEO from "@/components/SEO";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -22,10 +23,21 @@ const Auth = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
 
+  // Where to send the user after a successful sign-in. Defaults to home,
+  // but Welcome Back is preserved when they arrived from there or via ?returnTo.
+  const params = new URLSearchParams(location.search);
+  const returnToParam = params.get("returnTo");
+  const returnTo =
+    returnToParam === "/welcome-back"
+      ? "/welcome-back"
+      : (location.state as any)?.returnTo === "/welcome-back"
+      ? "/welcome-back"
+      : "/";
+
   // Redirect if already logged in
   useEffect(() => {
-    if (user) navigate("/");
-  }, [user, navigate]);
+    if (user) navigate(returnTo);
+  }, [user, navigate, returnTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,16 +48,16 @@ const Auth = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back! 🐰");
-        navigate("/");
+        navigate(returnTo);
       } else {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
+          options: { emailRedirectTo: `${window.location.origin}${returnTo}` },
         });
         if (error) throw error;
         toast.success("Account created! Welcome! 🐰");
-        navigate("/");
+        navigate(returnTo);
       }
     } catch (error: any) {
       const msg = error?.message || "Something went wrong";
@@ -78,7 +90,7 @@ const Auth = () => {
     setGoogleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: window.location.origin + returnTo,
         extraParams: {
           prompt: "consent",
           access_type: "offline",
@@ -100,7 +112,7 @@ const Auth = () => {
     setAppleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("apple", {
-        redirect_uri: window.location.origin,
+        redirect_uri: window.location.origin + returnTo,
       });
       if (error) {
         toast.error(error.message || "Apple sign-in failed");
@@ -241,6 +253,15 @@ const Auth = () => {
             onClick={() => navigate("/", { state: { skipToWizard: true } })}
           >
             Skip for now →
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full gap-2"
+            onClick={() => navigate("/welcome-back")}
+          >
+            Return to Welcome Back →
           </Button>
 
           <p className="text-xs text-center text-muted-foreground/60">
