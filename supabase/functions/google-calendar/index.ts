@@ -229,13 +229,11 @@ serve(async (req) => {
     let providerToken = req.headers.get('x-provider-token') || '';
 
     if (!providerToken) {
-      if (!stored?.refresh_token) {
-        return await authRequiredResponse('No Google credentials. Sign in with Google to refresh.');
-      }
-
       const stillValid = stored.access_token && stored.expires_at && new Date(stored.expires_at) > new Date();
       if (stillValid) {
         providerToken = stored.access_token!;
+      } else if (!stored?.refresh_token) {
+        return await authRequiredResponse('No Google credentials. Sign in with Google to refresh.');
       } else {
         const refreshAttempt = await refreshAndStoreProviderToken();
         providerToken = refreshAttempt.token || '';

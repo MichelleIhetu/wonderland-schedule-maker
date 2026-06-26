@@ -92,7 +92,7 @@ export const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken:
       client_id: data.clientId,
       scope: GOOGLE_CALENDAR_SCOPES,
       prompt: "consent",
-      callback: (response) => {
+      callback: async (response) => {
         if (response.error) {
           const description = response.error_description || response.error;
           resolve({
@@ -100,6 +100,16 @@ export const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken:
             error: `Google Calendar permission was not granted: ${description}`,
           });
           return;
+        }
+
+        if (response.access_token) {
+          await supabase.functions.invoke("google-token-save", {
+            body: {
+              access_token: response.access_token,
+              expires_in: 3600,
+              scope: GOOGLE_CALENDAR_SCOPES,
+            },
+          });
         }
 
         resolve({ accessToken: response.access_token || null });
