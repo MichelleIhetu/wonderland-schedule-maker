@@ -225,7 +225,7 @@ const WelcomeBack = () => {
             <span className="hidden sm:inline">Sign Out</span>
           </Button>
         ) : (
-          <Link to="/auth">
+          <Link to="/auth?returnTo=/welcome-back">
             <Button variant="ghost" size="sm" className="gap-2 text-[hsl(280_40%_40%)] glass-pill rounded-full px-4">
               <span className="font-body font-semibold">Sign In</span>
             </Button>
