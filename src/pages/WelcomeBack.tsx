@@ -347,6 +347,8 @@ const WelcomeBack = () => {
               </button>
             );
           })}
+        </div>
+
         <button
           onClick={() => runCalendarAnalysis(scope)}
           disabled={calendarAnalyzing}
