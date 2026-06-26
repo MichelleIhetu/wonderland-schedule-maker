@@ -93,15 +93,13 @@ const Index = () => {
     });
   };
 
-  // Load today's schedule on mount (works with or without auth via localStorage fallback)
+  // Load today's schedule in the background without pulling users off the welcome screen.
   useEffect(() => {
     if (scheduleLoaded) return;
     loadTodaySchedule().then((result) => {
       if (result && result.schedule.length > 0) {
         setGeneratedSchedule(result.schedule);
         if (result.settings) setSettings(result.settings);
-        setViewMode("schedule");
-        toast.success("Welcome back! Your schedule is ready 🐰");
       }
       setScheduleLoaded(true);
     });
@@ -146,7 +144,8 @@ const Index = () => {
   // Skip flow from Auth page: jump directly to the wizard (library scene).
   useEffect(() => {
     const state = location.state as any;
-    const skipWasJustRequested = state?.skipToWizard && sessionStorage.getItem(WIZARD_SKIP_REQUEST_KEY) === "1";
+    const storedSkipNonce = sessionStorage.getItem(WIZARD_SKIP_REQUEST_KEY);
+    const skipWasJustRequested = state?.skipToWizard && state?.skipToWizardNonce && storedSkipNonce === state.skipToWizardNonce;
     if (skipWasJustRequested) {
       sessionStorage.removeItem(WIZARD_SKIP_REQUEST_KEY);
       setViewMode("wizard");
@@ -197,8 +196,6 @@ const Index = () => {
     else toast("Check-in complete!", { description: "Keep going, you've got this!", icon: "✨" });
     if (data.needBreak) toast("Taking a longer break", { description: "Enjoy your rest time!", icon: "☕" });
   };
-
-  if (generatedSchedule.length > 0 && viewMode === "landing") setViewMode("schedule");
 
   const playBing = () => {
     const ctx = new AudioContext();
