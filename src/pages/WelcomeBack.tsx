@@ -348,15 +348,6 @@ const WelcomeBack = () => {
             );
           })}
         <button
-          onClick={() => setView("wizard")}
-          className="mt-3 text-sm font-body underline opacity-70 hover:opacity-100"
-          style={{ color: "hsl(280 40% 40%)" }}
-        >
-          Skip calendar →
-        </button>
-      </div>
-
-        <button
           onClick={() => runCalendarAnalysis(scope)}
           disabled={calendarAnalyzing}
           className="mt-6 flex items-center gap-3 px-8 py-4 rounded-full glass-pill text-lg transition-all hover:scale-105 disabled:opacity-60"
@@ -375,6 +366,14 @@ const WelcomeBack = () => {
             ✓ Calendar synced — tap Next to continue
           </p>
         )}
+
+        <button
+          onClick={() => { setCalendarAnalyzing(false); setView("wizard"); }}
+          className="mt-3 text-sm font-body underline opacity-70 hover:opacity-100"
+          style={{ color: "hsl(280 40% 40%)" }}
+        >
+          Skip calendar →
+        </button>
       </div>
 
       {/* Bunny mascot */}
