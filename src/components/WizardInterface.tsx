@@ -32,6 +32,7 @@ interface WizardInterfaceProps {
   initialScene?: Scene;
   onBackFromInitial?: () => void;
   onStartFocus?: () => void;
+  onUpdateSchedule?: () => void;
 }
 
 // ─── SCENE DEFINITIONS ───
