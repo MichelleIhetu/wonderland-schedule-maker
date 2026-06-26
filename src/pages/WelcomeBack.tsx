@@ -234,14 +234,22 @@ const WelcomeBack = () => {
           return;
         }
       }
-      if (calErr || calData?.error) { toast.error(calData?.error || "Failed to fetch calendar"); setCalendarAnalyzing(false); return; }
+      if (calErr || calData?.error) { toast.error(calData?.error || "Failed to fetch calendar"); setCalendarAnalyzing(false); window.clearTimeout(watchdog); return; }
       const events = calData?.events ?? [];
+      console.log("[calendar] fetched events:", events.length, calData);
       const todayStr = new Date().toISOString().slice(0, 10);
+
+      if (events.length === 0) {
+        toast("No upcoming events found — tap Next to continue ✨", { icon: "📭" });
+        setAnalyzedTasks([]);
+        setCalendarImported(true);
+        return;
+      }
 
       const { data: ana, error: anaErr } = await supabase.functions.invoke("analyze-calendar-tasks", {
         body: { events, today: todayStr },
       });
-      if (anaErr || ana?.error) { toast.error(ana?.error || "Analysis failed"); setCalendarAnalyzing(false); return; }
+      if (anaErr || ana?.error) { toast.error(ana?.error || "Analysis failed"); setCalendarAnalyzing(false); window.clearTimeout(watchdog); return; }
 
       setAnalyzedTasks(ana?.analyzed ?? []);
       setCalendarImported(true);
@@ -250,6 +258,7 @@ const WelcomeBack = () => {
       console.error(e);
       toast.error("Could not analyze calendar");
     } finally {
+      window.clearTimeout(watchdog);
       setCalendarAnalyzing(false);
     }
   };
