@@ -28,11 +28,11 @@ const Auth = () => {
   const params = new URLSearchParams(location.search);
   const returnToParam = params.get("returnTo");
   const returnTo =
-    returnToParam === "/welcome-back"
-      ? "/welcome-back"
-      : (location.state as any)?.returnTo === "/welcome-back"
-      ? "/welcome-back"
-      : "/";
+    returnToParam === "/"
+      ? "/"
+      : (location.state as any)?.returnTo === "/"
+      ? "/"
+      : "/welcome-back";
 
   // Redirect if already logged in
   useEffect(() => {
