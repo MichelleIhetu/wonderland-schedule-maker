@@ -203,6 +203,7 @@ const WelcomeBack = () => {
           generatedSchedule={generatedSchedule}
           initialScene="cozy"
           onBackFromInitial={() => setView("landing")}
+          onStartFocus={() => navigate("/pomodoro", { state: { schedule: generatedSchedule } })}
         />
       </>
     );
