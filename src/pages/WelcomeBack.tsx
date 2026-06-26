@@ -227,8 +227,13 @@ const WelcomeBack = () => {
 
       {/* Top bar */}
       <div className="relative z-10 flex items-center justify-between px-4 sm:px-8 py-4">
-        <Link to="/" className="text-sm font-body font-semibold" style={{ color: "hsl(280 40% 40%)" }}>
-          ← Home
+        <Link
+          to="/"
+          state={{ fromLibraryBack: true }}
+          className="text-sm font-body font-semibold"
+          style={{ color: "hsl(280 40% 40%)" }}
+        >
+          ← Back
         </Link>
         {user ? (
           <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-[hsl(280_40%_40%)]">
