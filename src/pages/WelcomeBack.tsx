@@ -106,9 +106,18 @@ const WelcomeBack = () => {
         return tokenResult.accessToken;
       }
 
+      // Guard: if we already attempted a Google redirect once and still have
+      // no session, don't bounce the user into another redirect (infinite loop).
+      if (sessionStorage.getItem(CALENDAR_OAUTH_ATTEMPT_KEY) === "1") {
+        sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+        toast.error("Google sign-in didn't complete. Please try again.");
+        return null;
+      }
+
       toast("Opening Google sign-in first…", { icon: "🔐" });
       calendarConsentAttempted = true;
       sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
+      sessionStorage.setItem(CALENDAR_OAUTH_ATTEMPT_KEY, "1");
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin + "/welcome-back",
         extraParams: {
@@ -121,6 +130,7 @@ const WelcomeBack = () => {
 
       if (result.error) {
         sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
+        sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
         toast.error(result.error.message || "Could not start Google sign-in");
         return null;
       }
