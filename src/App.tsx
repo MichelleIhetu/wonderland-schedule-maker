@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import WelcomeBack from "./pages/WelcomeBack";
 
 const queryClient = new QueryClient();
+const WIZARD_SKIP_REQUEST_KEY = "timebunny_skip_to_wizard_requested";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   // Temporarily bypassing auth - remove this to re-enable login
@@ -31,7 +32,8 @@ const LibraryEntryGuard = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   if (loading) return null;
   const state = (location.state ?? {}) as { fromLibraryBack?: boolean; skipToWizard?: boolean };
-  const explicitlyAllowed = state.fromLibraryBack === true || state.skipToWizard === true;
+  const skipWasJustRequested = state.skipToWizard === true && sessionStorage.getItem(WIZARD_SKIP_REQUEST_KEY) === "1";
+  const explicitlyAllowed = state.fromLibraryBack === true || skipWasJustRequested;
   if (user && !explicitlyAllowed) {
     return <Navigate to="/welcome-back" replace />;
   }
