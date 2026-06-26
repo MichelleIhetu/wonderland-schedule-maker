@@ -512,7 +512,7 @@ const Index = () => {
               style={{ color: "hsl(330 80% 45%)" }}
             >
               <Clock className="w-5 h-5" />
-              <span className="font-body font-semibold">Focus Timer</span>
+              <span className="font-body font-semibold">Pomodoro Timer</span>
               <span>⏱️</span>
             </button>
           )}
