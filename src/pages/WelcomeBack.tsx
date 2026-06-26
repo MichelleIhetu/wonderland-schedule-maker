@@ -133,6 +133,7 @@ const WelcomeBack = () => {
       if (result.error) {
         sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
         sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+        sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
         toast.error(result.error.message || "Could not start Google sign-in");
         return null;
       }

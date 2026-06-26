@@ -93,6 +93,7 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
+      sessionStorage.setItem(POST_GOOGLE_AUTH_REDIRECT_KEY, returnTo);
       const { error } = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
         extraParams: {
@@ -103,9 +104,9 @@ const Auth = () => {
         },
       });
       if (error) {
+        sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
         toast.error(error.message || "Google sign-in failed");
       } else {
-        sessionStorage.setItem(POST_GOOGLE_AUTH_REDIRECT_KEY, returnTo);
         navigateAfterAuth();
       }
     } catch (err: any) {

@@ -82,7 +82,7 @@ function jwtHasSubject(token: string): boolean {
   try {
     const payload = token.split('.')[1];
     if (!payload) return false;
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(payload.length / 4) * 4, '=');
     const decoded = JSON.parse(atob(normalized));
     return typeof decoded?.sub === 'string' && decoded.sub.length > 0;
   } catch {

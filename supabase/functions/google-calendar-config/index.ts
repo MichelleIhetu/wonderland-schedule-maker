@@ -26,7 +26,7 @@ serve(async (req) => {
     const token = authHeader.replace('Bearer ', '');
     try {
       const payload = token.split('.')[1];
-      const normalized = payload?.replace(/-/g, '+').replace(/_/g, '/');
+      const normalized = payload?.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(payload.length / 4) * 4, '=');
       const decoded = normalized ? JSON.parse(atob(normalized)) : null;
       if (!decoded?.sub) {
         return new Response(
