@@ -36,6 +36,7 @@ const defaultSettings: UserSettings = {
 
 type ViewMode = "landing" | "wizard" | "schedule";
 const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis";
+const CALENDAR_OAUTH_ATTEMPT_KEY = "calendar_oauth_attempt";
 const WIZARD_SKIP_REQUEST_KEY = "timebunny_skip_to_wizard_requested";
 
 const hexToHsl = (hex: string): string => {
