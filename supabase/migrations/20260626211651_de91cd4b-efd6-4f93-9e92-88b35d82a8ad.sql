@@ -1,0 +1,1 @@
+ALTER TABLE public.google_oauth_tokens ALTER COLUMN refresh_token DROP NOT NULL;

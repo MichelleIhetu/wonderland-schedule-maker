@@ -12,6 +12,7 @@ import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
 import { UserSettings } from "@/types/schedule";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { requestGoogleCalendarAccessToken } from "@/lib/googleCalendarAccess";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 
 const defaultSettings: UserSettings = {
@@ -25,7 +26,6 @@ const defaultSettings: UserSettings = {
 
 type View = "landing" | "wizard" | "schedule";
 const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis_wb";
-const CALENDAR_AUTH_ATTEMPTED_KEY = "calendar_auth_attempted_wb";
 
 const WelcomeBack = () => {
   const navigate = useNavigate();
@@ -75,14 +75,28 @@ const WelcomeBack = () => {
   const runCalendarAnalysis = async (chosenScope: "day" | "week" | "month" = scope) => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
-    const requestCalendarConsent = async (): Promise<boolean> => {
-      if (sessionStorage.getItem(CALENDAR_AUTH_ATTEMPTED_KEY) === "1") {
+    let calendarConsentAttempted = false;
+
+    const requestCalendarConsent = async (): Promise<string | null> => {
+      if (calendarConsentAttempted) {
         toast.error("Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.");
-        return false;
+        return null;
       }
 
-      toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
-      sessionStorage.setItem(CALENDAR_AUTH_ATTEMPTED_KEY, "1");
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (currentSession) {
+        toast("Opening Google Calendar permission…", { icon: "🔐" });
+        calendarConsentAttempted = true;
+        const tokenResult = await requestGoogleCalendarAccessToken();
+        if (!tokenResult.accessToken) {
+          toast.error(tokenResult.error || "Google Calendar access was not granted.");
+          return null;
+        }
+        return tokenResult.accessToken;
+      }
+
+      toast("Opening Google sign-in first…", { icon: "🔐" });
+      calendarConsentAttempted = true;
       sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin + "/welcome-back",
@@ -95,17 +109,16 @@ const WelcomeBack = () => {
       });
 
       if (result.error) {
-        sessionStorage.removeItem(CALENDAR_AUTH_ATTEMPTED_KEY);
         sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
         toast.error(result.error.message || "Could not start Google sign-in");
-        return false;
+        return null;
       }
 
-      if (result.redirected) return false;
+      if (result.redirected) return null;
 
       const { data: { session: refreshedSession } } = await supabase.auth.getSession();
       await persistGoogleTokens(refreshedSession);
-      return !!refreshedSession;
+      return null;
     };
 
     try {
@@ -124,11 +137,12 @@ const WelcomeBack = () => {
       const scopeLabel = chosenScope === "day" ? "today" : chosenScope === "week" ? "this week" : "the next 31 days";
       toast(`Scanning ${scopeLabel} of your calendar…`, { icon: "🔍" });
 
-      const fetchCalendar = async () => {
+      const fetchCalendar = async (calendarAccessToken?: string) => {
         const { data: { session: latestSession } } = await supabase.auth.getSession();
         await persistGoogleTokens(latestSession);
         const headers: Record<string, string> = {};
-        if (latestSession?.provider_token) headers["x-provider-token"] = latestSession.provider_token;
+        const tokenToUse = calendarAccessToken || latestSession?.provider_token;
+        if (tokenToUse) headers["x-provider-token"] = tokenToUse;
 
         return supabase.functions.invoke("google-calendar", {
           headers,
@@ -143,18 +157,16 @@ const WelcomeBack = () => {
         } else {
           toast("Calendar permission needs to be refreshed.", { icon: "📅" });
         }
-        const reconnected = await requestCalendarConsent();
-        if (!reconnected) return;
+        const calendarAccessToken = await requestCalendarConsent();
+        if (!calendarAccessToken) return;
 
-        ({ data: calData, error: calErr } = await fetchCalendar());
+        ({ data: calData, error: calErr } = await fetchCalendar(calendarAccessToken));
         if (calData?.needsAuth) {
           toast.error(calData?.error || "Calendar permission still needs approval");
           return;
         }
       }
       if (calErr || calData?.error) { toast.error(calData?.error || "Failed to fetch calendar"); setCalendarAnalyzing(false); return; }
-      sessionStorage.removeItem(CALENDAR_AUTH_ATTEMPTED_KEY);
-
       const events = calData?.events ?? [];
       const todayStr = new Date().toISOString().slice(0, 10);
 

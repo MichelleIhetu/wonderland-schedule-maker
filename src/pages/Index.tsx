@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import CalendarAnalysisModal, { AnalyzedTask } from "@/components/CalendarAnalysisModal";
 import { supabase } from "@/integrations/supabase/client";
+import { requestGoogleCalendarAccessToken } from "@/lib/googleCalendarAccess";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
 
@@ -35,7 +36,6 @@ const defaultSettings: UserSettings = {
 
 type ViewMode = "landing" | "wizard" | "schedule";
 const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis";
-const CALENDAR_AUTH_ATTEMPTED_KEY = "calendar_auth_attempted";
 
 const hexToHsl = (hex: string): string => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -212,14 +212,28 @@ const Index = () => {
   const runCalendarAnalysis = async () => {
     if (calendarAnalyzing) return;
     setCalendarAnalyzing(true);
-    const requestCalendarConsent = async (): Promise<boolean> => {
-      if (sessionStorage.getItem(CALENDAR_AUTH_ATTEMPTED_KEY) === "1") {
+    let calendarConsentAttempted = false;
+
+    const requestCalendarConsent = async (): Promise<string | null> => {
+      if (calendarConsentAttempted) {
         toast.error("Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.");
-        return false;
+        return null;
       }
 
-      toast("Opening Google sign-in for Calendar access…", { icon: "🔐" });
-      sessionStorage.setItem(CALENDAR_AUTH_ATTEMPTED_KEY, "1");
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (currentSession) {
+        toast("Opening Google Calendar permission…", { icon: "🔐" });
+        calendarConsentAttempted = true;
+        const tokenResult = await requestGoogleCalendarAccessToken();
+        if (!tokenResult.accessToken) {
+          toast.error(tokenResult.error || "Google Calendar access was not granted.");
+          return null;
+        }
+        return tokenResult.accessToken;
+      }
+
+      toast("Opening Google sign-in first…", { icon: "🔐" });
+      calendarConsentAttempted = true;
       sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
       const { lovable } = await import("@/integrations/lovable");
       const result = await lovable.auth.signInWithOAuth("google", {
@@ -233,17 +247,16 @@ const Index = () => {
       });
 
       if (result.error) {
-        sessionStorage.removeItem(CALENDAR_AUTH_ATTEMPTED_KEY);
         sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
         toast.error(result.error.message || "Could not start Google sign-in");
-        return false;
+        return null;
       }
 
-      if (result.redirected) return false;
+      if (result.redirected) return null;
 
       const { data: { session: refreshedSession } } = await supabase.auth.getSession();
       await persistGoogleTokens(refreshedSession);
-      return !!refreshedSession;
+      return null;
     };
 
     try {
@@ -266,11 +279,12 @@ const Index = () => {
 
       toast("Scanning the next 31 days of your calendar…", { icon: "🔍" });
 
-      const fetchCalendar = async () => {
+      const fetchCalendar = async (calendarAccessToken?: string) => {
         const { data: { session: latestSession } } = await supabase.auth.getSession();
         await persistGoogleTokens(latestSession);
         const headers: Record<string, string> = {};
-        if (latestSession?.provider_token) headers["x-provider-token"] = latestSession.provider_token;
+        const tokenToUse = calendarAccessToken || latestSession?.provider_token;
+        if (tokenToUse) headers["x-provider-token"] = tokenToUse;
 
         return supabase.functions.invoke("google-calendar", {
           headers,
@@ -289,10 +303,10 @@ const Index = () => {
         } else {
           toast("Calendar permission needs to be refreshed.", { icon: "📅" });
         }
-        const reconnected = await requestCalendarConsent();
-        if (!reconnected) return;
+        const calendarAccessToken = await requestCalendarConsent();
+        if (!calendarAccessToken) return;
 
-        ({ data: calData, error: calErr } = await fetchCalendar());
+        ({ data: calData, error: calErr } = await fetchCalendar(calendarAccessToken));
         if (calData?.needsAuth) {
           toast.error(calData?.error || "Calendar permission still needs approval");
           return;
@@ -303,7 +317,6 @@ const Index = () => {
         setCalendarAnalyzing(false);
         return;
       }
-      sessionStorage.removeItem(CALENDAR_AUTH_ATTEMPTED_KEY);
       const allEvents = calData?.events ?? [];
 
       // Smart fallback: try today → this week → this month

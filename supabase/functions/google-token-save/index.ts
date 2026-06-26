@@ -27,13 +27,53 @@ serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const { refresh_token, access_token, expires_in, scope } = body || {};
-    if (!refresh_token) {
-      return new Response(JSON.stringify({ error: 'refresh_token required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (!refresh_token && !access_token) {
+      return new Response(JSON.stringify({ error: 'refresh_token or access_token required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const expiresAt = expires_in ? new Date(Date.now() + (Number(expires_in) - 60) * 1000).toISOString() : null;
 
     const admin = createClient(supabaseUrl, serviceKey);
+
+    if (!refresh_token && access_token) {
+      const { data: existing, error: readErr } = await admin
+        .from('google_oauth_tokens')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (readErr) {
+        console.error('Read token row error:', readErr);
+        return new Response(JSON.stringify({ error: readErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const payload = {
+        user_id: user.id,
+        refresh_token: null,
+        access_token,
+        expires_at: expiresAt,
+        scope: scope || null,
+      };
+
+      const { error: updateErr } = existing ? await admin
+        .from('google_oauth_tokens')
+        .update({
+          access_token,
+          expires_at: expiresAt,
+          scope: scope || null,
+        })
+        .eq('user_id', user.id) : await admin
+        .from('google_oauth_tokens')
+        .insert(payload);
+
+      if (updateErr) {
+        console.error('Save access token error:', updateErr);
+        return new Response(JSON.stringify({ error: updateErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     const { error: upErr } = await admin
       .from('google_oauth_tokens')
       .upsert({
