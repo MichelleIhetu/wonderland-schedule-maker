@@ -229,7 +229,7 @@ serve(async (req) => {
     let providerToken = req.headers.get('x-provider-token') || '';
 
     if (!providerToken) {
-      const stillValid = stored.access_token && stored.expires_at && new Date(stored.expires_at) > new Date();
+      const stillValid = stored?.access_token && stored.expires_at && new Date(stored.expires_at) > new Date();
       if (stillValid) {
         providerToken = stored.access_token!;
       } else if (!stored?.refresh_token) {
