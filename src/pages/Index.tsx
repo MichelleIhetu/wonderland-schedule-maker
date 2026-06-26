@@ -36,6 +36,7 @@ const defaultSettings: UserSettings = {
 
 type ViewMode = "landing" | "wizard" | "schedule";
 const RESUME_CALENDAR_ANALYSIS_KEY = "resume_calendar_analysis";
+const CALENDAR_OAUTH_ATTEMPT_KEY = "calendar_oauth_attempt";
 const WIZARD_SKIP_REQUEST_KEY = "timebunny_skip_to_wizard_requested";
 
 const hexToHsl = (hex: string): string => {
@@ -304,9 +305,18 @@ const Index = () => {
         return tokenResult.accessToken;
       }
 
+      // Guard against an infinite redirect loop when Supabase never finishes
+      // establishing a session after Google sign-in (bad_jwt / missing sub).
+      if (sessionStorage.getItem(CALENDAR_OAUTH_ATTEMPT_KEY) === "1") {
+        sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+        toast.error("Google sign-in didn't complete. Please try again.");
+        return null;
+      }
+
       toast("Opening Google sign-in first…", { icon: "🔐" });
       calendarConsentAttempted = true;
       sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
+      sessionStorage.setItem(CALENDAR_OAUTH_ATTEMPT_KEY, "1");
       const { lovable } = await import("@/integrations/lovable");
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
@@ -320,6 +330,7 @@ const Index = () => {
 
       if (result.error) {
         sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
+        sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
         toast.error(result.error.message || "Could not start Google sign-in");
         return null;
       }
@@ -336,6 +347,9 @@ const Index = () => {
       // when the current session no longer has a provider_token.
       let { data: { session } } = await supabase.auth.getSession();
       await persistGoogleTokens(session);
+
+      // Got a session: clear the redirect-attempt guard so future re-auths work.
+      if (session) sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
 
       if (!session) {
         await requestCalendarConsent();
