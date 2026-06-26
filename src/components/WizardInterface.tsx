@@ -1053,7 +1053,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                       className="px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95 shadow-md text-white font-semibold text-sm"
                       style={{ background: "hsl(150 60% 45%)", fontFamily: "var(--font-body)" }}
                     >
-                      Start Focus Timer →
+                      Pomodoro Timer →
                     </button>
                   )}
                 </div>

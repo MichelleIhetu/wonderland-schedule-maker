@@ -103,7 +103,7 @@ export default function ScheduleDisplay({ schedule, onClear, onStartPomodoro, th
           className="w-full gap-2 bg-gradient-to-r from-primary to-pink-500 hover:from-primary/90 hover:to-pink-500/90"
         >
           <Play className="w-4 h-4" />
-          Start Focus Session
+          Pomodoro Timer
         </Button>
         <p className="text-xs text-muted-foreground font-body italic text-center">
           "Begin at the beginning... and go on till you come to the end."
