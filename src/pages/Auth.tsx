@@ -112,7 +112,7 @@ const Auth = () => {
     setAppleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("apple", {
-        redirect_uri: window.location.origin,
+        redirect_uri: window.location.origin + returnTo,
       });
       if (error) {
         toast.error(error.message || "Apple sign-in failed");
