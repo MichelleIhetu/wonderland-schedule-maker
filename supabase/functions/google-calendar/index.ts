@@ -78,6 +78,18 @@ type StoredGoogleToken = {
   expires_at: string | null;
 };
 
+function jwtHasSubject(token: string): boolean {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return false;
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = JSON.parse(atob(normalized));
+    return typeof decoded?.sub === 'string' && decoded.sub.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 function isCalendarAuthError(status: number, errorText: string): boolean {
   const normalized = errorText.toLowerCase();
   return status === 401 || status === 403 ||
@@ -106,6 +118,13 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
+    if (!jwtHasSubject(token)) {
+      return new Response(
+        JSON.stringify({ error: 'Please sign in to use Google Calendar.', needsAuth: true, events: [] }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 

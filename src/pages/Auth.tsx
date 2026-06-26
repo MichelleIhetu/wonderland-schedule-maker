@@ -13,6 +13,7 @@ import SpiderWebBackground from "@/components/SpiderWebBackground";
 import { useAuth } from "@/hooks/useAuth";
 
 const WIZARD_SKIP_REQUEST_KEY = "timebunny_skip_to_wizard_requested";
+const POST_GOOGLE_AUTH_REDIRECT_KEY = "timebunny_post_google_auth_redirect";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -93,7 +94,7 @@ const Auth = () => {
     setGoogleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + returnTo + (returnTo === "/welcome-back" ? "?landing=1" : ""),
+        redirect_uri: window.location.origin,
         extraParams: {
           prompt: "consent",
           access_type: "offline",
@@ -103,6 +104,9 @@ const Auth = () => {
       });
       if (error) {
         toast.error(error.message || "Google sign-in failed");
+      } else {
+        sessionStorage.setItem(POST_GOOGLE_AUTH_REDIRECT_KEY, returnTo);
+        navigateAfterAuth();
       }
     } catch (err: any) {
       toast.error("Google sign-in failed");
@@ -115,7 +119,7 @@ const Auth = () => {
     setAppleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("apple", {
-        redirect_uri: window.location.origin + returnTo + (returnTo === "/welcome-back" ? "?landing=1" : ""),
+        redirect_uri: window.location.origin,
       });
       if (error) {
         toast.error(error.message || "Apple sign-in failed");

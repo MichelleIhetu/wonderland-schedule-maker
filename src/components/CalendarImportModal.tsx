@@ -74,7 +74,7 @@ const CalendarImportModal = ({ isOpen, onClose, onImport }: CalendarImportModalP
         setUser(session?.user ?? null);
         if (session?.provider_token) setProviderToken(session.provider_token);
         if (event === 'SIGNED_IN' || (session as any)?.provider_refresh_token) {
-          persistProviderTokens(session);
+          setTimeout(() => { void persistProviderTokens(session); }, 0);
         }
       }
     );

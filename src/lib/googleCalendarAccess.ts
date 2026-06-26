@@ -59,7 +59,45 @@ const loadGoogleIdentityScript = () => {
   return googleScriptPromise;
 };
 
-export const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string | null; error?: string; configurationError?: boolean }> => {
+const requestToken = (clientId: string, prompt: "" | "consent") => new Promise<{ accessToken: string | null; error?: string }>((resolve) => {
+  const client = window.google!.accounts!.oauth2!.initTokenClient({
+    client_id: clientId,
+    scope: GOOGLE_CALENDAR_SCOPES,
+    prompt,
+    callback: async (response) => {
+      if (response.error) {
+        const description = response.error_description || response.error;
+        resolve({
+          accessToken: null,
+          error: `Google Calendar permission was not granted: ${description}`,
+        });
+        return;
+      }
+
+      if (response.access_token) {
+        await supabase.functions.invoke("google-token-save", {
+          body: {
+            access_token: response.access_token,
+            expires_in: 3600,
+            scope: GOOGLE_CALENDAR_SCOPES,
+          },
+        });
+      }
+
+      resolve({ accessToken: response.access_token || null });
+    },
+    error_callback: () => {
+      resolve({
+        accessToken: null,
+        error: "Google Calendar permission popup was blocked or closed.",
+      });
+    },
+  });
+
+  client.requestAccessToken({ prompt });
+});
+
+export const requestGoogleCalendarAccessToken = async (options: { forceConsent?: boolean } = {}): Promise<{ accessToken: string | null; error?: string; configurationError?: boolean }> => {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
     return { accessToken: null, error: "Please sign in before connecting Calendar." };
@@ -87,41 +125,9 @@ export const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken:
     return { accessToken: null, error: "Google Calendar sign-in is unavailable in this browser." };
   }
 
-  return new Promise((resolve) => {
-    const client = window.google!.accounts!.oauth2!.initTokenClient({
-      client_id: data.clientId,
-      scope: GOOGLE_CALENDAR_SCOPES,
-      prompt: "consent",
-      callback: async (response) => {
-        if (response.error) {
-          const description = response.error_description || response.error;
-          resolve({
-            accessToken: null,
-            error: `Google Calendar permission was not granted: ${description}`,
-          });
-          return;
-        }
+  if (options.forceConsent) return requestToken(data.clientId, "consent");
 
-        if (response.access_token) {
-          await supabase.functions.invoke("google-token-save", {
-            body: {
-              access_token: response.access_token,
-              expires_in: 3600,
-              scope: GOOGLE_CALENDAR_SCOPES,
-            },
-          });
-        }
-
-        resolve({ accessToken: response.access_token || null });
-      },
-      error_callback: () => {
-        resolve({
-          accessToken: null,
-          error: "Google Calendar permission popup was blocked or closed.",
-        });
-      },
-    });
-
-    client.requestAccessToken({ prompt: "consent" });
-  });
+  const silent = await requestToken(data.clientId, "");
+  if (silent.accessToken) return silent;
+  return requestToken(data.clientId, "consent");
 };

@@ -19,6 +19,17 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'No auth' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
     const token = authHeader.replace('Bearer ', '');
+    try {
+      const payload = token.split('.')[1];
+      const normalized = payload?.replace(/-/g, '+').replace(/_/g, '/');
+      const decoded = normalized ? JSON.parse(atob(normalized)) : null;
+      if (!decoded?.sub) {
+        return new Response(JSON.stringify({ error: 'Not authenticated' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+    } catch {
+      return new Response(JSON.stringify({ error: 'Not authenticated' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const { data: { user }, error } = await supabase.auth.getUser(token);
     if (error || !user) {
