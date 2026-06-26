@@ -142,6 +142,15 @@ const Index = () => {
     }
   }, [location.state]);
 
+  // Skip flow from Auth page: jump directly to the wizard (library scene).
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.skipToWizard) {
+      setViewMode("wizard");
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   useEffect(() => { setCustomColors(defaultThemeColors[settings.backgroundTheme]); }, [settings.backgroundTheme]);
 
   // Auto-resume calendar analysis after returning from Google OAuth redirect.
@@ -206,7 +215,7 @@ const Index = () => {
 
   const todayDate = useMemo(() => getFormattedDate(), []);
 
-  const handleStart = () => { playBing(); setViewMode("wizard"); };
+  const handleStart = () => { playBing(); navigate("/welcome-back"); };
   const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
 
   const runCalendarAnalysis = async () => {
@@ -437,7 +446,13 @@ const Index = () => {
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Top bar */}
         <div className="flex items-center justify-between px-4 sm:px-8 py-4">
-          <div />
+        <div className="flex items-center gap-2">
+          <Link to="/auth">
+            <Button variant="ghost" size="sm" className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)] glass-pill rounded-full px-4">
+              <span className="font-body font-semibold">New user?</span>
+            </Button>
+          </Link>
+        </div>
           {user ? (
             <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)]">
               <LogOut className="w-4 h-4" />
@@ -483,13 +498,6 @@ const Index = () => {
             </button>
           )}
 
-          <Link
-            to="/welcome-back"
-            className="mt-4 text-sm font-body font-semibold underline-offset-4 hover:underline"
-            style={{ color: "hsl(280 40% 40%)" }}
-          >
-            Returning? Welcome back →
-          </Link>
         </div>
 
         {/* Nav links - at the bottom of the page */}
