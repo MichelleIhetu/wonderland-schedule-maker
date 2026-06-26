@@ -500,16 +500,6 @@ const Index = () => {
             </span>
           </button>
 
-          {generatedSchedule.length > 0 && (
-            <button
-              onClick={() => setViewMode("schedule")}
-              className="glass-pill px-8 sm:px-10 py-3 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 mt-4"
-            >
-              <span className="font-body font-semibold text-base sm:text-lg" style={{ color: "hsl(280 50% 50%)" }}>
-                take me to my schedule →
-              </span>
-            </button>
-          )}
 
         </div>
 
