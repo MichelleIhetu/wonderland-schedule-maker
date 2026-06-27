@@ -22,9 +22,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import CalendarAnalysisModal, { AnalyzedTask } from "@/components/CalendarAnalysisModal";
 import { supabase } from "@/integrations/supabase/client";
 import { connectGoogleCalendar } from "@/lib/googleCalendarAccess";
+
 const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string | null; error?: string }> => {
-  const r = await connectGoogleCalendar();
-  return { accessToken: null, error: r.error };
+  await connectGoogleCalendar();
+  return { accessToken: null };
 };
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
@@ -52,15 +53,22 @@ const hexToHsl = (hex: string): string => {
   let b = parseInt(result[3], 16) / 255;
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
-  let h = 0, s = 0;
+  let h = 0,
+    s = 0;
   const l = (max + min) / 2;
   if (max !== min) {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-      case g: h = ((b - r) / d + 2) / 6; break;
-      case b: h = ((r - g) / d + 4) / 6; break;
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
     }
   }
   return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
@@ -118,11 +126,7 @@ const Index = () => {
     }
   }, [generatedSchedule, settings, scheduleLoaded]);
 
-  const {
-    minutesUntilNextCheckIn,
-    completeCheckIn,
-    skipCheckIn,
-  } = useHourlyCheckIn({
+  const { minutesUntilNextCheckIn, completeCheckIn, skipCheckIn } = useHourlyCheckIn({
     enabled: generatedSchedule.length > 0,
     intervalMinutes: 15,
     onCheckInDue: () => {
@@ -136,12 +140,22 @@ const Index = () => {
     const state = location.state as any;
     if (state?.vibeCheckResult) {
       const result = state.vibeCheckResult;
-      completeCheckIn({ mood: result.mood, energy: result.energy, taskUpdate: result.notes, needBreak: result.needBreak });
+      completeCheckIn({
+        mood: result.mood,
+        energy: result.energy,
+        taskUpdate: result.notes,
+        needBreak: result.needBreak,
+      });
       if (result.mood === "struggling") toast("Hang in there! We've noted your vibe.", { icon: "💪" });
       else if (result.mood === "great") toast("You're killing it! Keep going!", { icon: "🔥" });
       else toast("Vibe check complete!", { icon: "✨" });
-      if (result.adjustSchedule === "lighten" && generatedSchedule.length > 0) toast("Lightening your load — non-urgent tasks pushed back", { icon: "📋" });
-      else if (result.adjustSchedule === "reschedule") { toast("Let's rebuild your schedule from here", { icon: "🔄" }); setGeneratedSchedule([]); setViewMode("wizard"); }
+      if (result.adjustSchedule === "lighten" && generatedSchedule.length > 0)
+        toast("Lightening your load — non-urgent tasks pushed back", { icon: "📋" });
+      else if (result.adjustSchedule === "reschedule") {
+        toast("Let's rebuild your schedule from here", { icon: "🔄" });
+        setGeneratedSchedule([]);
+        setViewMode("wizard");
+      }
       if (result.needBreak) toast("Adding a break for you — take it easy!", { icon: "☕" });
       window.history.replaceState({}, document.title);
     }
@@ -151,7 +165,8 @@ const Index = () => {
   useEffect(() => {
     const state = location.state as any;
     const storedSkipNonce = sessionStorage.getItem(WIZARD_SKIP_REQUEST_KEY);
-    const skipWasJustRequested = state?.skipToWizard && state?.skipToWizardNonce && storedSkipNonce === state.skipToWizardNonce;
+    const skipWasJustRequested =
+      state?.skipToWizard && state?.skipToWizardNonce && storedSkipNonce === state.skipToWizardNonce;
     if (skipWasJustRequested) {
       sessionStorage.removeItem(WIZARD_SKIP_REQUEST_KEY);
       setViewMode("wizard");
@@ -171,7 +186,9 @@ const Index = () => {
       // Pomodoro view reflects what's actually on the user's calendar now.
       (async () => {
         try {
-          const { data: { session } } = await supabase.auth.getSession();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
           if (session) {
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
             const { data } = await supabase.functions.invoke("google-calendar", {
@@ -179,13 +196,21 @@ const Index = () => {
             });
             const events: Array<any> = data?.events || [];
             const todayLocal = new Intl.DateTimeFormat("en-CA", {
-              year: "numeric", month: "2-digit", day: "2-digit", timeZone: timezone,
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              timeZone: timezone,
             }).format(new Date());
             const todays = events
               .filter((e) => e.date === todayLocal && !e.isAllDay && e.startTime)
               .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
             if (todays.length > 0) {
-              const suits: Array<"hearts" | "diamonds" | "clubs" | "spades"> = ["hearts", "diamonds", "clubs", "spades"];
+              const suits: Array<"hearts" | "diamonds" | "clubs" | "spades"> = [
+                "hearts",
+                "diamonds",
+                "clubs",
+                "spades",
+              ];
               const schedule = todays.map((e, i) => ({
                 id: e.id || `cal-${i}`,
                 title: e.title || "Calendar Event",
@@ -224,8 +249,9 @@ const Index = () => {
     }
   }, [location.state]);
 
-
-  useEffect(() => { setCustomColors(defaultThemeColors[settings.backgroundTheme]); }, [settings.backgroundTheme]);
+  useEffect(() => {
+    setCustomColors(defaultThemeColors[settings.backgroundTheme]);
+  }, [settings.backgroundTheme]);
 
   // Auto-resume calendar analysis after returning from Google OAuth redirect.
   useEffect(() => {
@@ -233,7 +259,9 @@ const Index = () => {
     if (sessionStorage.getItem(RESUME_CALENDAR_ANALYSIS_KEY) === "1") {
       sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
       // Wait a tick for the auth state to settle, then resume.
-      setTimeout(() => { runCalendarAnalysis(); }, 600);
+      setTimeout(() => {
+        runCalendarAnalysis();
+      }, 600);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading]);
@@ -246,7 +274,6 @@ const Index = () => {
     sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
     navigate(redirectTo, { replace: true, state: redirectTo === "/welcome-back" ? { forceLanding: true } : undefined });
   }, [user, navigate]);
-
 
   useEffect(() => {
     const root = document.documentElement;
@@ -262,16 +289,33 @@ const Index = () => {
     root.style.setProperty("--popover-foreground", hexToHsl(customColors.foreground));
   }, [settings.backgroundTheme, customColors]);
 
-  const handleWizardComplete = (tasks: string) => { sendMessage(tasks); setViewMode("schedule"); };
-  const handleClearSchedule = () => { setGeneratedSchedule([]); setViewMode("wizard"); };
-  const handleStartPomodoro = () => { navigate("/pomodoro", { state: { schedule: generatedSchedule } }); };
-  const handleBackToSchedule = () => { setViewMode("schedule"); };
-  const handleResetColors = () => { setCustomColors(defaultThemeColors[settings.backgroundTheme]); };
+  const handleWizardComplete = (tasks: string) => {
+    sendMessage(tasks);
+    setViewMode("schedule");
+  };
+  const handleClearSchedule = () => {
+    setGeneratedSchedule([]);
+    setViewMode("wizard");
+  };
+  const handleStartPomodoro = () => {
+    navigate("/pomodoro", { state: { schedule: generatedSchedule } });
+  };
+  const handleBackToSchedule = () => {
+    setViewMode("schedule");
+  };
+  const handleResetColors = () => {
+    setCustomColors(defaultThemeColors[settings.backgroundTheme]);
+  };
 
   const handleCheckInSubmit = (data: CheckInData) => {
     completeCheckIn(data);
-    if (data.mood === "struggling") toast("Hang in there! Consider taking a longer break.", { description: "It's okay to adjust your pace.", icon: "💪" });
-    else if (data.mood === "great") toast("Amazing! Keep up the great work!", { description: "You're doing wonderfully!", icon: "🌟" });
+    if (data.mood === "struggling")
+      toast("Hang in there! Consider taking a longer break.", {
+        description: "It's okay to adjust your pace.",
+        icon: "💪",
+      });
+    else if (data.mood === "great")
+      toast("Amazing! Keep up the great work!", { description: "You're doing wonderfully!", icon: "🌟" });
     else toast("Check-in complete!", { description: "Keep going, you've got this!", icon: "✨" });
     if (data.needBreak) toast("Taking a longer break", { description: "Enjoy your rest time!", icon: "☕" });
   };
@@ -297,8 +341,13 @@ const Index = () => {
 
   const todayDate = useMemo(() => getFormattedDate(), []);
 
-  const handleStart = () => { playBing(); navigate("/welcome-back"); };
-  const handleBackToLanding = () => { if (generatedSchedule.length === 0) setViewMode("landing"); };
+  const handleStart = () => {
+    playBing();
+    navigate("/welcome-back");
+  };
+  const handleBackToLanding = () => {
+    if (generatedSchedule.length === 0) setViewMode("landing");
+  };
 
   const runCalendarAnalysis = async () => {
     if (calendarAnalyzing) return;
@@ -308,7 +357,9 @@ const Index = () => {
     const waitForAuthSession = async (timeoutMs = 6000) => {
       const started = Date.now();
       while (Date.now() - started < timeoutMs) {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (session) return session;
         await new Promise((resolve) => setTimeout(resolve, 250));
       }
@@ -317,11 +368,15 @@ const Index = () => {
 
     const requestCalendarConsent = async (): Promise<string | null> => {
       if (calendarConsentAttempted) {
-        toast.error("Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.");
+        toast.error(
+          "Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.",
+        );
         return null;
       }
 
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
       if (currentSession) {
         toast("Opening Google Calendar permission…", { icon: "🔐" });
         calendarConsentAttempted = true;
@@ -360,7 +415,8 @@ const Index = () => {
           prompt: "consent",
           access_type: "offline",
           include_granted_scopes: "true",
-          scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
+          scope:
+            "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
         },
       });
 
@@ -387,7 +443,9 @@ const Index = () => {
     try {
       // Check existing session. The backend can use saved refresh tokens even
       // when the current session no longer has a provider_token.
-      let { data: { session } } = await supabase.auth.getSession();
+      let {
+        data: { session },
+      } = await supabase.auth.getSession();
       await persistGoogleTokens(session);
 
       // Got a session: clear the redirect-attempt guard so future re-auths work.
@@ -402,17 +460,18 @@ const Index = () => {
         sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
       }
 
-
-
-
       // Scan full month (31-day horizon).
-      const start = new Date(); start.setHours(0, 0, 0, 0);
-      const end = new Date(start); end.setDate(end.getDate() + 31);
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 31);
 
       toast("Scanning the next 31 days of your calendar…", { icon: "🔍" });
 
       const fetchCalendar = async (calendarAccessToken?: string) => {
-        const { data: { session: latestSession } } = await supabase.auth.getSession();
+        const {
+          data: { session: latestSession },
+        } = await supabase.auth.getSession();
         await persistGoogleTokens(latestSession);
         const headers: Record<string, string> = {};
         const tokenToUse = calendarAccessToken || latestSession?.provider_token;
@@ -454,12 +513,17 @@ const Index = () => {
       // Smart fallback: try today → this week → this month
       const now = new Date();
       const todayStr = now.toISOString().slice(0, 10);
-      const weekEnd = new Date(now); weekEnd.setDate(weekEnd.getDate() + 7);
+      const weekEnd = new Date(now);
+      weekEnd.setDate(weekEnd.getDate() + 7);
 
       const getEventDate = (ev: any): string | null => {
         const raw = ev?.date ?? ev?.startTime ?? ev?.start ?? null;
         if (!raw) return null;
-        try { return new Date(raw).toISOString().slice(0, 10); } catch { return null; }
+        try {
+          return new Date(raw).toISOString().slice(0, 10);
+        } catch {
+          return null;
+        }
       };
 
       const inRange = (ev: any, fromStr: string, toStr: string) => {
@@ -493,7 +557,6 @@ const Index = () => {
 
       setAnalyzedTasks(ana?.analyzed ?? []);
       toast.success(`Analyzed ${ana?.analyzed?.length ?? 0} events from ${scopeLabel} ✨`);
-
     } catch (e) {
       console.error(e);
       toast.error("Could not analyze calendar");
@@ -502,188 +565,249 @@ const Index = () => {
     }
   };
 
-
-
   // ─── LANDING PAGE ───
   if (viewMode === "landing") {
     return (
       <div className="min-h-screen relative overflow-hidden" style={{ background: "hsl(300 50% 88%)" }}>
-      <SEO title="TimeBunny — AI Schedule Builder & Atomic Habits Companion" description="Build a focused daily plan from your calendar, energy, and long-term goals with a kawaii bunny mascot and built-in Pomodoro timer." path="/" />
+        <SEO
+          title="TimeBunny — AI Schedule Builder & Atomic Habits Companion"
+          description="Build a focused daily plan from your calendar, energy, and long-term goals with a kawaii bunny mascot and built-in Pomodoro timer."
+          path="/"
+        />
 
-      {/* Clock outline background - FULL PAGE */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-        <div
-          className="rounded-full absolute"
-          style={{
-            width: "140vmax",
-            height: "140vmax",
-            border: "16px solid hsl(90 80% 45%)",
-            background: "hsl(40 60% 95%)",
-          }}
-        >
-          {/* Hour marks - 12, 3, 6, 9 - visible portions */}
-          <div className="absolute top-[2%] left-1/2 -translate-x-1/2 w-[16px] h-[60px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-          <div className="absolute bottom-[2%] left-1/2 -translate-x-1/2 w-[16px] h-[60px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-          <div className="absolute left-[2%] top-1/2 -translate-y-1/2 w-[60px] h-[16px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-          <div className="absolute right-[2%] top-1/2 -translate-y-1/2 w-[60px] h-[16px] rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-          {/* Clock hands - visible portion */}
-          <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[10px] h-[30%] rounded-full origin-bottom rotate-[30deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
-          <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[8px] h-[35%] rounded-full origin-bottom rotate-[-60deg]" style={{ background: "hsl(90 80% 45% / 0.7)" }} />
-          {/* Center dot */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full" style={{ background: "hsl(90 80% 45%)" }} />
-        </div>
-      </div>
-
-      {/* Clock tick marks in circular pattern */}
-      <div className="absolute inset-0 pointer-events-none z-[1] flex items-center justify-center">
-        <div className="relative" style={{ width: "min(150vw, 150vh)", height: "min(150vw, 150vh)" }}>
-          {Array.from({ length: 60 }).map((_, i) => {
-            const isHour = i % 5 === 0;
-            const angle = i * 6;
-            return (
-              <div
-                key={i}
-                className="absolute top-0 left-1/2 -translate-x-1/2 origin-bottom"
-                style={{
-                  height: "50%",
-                  transform: `translateX(-50%) rotate(${angle}deg)`,
-                }}
-              >
-                <div
-                  className="rounded-full mx-auto"
-                  style={{
-                    width: isHour ? "6px" : "3px",
-                    height: isHour ? "24px" : "12px",
-                    background: isHour
-                      ? "hsl(90 80% 45% / 0.7)"
-                      : "hsl(90 80% 45% / 0.3)",
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Content - positioned above and below clock */}
-      <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-4 sm:px-8 py-4">
-        <div className="flex items-center gap-2">
-          <Link to="/auth">
-            <Button variant="ghost" size="sm" className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)] glass-pill rounded-full px-4">
-              <span className="font-body font-semibold">New user?</span>
-            </Button>
-          </Link>
-        </div>
-          {user ? (
-            <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)]">
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Sign Out</span>
-            </Button>
-          ) : (
-            <Link to="/auth">
-              <Button variant="ghost" size="sm" className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)] glass-pill rounded-full px-4">
-                <span className="font-body font-semibold">Sign In / Sign Up</span>
-              </Button>
-            </Link>
-          )}
-        </div>
-
-        {/* Title and Start button - centered */}
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="text-center">
-            <h1 className="pixel-title text-6xl sm:text-7xl md:text-8xl lg:text-[8rem] leading-none tracking-[0.15em]" style={{ color: "hsl(280 50% 65%)" }}>
-              TIME
-            </h1>
-            <h1 className="pixel-title text-6xl sm:text-7xl md:text-8xl lg:text-[8rem] leading-none mt-4 sm:mt-6 md:mt-8 tracking-[0.15em] ml-4 sm:ml-8 md:ml-12" style={{ color: "hsl(185 70% 60%)" }}>
-              BUNNY
-            </h1>
-          </div>
-
-          <button
-            onClick={handleStart}
-            className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 mt-4 sm:mt-6"
+        {/* Clock outline background - FULL PAGE */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+          <div
+            className="rounded-full absolute"
+            style={{
+              width: "140vmax",
+              height: "140vmax",
+              border: "16px solid hsl(90 80% 45%)",
+              background: "hsl(40 60% 95%)",
+            }}
           >
-            <span className="pixel-title-alt text-2xl sm:text-3xl" style={{ color: "hsl(330 80% 55%)" }}>
-              start
-            </span>
-          </button>
-
-
-        </div>
-
-        {/* Nav links - at the bottom of the page */}
-        <div className="flex flex-wrap items-center justify-center gap-8 pb-8 sm:pb-12 mt-6">
-          {generatedSchedule.length > 0 && (
-            <button
-              onClick={handleStartPomodoro}
-              className="flex items-center gap-2 px-6 py-3 rounded-full glass-pill text-base transition-all hover:scale-105"
-              style={{ color: "hsl(330 80% 45%)" }}
-            >
-              <Clock className="w-5 h-5" />
-              <span className="font-body font-semibold">Pomodoro Timer</span>
-              <span>⏱️</span>
-            </button>
-          )}
-          <Link
-            to="/goals"
-            className="flex items-center gap-2 px-7 py-3.5 rounded-full glass-pill text-lg transition-all hover:scale-105"
-            style={{ color: "hsl(280 40% 40%)" }}
-          >
-            <Target className="w-6 h-6" />
-            <span className="font-body font-semibold">Goals</span>
-            <span>🎯</span>
-          </Link>
-          <button
-            onClick={runCalendarAnalysis}
-            disabled={calendarAnalyzing}
-            className="flex items-center gap-2 px-7 py-3.5 rounded-full glass-pill text-lg transition-all hover:scale-105 disabled:opacity-60"
-            style={{ color: "hsl(280 40% 40%)" }}
-            aria-label="Scan and analyze my calendar for the month"
-            title={`Scan calendar (next 31 days) • ${todayDate}`}
-          >
-            <Calendar className="w-6 h-6" />
-            <span className="font-body font-semibold">
-              {calendarAnalyzing ? "Analyzing…" : "My Calendar"}
-            </span>
-            <span>📅</span>
-          </button>
-        </div>
-
-
-        {/* Bunny mascot - positioned on the right */}
-        <div className="absolute bottom-4 -right-28 sm:bottom-8 sm:-right-24 lg:-right-20 z-10">
-          <div role="button" tabIndex={0} aria-label="Toggle TimeBunny mascot speech bubble" className="relative cursor-pointer" onClick={() => setShowSpeechBubble(!showSpeechBubble)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setShowSpeechBubble(!showSpeechBubble); }}>
-            {/* Bunny mascot */}
-            <img
-              src={bunnyMascot}
-              alt="TimeBunny mascot"
-              className="w-72 sm:w-96 md:w-[28rem] lg:w-[32rem] object-contain drop-shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95 pixel-img"
-              draggable={false}
+            {/* Hour marks - 12, 3, 6, 9 - visible portions */}
+            <div
+              className="absolute top-[2%] left-1/2 -translate-x-1/2 w-[16px] h-[60px] rounded-full"
+              style={{ background: "hsl(90 80% 45%)" }}
+            />
+            <div
+              className="absolute bottom-[2%] left-1/2 -translate-x-1/2 w-[16px] h-[60px] rounded-full"
+              style={{ background: "hsl(90 80% 45%)" }}
+            />
+            <div
+              className="absolute left-[2%] top-1/2 -translate-y-1/2 w-[60px] h-[16px] rounded-full"
+              style={{ background: "hsl(90 80% 45%)" }}
+            />
+            <div
+              className="absolute right-[2%] top-1/2 -translate-y-1/2 w-[60px] h-[16px] rounded-full"
+              style={{ background: "hsl(90 80% 45%)" }}
+            />
+            {/* Clock hands - visible portion */}
+            <div
+              className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[10px] h-[30%] rounded-full origin-bottom rotate-[30deg]"
+              style={{ background: "hsl(90 80% 45% / 0.7)" }}
+            />
+            <div
+              className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[8px] h-[35%] rounded-full origin-bottom rotate-[-60deg]"
+              style={{ background: "hsl(90 80% 45% / 0.7)" }}
+            />
+            {/* Center dot */}
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full"
+              style={{ background: "hsl(90 80% 45%)" }}
             />
           </div>
         </div>
+
+        {/* Clock tick marks in circular pattern */}
+        <div className="absolute inset-0 pointer-events-none z-[1] flex items-center justify-center">
+          <div className="relative" style={{ width: "min(150vw, 150vh)", height: "min(150vw, 150vh)" }}>
+            {Array.from({ length: 60 }).map((_, i) => {
+              const isHour = i % 5 === 0;
+              const angle = i * 6;
+              return (
+                <div
+                  key={i}
+                  className="absolute top-0 left-1/2 -translate-x-1/2 origin-bottom"
+                  style={{
+                    height: "50%",
+                    transform: `translateX(-50%) rotate(${angle}deg)`,
+                  }}
+                >
+                  <div
+                    className="rounded-full mx-auto"
+                    style={{
+                      width: isHour ? "6px" : "3px",
+                      height: isHour ? "24px" : "12px",
+                      background: isHour ? "hsl(90 80% 45% / 0.7)" : "hsl(90 80% 45% / 0.3)",
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Content - positioned above and below clock */}
+        <div className="relative z-10 min-h-screen flex flex-col">
+          {/* Top bar */}
+          <div className="flex items-center justify-between px-4 sm:px-8 py-4">
+            <div className="flex items-center gap-2">
+              <Link to="/auth">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)] glass-pill rounded-full px-4"
+                >
+                  <span className="font-body font-semibold">New user?</span>
+                </Button>
+              </Link>
+            </div>
+            {user ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={signOut}
+                className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)]"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </Button>
+            ) : (
+              <Link to="/auth">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 text-[hsl(280_40%_40%)] hover:text-[hsl(280_40%_30%)] glass-pill rounded-full px-4"
+                >
+                  <span className="font-body font-semibold">Sign In / Sign Up</span>
+                </Button>
+              </Link>
+            )}
+          </div>
+
+          {/* Title and Start button - centered */}
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <div className="text-center">
+              <h1
+                className="pixel-title text-6xl sm:text-7xl md:text-8xl lg:text-[8rem] leading-none tracking-[0.15em]"
+                style={{ color: "hsl(280 50% 65%)" }}
+              >
+                TIME
+              </h1>
+              <h1
+                className="pixel-title text-6xl sm:text-7xl md:text-8xl lg:text-[8rem] leading-none mt-4 sm:mt-6 md:mt-8 tracking-[0.15em] ml-4 sm:ml-8 md:ml-12"
+                style={{ color: "hsl(185 70% 60%)" }}
+              >
+                BUNNY
+              </h1>
+            </div>
+
+            <button
+              onClick={handleStart}
+              className="glass-pill px-12 sm:px-16 py-4 sm:py-5 rounded-full cursor-pointer transition-all hover:scale-105 active:scale-95 mt-4 sm:mt-6"
+            >
+              <span className="pixel-title-alt text-2xl sm:text-3xl" style={{ color: "hsl(330 80% 55%)" }}>
+                start
+              </span>
+            </button>
+          </div>
+
+          {/* Nav links - at the bottom of the page */}
+          <div className="flex flex-wrap items-center justify-center gap-8 pb-8 sm:pb-12 mt-6">
+            {generatedSchedule.length > 0 && (
+              <button
+                onClick={handleStartPomodoro}
+                className="flex items-center gap-2 px-6 py-3 rounded-full glass-pill text-base transition-all hover:scale-105"
+                style={{ color: "hsl(330 80% 45%)" }}
+              >
+                <Clock className="w-5 h-5" />
+                <span className="font-body font-semibold">Pomodoro Timer</span>
+                <span>⏱️</span>
+              </button>
+            )}
+            <Link
+              to="/goals"
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full glass-pill text-lg transition-all hover:scale-105"
+              style={{ color: "hsl(280 40% 40%)" }}
+            >
+              <Target className="w-6 h-6" />
+              <span className="font-body font-semibold">Goals</span>
+              <span>🎯</span>
+            </Link>
+            <button
+              onClick={runCalendarAnalysis}
+              disabled={calendarAnalyzing}
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full glass-pill text-lg transition-all hover:scale-105 disabled:opacity-60"
+              style={{ color: "hsl(280 40% 40%)" }}
+              aria-label="Scan and analyze my calendar for the month"
+              title={`Scan calendar (next 31 days) • ${todayDate}`}
+            >
+              <Calendar className="w-6 h-6" />
+              <span className="font-body font-semibold">{calendarAnalyzing ? "Analyzing…" : "My Calendar"}</span>
+              <span>📅</span>
+            </button>
+          </div>
+
+          {/* Bunny mascot - positioned on the right */}
+          <div className="absolute bottom-4 -right-28 sm:bottom-8 sm:-right-24 lg:-right-20 z-10">
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Toggle TimeBunny mascot speech bubble"
+              className="relative cursor-pointer"
+              onClick={() => setShowSpeechBubble(!showSpeechBubble)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") setShowSpeechBubble(!showSpeechBubble);
+              }}
+            >
+              {/* Bunny mascot */}
+              <img
+                src={bunnyMascot}
+                alt="TimeBunny mascot"
+                className="w-72 sm:w-96 md:w-[28rem] lg:w-[32rem] object-contain drop-shadow-xl transition-transform duration-200 hover:scale-105 active:scale-95 pixel-img"
+                draggable={false}
+              />
+            </div>
+          </div>
+        </div>
+        <CalendarAnalysisModal
+          isOpen={analyzedTasks !== null}
+          onClose={() => setAnalyzedTasks(null)}
+          onNext={() => {
+            playBing();
+            setViewMode("wizard");
+          }}
+          tasks={analyzedTasks ?? []}
+          monthLabel={new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+        />
       </div>
-      <CalendarAnalysisModal
-        isOpen={analyzedTasks !== null}
-        onClose={() => setAnalyzedTasks(null)}
-        onNext={() => { playBing(); setViewMode("wizard"); }}
-        tasks={analyzedTasks ?? []}
-        monthLabel={new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" })}
-      />
-    </div>
     );
   }
 
   // ─── APP VIEW ───
   return (
     <>
-      <SEO title="Build Your Schedule — TimeBunny" description="Walk through the TimeBunny wizard to capture energy, stress, and tasks, then generate today's focused schedule." path="/" />
-      <WizardInterface settings={settings} onSettingsChange={setSettings} onComplete={handleWizardComplete} isLoading={isLoading} generatedSchedule={generatedSchedule} initialScene={viewMode === "schedule" ? "schedule" : "library"} onUpdateSchedule={() => { setGeneratedSchedule([]); setViewMode("wizard"); }} />
+      <SEO
+        title="Build Your Schedule — TimeBunny"
+        description="Walk through the TimeBunny wizard to capture energy, stress, and tasks, then generate today's focused schedule."
+        path="/"
+      />
+      <WizardInterface
+        settings={settings}
+        onSettingsChange={setSettings}
+        onComplete={handleWizardComplete}
+        isLoading={isLoading}
+        generatedSchedule={generatedSchedule}
+        initialScene={viewMode === "schedule" ? "schedule" : "library"}
+        onUpdateSchedule={() => {
+          setGeneratedSchedule([]);
+          setViewMode("wizard");
+        }}
+      />
     </>
   );
-
 };
 
 export default Index;
