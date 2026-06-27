@@ -140,8 +140,10 @@ const WelcomeBack = () => {
         toast("Opening Google Calendar permission…", { icon: "🔐" });
         calendarConsentAttempted = true;
         await requestGoogleCalendarAccessToken();
-sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
-return null;
+        sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
+        return null;
+      }
+
       // Guard: if we already attempted a Google redirect once and still have
       // no session, don't bounce the user into another redirect (infinite loop).
       if (sessionStorage.getItem(CALENDAR_OAUTH_ATTEMPT_KEY) === "1") {
