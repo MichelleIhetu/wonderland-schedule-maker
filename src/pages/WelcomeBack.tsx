@@ -13,12 +13,13 @@ import { UserSettings } from "@/types/schedule";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { connectGoogleCalendar } from "@/lib/googleCalendarAccess";
-const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string | null; error?: string }> => {
-  const r = await connectGoogleCalendar();
-  return { accessToken: null, error: r.error };
-};
+
 import bunnyMascot from "@/assets/bunny-mascot.png";
 
+const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string | null; error?: string }> => {
+  await connectGoogleCalendar();
+  return { accessToken: null };
+};
 const defaultSettings: UserSettings = {
   energyLevel: "motivated",
   stressLevel: "medium",
@@ -85,10 +86,14 @@ const WelcomeBack = () => {
     const autoScan = (location.state as any)?.autoScan === true;
     if (sessionStorage.getItem(RESUME_CALENDAR_ANALYSIS_KEY) === "1") {
       sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
-      setTimeout(() => { runCalendarAnalysis(scope); }, 600);
+      setTimeout(() => {
+        runCalendarAnalysis(scope);
+      }, 600);
     } else if (autoScan) {
       window.history.replaceState({}, document.title, "/welcome-back");
-      setTimeout(() => { runCalendarAnalysis(scope); }, 200);
+      setTimeout(() => {
+        runCalendarAnalysis(scope);
+      }, 200);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading]);
@@ -111,7 +116,9 @@ const WelcomeBack = () => {
     const waitForAuthSession = async (timeoutMs = 6000) => {
       const started = Date.now();
       while (Date.now() - started < timeoutMs) {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (session) return session;
         await new Promise((resolve) => setTimeout(resolve, 250));
       }
@@ -120,11 +127,15 @@ const WelcomeBack = () => {
 
     const requestCalendarConsent = async (): Promise<string | null> => {
       if (calendarConsentAttempted) {
-        toast.error("Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.");
+        toast.error(
+          "Google sign-in finished, but Calendar access still is not available. Please check the app's Google Calendar setup before trying again.",
+        );
         return null;
       }
 
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
       if (currentSession) {
         toast("Opening Google Calendar permission…", { icon: "🔐" });
         calendarConsentAttempted = true;
@@ -162,7 +173,8 @@ const WelcomeBack = () => {
           prompt: "consent",
           access_type: "offline",
           include_granted_scopes: "true",
-          scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
+          scope:
+            "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
         },
       });
 
@@ -187,7 +199,9 @@ const WelcomeBack = () => {
     };
 
     try {
-      let { data: { session } } = await supabase.auth.getSession();
+      let {
+        data: { session },
+      } = await supabase.auth.getSession();
       await persistGoogleTokens(session);
 
       // Got a session: clear the redirect-attempt guard so future re-auths work.
@@ -207,12 +221,15 @@ const WelcomeBack = () => {
       const tryOrder = scopeOrder.slice(startIdx);
 
       const fetchCalendar = async (scopeKey: "day" | "week" | "month", calendarAccessToken?: string) => {
-        const start = new Date(); start.setHours(0, 0, 0, 0);
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
         const end = new Date(start);
         const scopeDays = scopeKey === "day" ? 1 : scopeKey === "week" ? 7 : 31;
         end.setDate(end.getDate() + scopeDays);
 
-        const { data: { session: latestSession } } = await supabase.auth.getSession();
+        const {
+          data: { session: latestSession },
+        } = await supabase.auth.getSession();
         await persistGoogleTokens(latestSession);
         const headers: Record<string, string> = {};
         const tokenToUse = calendarAccessToken || latestSession?.provider_token;
@@ -220,7 +237,11 @@ const WelcomeBack = () => {
 
         return supabase.functions.invoke("google-calendar", {
           headers,
-          body: { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, timeMin: start.toISOString(), timeMax: end.toISOString() },
+          body: {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            timeMin: start.toISOString(),
+            timeMax: end.toISOString(),
+          },
         });
       };
 
@@ -241,18 +262,27 @@ const WelcomeBack = () => {
             toast("Calendar permission needs to be refreshed.", { icon: "📅" });
           }
           const calendarAccessToken = await requestCalendarConsent();
-          if (!calendarAccessToken) { setCalendarAnalyzing(false); window.clearTimeout(watchdog); return; }
+          if (!calendarAccessToken) {
+            setCalendarAnalyzing(false);
+            window.clearTimeout(watchdog);
+            return;
+          }
           res = await fetchCalendar(scopeKey, calendarAccessToken);
           if (res.data?.needsAuth) {
             toast.error(res.data?.error || "Calendar permission still needs approval");
-            setCalendarAnalyzing(false); window.clearTimeout(watchdog); return;
+            setCalendarAnalyzing(false);
+            window.clearTimeout(watchdog);
+            return;
           }
         }
 
-        calData = res.data; calErr = res.error;
+        calData = res.data;
+        calErr = res.error;
         if (calErr || calData?.error) {
           toast.error(calData?.error || "Failed to fetch calendar");
-          setCalendarAnalyzing(false); window.clearTimeout(watchdog); return;
+          setCalendarAnalyzing(false);
+          window.clearTimeout(watchdog);
+          return;
         }
 
         const fetched = calData?.events ?? [];
@@ -261,7 +291,9 @@ const WelcomeBack = () => {
           events = fetched;
           usedScope = scopeKey;
           if (scopeKey !== chosenScope) {
-            toast(`No events in ${chosenScope === "day" ? "today" : "this week"} — widened to ${label}`, { icon: "🔭" });
+            toast(`No events in ${chosenScope === "day" ? "today" : "this week"} — widened to ${label}`, {
+              icon: "🔭",
+            });
           }
           break;
         }
@@ -270,17 +302,23 @@ const WelcomeBack = () => {
       const todayStr = new Date().toISOString().slice(0, 10);
 
       if (events.length === 0) {
-        toast.error("Still no upcoming events found across the next 31 days. Double-check the Google account you signed in with has events on its calendar.");
+        toast.error(
+          "Still no upcoming events found across the next 31 days. Double-check the Google account you signed in with has events on its calendar.",
+        );
         setAnalyzedTasks([]);
         setCalendarImported(true);
         return;
       }
 
-
       const { data: ana, error: anaErr } = await supabase.functions.invoke("analyze-calendar-tasks", {
         body: { events, today: todayStr },
       });
-      if (anaErr || ana?.error) { toast.error(ana?.error || "Analysis failed"); setCalendarAnalyzing(false); window.clearTimeout(watchdog); return; }
+      if (anaErr || ana?.error) {
+        toast.error(ana?.error || "Analysis failed");
+        setCalendarAnalyzing(false);
+        window.clearTimeout(watchdog);
+        return;
+      }
 
       setAnalyzedTasks(ana?.analyzed ?? []);
       setCalendarImported(true);
@@ -303,7 +341,11 @@ const WelcomeBack = () => {
   if (view === "wizard") {
     return (
       <>
-        <SEO title="Welcome Back — TimeBunny" description="Pick up where you left off: journal, energy, stress, focus." path="/welcome-back" />
+        <SEO
+          title="Welcome Back — TimeBunny"
+          description="Pick up where you left off: journal, energy, stress, focus."
+          path="/welcome-back"
+        />
         <WizardInterface
           settings={settings}
           onSettingsChange={setSettings}
@@ -321,7 +363,11 @@ const WelcomeBack = () => {
   // ─── LANDING (returning user) ───
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: "hsl(300 50% 88%)" }}>
-      <SEO title="Welcome Back — TimeBunny" description="Returning? Sync your calendar, journal, and jump straight to your focus timer." path="/welcome-back" />
+      <SEO
+        title="Welcome Back — TimeBunny"
+        description="Returning? Sync your calendar, journal, and jump straight to your focus timer."
+        path="/welcome-back"
+      />
 
       {/* Top bar */}
       <div className="relative z-10 flex items-center justify-between px-4 sm:px-8 py-4">
@@ -349,10 +395,16 @@ const WelcomeBack = () => {
 
       {/* Hero */}
       <div className="relative z-10 flex flex-col items-center justify-center px-6 pt-8 pb-24 text-center">
-        <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl leading-none tracking-[0.15em]" style={{ color: "hsl(280 50% 65%)" }}>
+        <h1
+          className="pixel-title text-5xl sm:text-6xl md:text-7xl leading-none tracking-[0.15em]"
+          style={{ color: "hsl(280 50% 65%)" }}
+        >
           WELCOME
         </h1>
-        <h1 className="pixel-title text-5xl sm:text-6xl md:text-7xl leading-none mt-3 tracking-[0.15em]" style={{ color: "hsl(185 70% 60%)" }}>
+        <h1
+          className="pixel-title text-5xl sm:text-6xl md:text-7xl leading-none mt-3 tracking-[0.15em]"
+          style={{ color: "hsl(185 70% 60%)" }}
+        >
           BACK
         </h1>
         <p className="mt-6 max-w-md font-body text-base sm:text-lg" style={{ color: "hsl(280 40% 35%)" }}>
@@ -360,7 +412,11 @@ const WelcomeBack = () => {
         </p>
 
         {/* Scope selector */}
-        <div className="mt-8 flex items-center gap-2 glass-pill rounded-full p-1" role="group" aria-label="Calendar scope">
+        <div
+          className="mt-8 flex items-center gap-2 glass-pill rounded-full p-1"
+          role="group"
+          aria-label="Calendar scope"
+        >
           {(["day", "week", "month"] as const).map((s) => {
             const active = scope === s;
             return (
@@ -401,7 +457,10 @@ const WelcomeBack = () => {
         )}
 
         <button
-          onClick={() => { setCalendarAnalyzing(false); setView("wizard"); }}
+          onClick={() => {
+            setCalendarAnalyzing(false);
+            setView("wizard");
+          }}
           className="mt-3 text-sm font-body underline opacity-70 hover:opacity-100"
           style={{ color: "hsl(280 40% 40%)" }}
         >
@@ -435,7 +494,10 @@ const WelcomeBack = () => {
       <CalendarAnalysisModal
         isOpen={analyzedTasks !== null}
         onClose={() => setAnalyzedTasks(null)}
-        onNext={() => { setAnalyzedTasks(null); setView("wizard"); }}
+        onNext={() => {
+          setAnalyzedTasks(null);
+          setView("wizard");
+        }}
         tasks={analyzedTasks ?? []}
         monthLabel={new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" })}
       />
