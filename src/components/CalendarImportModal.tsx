@@ -11,7 +11,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { requestGoogleCalendarAccessToken } from "@/lib/googleCalendarAccess";
+import { connectGoogleCalendar } from "@/lib/googleCalendarAccess";
+const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string | null; error?: string }> => {
+  const r = await connectGoogleCalendar();
+  return { accessToken: null, error: r.error };
+};
 import { User, Session } from "@supabase/supabase-js";
 
 export interface CalendarEvent {
