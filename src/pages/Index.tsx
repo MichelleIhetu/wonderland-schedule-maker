@@ -380,9 +380,11 @@ const Index = () => {
       if (currentSession) {
         toast("Opening Google Calendar permission…", { icon: "🔐" });
         calendarConsentAttempted = true;
-       await requestGoogleCalendarAccessToken();
-sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
-return null;
+        await requestGoogleCalendarAccessToken();
+        sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
+        return null;
+      }
+
 
       // Guard against an infinite redirect loop when Supabase never finishes
       // establishing a session after Google sign-in (bad_jwt / missing sub).
