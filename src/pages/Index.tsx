@@ -21,7 +21,11 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import CalendarAnalysisModal, { AnalyzedTask } from "@/components/CalendarAnalysisModal";
 import { supabase } from "@/integrations/supabase/client";
-import { requestGoogleCalendarAccessToken } from "@/lib/googleCalendarAccess";
+import { connectGoogleCalendar } from "@/lib/googleCalendarAccess";
+const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string | null; error?: string }> => {
+  const r = await connectGoogleCalendar();
+  return { accessToken: null, error: r.error };
+};
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
 
