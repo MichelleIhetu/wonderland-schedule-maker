@@ -1,6 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
+type GoogleCalendarConnectionResult = {
+  accessToken: string | null;
+  error?: string;
+  redirected?: boolean;
+};
+
 const GOOGLE_CALENDAR_SCOPES =
   "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly";
 
@@ -28,7 +34,7 @@ const persistGoogleTokens = async (session: any) => {
   });
 };
 
-export const connectGoogleCalendar = async () => {
+export const connectGoogleCalendar = async (): Promise<GoogleCalendarConnectionResult> => {
   const {
     data: { session: existingSession },
   } = await supabase.auth.getSession();
@@ -47,7 +53,7 @@ export const connectGoogleCalendar = async () => {
     },
   });
 
-  if (result.error) return { error: result.error.message };
+  if (result.error) return { accessToken: null, error: result.error.message };
   if (result.redirected) return { accessToken: null, redirected: true };
 
   const session = await waitForAuthSession();
