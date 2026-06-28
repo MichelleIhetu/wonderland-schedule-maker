@@ -22,11 +22,11 @@ const waitForAuthSession = async (timeoutMs = 6000) => {
   return null;
 };
 
-const persistGoogleTokens = async (session: any) => {
-  if (!session?.provider_refresh_token) return;
+export const persistGoogleTokens = async (session: any) => {
+  if (!session?.provider_refresh_token && !session?.provider_token) return;
   await supabase.functions.invoke("google-token-save", {
     body: {
-      refresh_token: session.provider_refresh_token,
+      refresh_token: session.provider_refresh_token || null,
       access_token: session.provider_token || null,
       expires_in: 3600,
       scope:
