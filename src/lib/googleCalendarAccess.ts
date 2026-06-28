@@ -39,9 +39,9 @@ export const connectGoogleCalendar = async (): Promise<GoogleCalendarConnectionR
   const {
     data: { session: existingSession },
   } = await supabase.auth.getSession();
-  if (existingSession?.provider_token) {
+  if (existingSession) {
     await persistGoogleTokens(existingSession);
-    return { accessToken: existingSession.provider_token };
+    return { accessToken: null };
   }
 
   const result = await lovable.auth.signInWithOAuth("google", {
