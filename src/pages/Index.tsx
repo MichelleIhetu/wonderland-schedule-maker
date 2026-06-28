@@ -479,12 +479,10 @@ const Index = () => {
         } else {
           toast("Calendar permission needs to be refreshed.", { icon: "📅" });
         }
-        const calendarAccessToken = await requestCalendarConsent();
-        if (!calendarAccessToken) return;
-
-        ({ data: calData, error: calErr } = await fetchCalendar(calendarAccessToken));
+        await requestCalendarConsent();
+        ({ data: calData, error: calErr } = await fetchCalendar());
         if (calData?.needsAuth) {
-          toast.error(calData?.error || "Calendar permission still needs approval");
+          toast.error("Calendar access unavailable. Please sign in again.");
           return;
         }
       }
