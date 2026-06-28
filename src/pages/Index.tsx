@@ -378,12 +378,7 @@ const Index = () => {
         data: { session: currentSession },
       } = await supabase.auth.getSession();
       if (currentSession) {
-        toast("Opening Google Calendar permission…", { icon: "🔐" });
-        calendarConsentAttempted = true;
-        sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
-        const tokenResult = await requestGoogleCalendarAccessToken();
-        if (tokenResult.error) toast.error(tokenResult.error);
-        return tokenResult.accessToken;
+        return null;
       }
 
 
@@ -468,16 +463,7 @@ const Index = () => {
       toast("Scanning the next 31 days of your calendar…", { icon: "🔍" });
 
       const fetchCalendar = async (calendarAccessToken?: string) => {
-        const {
-          data: { session: latestSession },
-        } = await supabase.auth.getSession();
-        await persistGoogleTokens(latestSession);
-        const headers: Record<string, string> = {};
-        const tokenToUse = calendarAccessToken || latestSession?.provider_token;
-        if (tokenToUse) headers["x-provider-token"] = tokenToUse;
-
         return supabase.functions.invoke("google-calendar", {
-          headers,
           body: {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             timeMin: start.toISOString(),
@@ -493,12 +479,10 @@ const Index = () => {
         } else {
           toast("Calendar permission needs to be refreshed.", { icon: "📅" });
         }
-        const calendarAccessToken = await requestCalendarConsent();
-        if (!calendarAccessToken) return;
-
-        ({ data: calData, error: calErr } = await fetchCalendar(calendarAccessToken));
+        await requestCalendarConsent();
+        ({ data: calData, error: calErr } = await fetchCalendar());
         if (calData?.needsAuth) {
-          toast.error(calData?.error || "Calendar permission still needs approval");
+          toast.error("Calendar access unavailable. Please sign in again.");
           return;
         }
       }
