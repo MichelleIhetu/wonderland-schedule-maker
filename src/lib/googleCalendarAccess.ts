@@ -68,17 +68,35 @@ supabase.auth.onAuthStateChange(async (event, session) => {
   }
 });
 
-export const fetchCalendarEvents = async (timezone: string) => {
-  const { data } = await supabase.functions.invoke("google-calendar", {
+export const fetchCalendarEvents = async (timezone: string, opts?: { forceRefresh?: boolean }) => {
+  // Always try cache first for instant load
+  const { data: cachedData } = await supabase.functions.invoke("google-calendar", {
     body: { timezone, cacheOnly: true },
   });
 
-  const fetchedAt = data?.fetchedAt ? new Date(data.fetchedAt) : null;
+  const fetchedAt = cachedData?.fetchedAt ? new Date(cachedData.fetchedAt) : null;
   const ageMinutes = fetchedAt ? (Date.now() - fetchedAt.getTime()) / 60000 : 999;
 
-  return {
-    events: data?.events ?? [],
-    stale: ageMinutes > 20,
-    fetchedAt,
-  };
+  // If cache is fresh (under 20 min), return it immediately
+  if (cachedData?.events?.length && ageMinutes < 20) {
+    return cachedData.events;
+  }
+
+  // Cache is stale or empty — do a live fetch
+  const { data } = await supabase.functions.invoke("google-calendar", {
+    body: { timezone, forceRefresh: true },
+  });
+
+  if (data?.needsAuth) {
+    const reconnect = await connectGoogleCalendar();
+    if (reconnect.redirected) return cachedData?.events ?? [];
+    if (reconnect.error) return cachedData?.events ?? [];
+    // Retry after reconnect
+    const { data: retryData } = await supabase.functions.invoke("google-calendar", {
+      body: { timezone, forceRefresh: true },
+    });
+    return retryData?.events ?? cachedData?.events ?? [];
+  }
+
+  return data?.events ?? cachedData?.events ?? [];
 };
