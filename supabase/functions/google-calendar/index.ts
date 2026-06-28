@@ -445,8 +445,20 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ events, fromCache: false }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        events,
+        fromCache: false,
+        diagnostics: {
+          timezone,
+          timeMin,
+          timeMax,
+          calendarsScanned: calendarIds.length,
+          rawEventCount: mergedItems.length,
+          filteredEventCount: events.length,
+          perCalendar,
+        },
+      }),
+
     );
 
   } catch (error: unknown) {
