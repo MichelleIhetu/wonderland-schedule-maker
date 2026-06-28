@@ -154,10 +154,12 @@ serve(async (req) => {
     let timeMin = '';
     let timeMax = '';
     let cacheOnly = false;
+    let forceRefresh = false;
     try {
       const body = await req.json();
       if (body?.timezone) timezone = body.timezone;
       if (body?.cacheOnly) cacheOnly = true;
+      if (body?.forceRefresh) forceRefresh = true;
       if (body?.timeMin) timeMin = body.timeMin;
       if (body?.timeMax) timeMax = body.timeMax;
     } catch {}
