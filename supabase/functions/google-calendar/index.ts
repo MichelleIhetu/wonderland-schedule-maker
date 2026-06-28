@@ -249,7 +249,7 @@ serve(async (req) => {
     // >2 min of life. Otherwise silently refresh using the saved refresh token.
     // The session-provided header is only a last resort, since it may itself be
     // stale on the first request of a new day.
-    const storedFresh = !!(stored?.access_token && stored.expires_at &&
+    const storedFresh = !forceRefresh && !!(stored?.access_token && stored.expires_at &&
       new Date(stored.expires_at).getTime() - Date.now() > 120_000);
     const headerProviderToken = req.headers.get('x-provider-token') || '';
 
