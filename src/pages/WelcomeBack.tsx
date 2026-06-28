@@ -17,8 +17,8 @@ import { connectGoogleCalendar } from "@/lib/googleCalendarAccess";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 
 const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string | null; error?: string }> => {
-  await connectGoogleCalendar();
-  return { accessToken: null };
+  const result = await connectGoogleCalendar();
+  return { accessToken: result.accessToken ?? null, error: result.error };
 };
 const defaultSettings: UserSettings = {
   energyLevel: "motivated",
@@ -139,9 +139,10 @@ const WelcomeBack = () => {
       if (currentSession) {
         toast("Opening Google Calendar permission…", { icon: "🔐" });
         calendarConsentAttempted = true;
-        await requestGoogleCalendarAccessToken();
         sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
-        return null;
+        const tokenResult = await requestGoogleCalendarAccessToken();
+        if (tokenResult.error) toast.error(tokenResult.error);
+        return tokenResult.accessToken;
       }
 
       // Guard: if we already attempted a Google redirect once and still have

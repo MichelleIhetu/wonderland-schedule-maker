@@ -24,8 +24,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { connectGoogleCalendar } from "@/lib/googleCalendarAccess";
 
 const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string | null; error?: string }> => {
-  await connectGoogleCalendar();
-  return { accessToken: null };
+  const result = await connectGoogleCalendar();
+  return { accessToken: result.accessToken ?? null, error: result.error };
 };
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
@@ -380,9 +380,10 @@ const Index = () => {
       if (currentSession) {
         toast("Opening Google Calendar permission…", { icon: "🔐" });
         calendarConsentAttempted = true;
-        await requestGoogleCalendarAccessToken();
         sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
-        return null;
+        const tokenResult = await requestGoogleCalendarAccessToken();
+        if (tokenResult.error) toast.error(tokenResult.error);
+        return tokenResult.accessToken;
       }
 
 

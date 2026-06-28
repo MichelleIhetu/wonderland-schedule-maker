@@ -14,7 +14,7 @@ import { lovable } from "@/integrations/lovable";
 import { connectGoogleCalendar } from "@/lib/googleCalendarAccess";
 const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string | null; error?: string }> => {
   const r = await connectGoogleCalendar();
-  return { accessToken: null, error: r.error };
+  return { accessToken: r.accessToken ?? null, error: r.error };
 };
 import { User, Session } from "@supabase/supabase-js";
 
