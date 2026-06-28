@@ -245,15 +245,10 @@ const WelcomeBack = () => {
           } else {
             toast("Calendar permission needs to be refreshed.", { icon: "📅" });
           }
-          const calendarAccessToken = await requestCalendarConsent();
-          if (!calendarAccessToken) {
-            setCalendarAnalyzing(false);
-            window.clearTimeout(watchdog);
-            return;
-          }
-          res = await fetchCalendar(scopeKey, calendarAccessToken);
+          await requestCalendarConsent();
+          res = await fetchCalendar(scopeKey);
           if (res.data?.needsAuth) {
-            toast.error(res.data?.error || "Calendar permission still needs approval");
+            toast.error("Calendar access unavailable. Please sign in again.");
             setCalendarAnalyzing(false);
             window.clearTimeout(watchdog);
             return;
