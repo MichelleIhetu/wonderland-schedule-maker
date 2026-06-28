@@ -137,12 +137,7 @@ const WelcomeBack = () => {
         data: { session: currentSession },
       } = await supabase.auth.getSession();
       if (currentSession) {
-        toast("Opening Google Calendar permission…", { icon: "🔐" });
-        calendarConsentAttempted = true;
-        sessionStorage.setItem(RESUME_CALENDAR_ANALYSIS_KEY, "1");
-        const tokenResult = await requestGoogleCalendarAccessToken();
-        if (tokenResult.error) toast.error(tokenResult.error);
-        return tokenResult.accessToken;
+        return null;
       }
 
       // Guard: if we already attempted a Google redirect once and still have
