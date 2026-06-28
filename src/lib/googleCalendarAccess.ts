@@ -29,7 +29,8 @@ const persistGoogleTokens = async (session: any) => {
       refresh_token: session.provider_refresh_token,
       access_token: session.provider_token || null,
       expires_in: 3600,
-      scope: "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
+      scope:
+        "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
     },
   });
 };
@@ -67,24 +68,17 @@ supabase.auth.onAuthStateChange(async (event, session) => {
   }
 });
 
-export const fetchCalendarEvents = async (timezone: string, opts?: { forceRefresh?: boolean }) => {
-  const forceRefresh = opts?.forceRefresh ?? true;
-  const invoke = async () => {
-    const { data } = await supabase.functions.invoke("google-calendar", {
-      body: { timezone, forceRefresh },
-    });
-    return data;
+export const fetchCalendarEvents = async (timezone: string) => {
+  const { data } = await supabase.functions.invoke("google-calendar", {
+    body: { timezone, cacheOnly: true },
+  });
+
+  const fetchedAt = data?.fetchedAt ? new Date(data.fetchedAt) : null;
+  const ageMinutes = fetchedAt ? (Date.now() - fetchedAt.getTime()) / 60000 : 999;
+
+  return {
+    events: data?.events ?? [],
+    stale: ageMinutes > 20,
+    fetchedAt,
   };
-
-  let data = await invoke();
-
-  if (data?.needsAuth) {
-    const reconnect = await connectGoogleCalendar();
-    if (reconnect.redirected) return [];
-    if (reconnect.accessToken) {
-      data = await invoke();
-    }
-  }
-
-  return data?.events ?? [];
 };
