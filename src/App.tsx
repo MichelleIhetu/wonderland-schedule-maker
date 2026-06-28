@@ -26,23 +26,33 @@ const ConditionalNav = () => {
 
 const TokenCapture = () => {
   useEffect(() => {
+    const saveTokens = async (session: any) => {
+      if (!session) return;
+      const refreshToken = session.provider_refresh_token;
+      const accessToken = session.provider_token;
+      if (refreshToken || accessToken) {
+        await supabase.functions.invoke("google-token-save", {
+          body: {
+            refresh_token: refreshToken ?? null,
+            access_token: accessToken ?? null,
+            expires_in: 3600,
+            scope:
+              "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
+          },
+        });
+      }
+    };
+
+    // Capture tokens from existing session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      saveTokens(session);
+    });
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session) {
-        const refreshToken = session.provider_refresh_token;
-        const accessToken = session.provider_token;
-        if (refreshToken || accessToken) {
-          await supabase.functions.invoke("google-token-save", {
-            body: {
-              refresh_token: refreshToken ?? null,
-              access_token: accessToken ?? null,
-              expires_in: 3600,
-              scope:
-                "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
-            },
-          });
-        }
+        await saveTokens(session);
       }
     });
     return () => subscription.unsubscribe();
