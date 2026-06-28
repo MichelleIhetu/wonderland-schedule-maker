@@ -283,7 +283,8 @@ const WelcomeBack = () => {
         }
 
         const fetched = calData?.events ?? [];
-        console.log(`[calendar] scope=${scopeKey} fetched ${fetched.length} events`);
+        const diag = calData?.diagnostics;
+        console.log(`[calendar] scope=${scopeKey} fetched ${fetched.length} events`, diag);
         if (fetched.length > 0) {
           events = fetched;
           usedScope = scopeKey;
@@ -299,13 +300,22 @@ const WelcomeBack = () => {
       const todayStr = new Date().toISOString().slice(0, 10);
 
       if (events.length === 0) {
-        toast.error(
-          "Still no upcoming events found across the next 31 days. Double-check the Google account you signed in with has events on its calendar.",
-        );
+        const diag = calData?.diagnostics;
+        const breakdown = diag?.perCalendar
+          ?.map((c: any) => `${c.summary}: ${c.rawCount}${c.error ? ` (${c.error})` : ""}`)
+          .join(" • ");
+        if (breakdown) {
+          toast.error(`No upcoming events in next 31 days. Calendars scanned — ${breakdown}`, { duration: 9000 });
+        } else {
+          toast.error(
+            "Still no upcoming events found across the next 31 days. Double-check the Google account you signed in with has events on its calendar.",
+          );
+        }
         setAnalyzedTasks([]);
         setCalendarImported(true);
         return;
       }
+
 
       const { data: ana, error: anaErr } = await supabase.functions.invoke("analyze-calendar-tasks", {
         body: { events, today: todayStr },
