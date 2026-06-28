@@ -458,6 +458,7 @@ serve(async (req) => {
           perCalendar,
         },
       }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
 
     );
 
@@ -465,8 +466,8 @@ serve(async (req) => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error in google-calendar function:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: 'GOOGLE_CALENDAR_SERVICE_FAILED', details: errorMessage, fallback: true, events: [] }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
