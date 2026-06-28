@@ -243,26 +243,34 @@ serve(async (req) => {
       return { token: refreshed.access_token, failure: null };
     };
 
-    // Resolve a Google access token: prefer the current session header, then a
-    // saved valid access token, then silently refresh with the saved refresh token.
-    let providerToken = req.headers.get('x-provider-token') || '';
+    // Resolve a Google access token. Prefer a saved access token that still has
+    // >2 min of life. Otherwise silently refresh using the saved refresh token.
+    // The session-provided header is only a last resort, since it may itself be
+    // stale on the first request of a new day.
+    const storedFresh = !!(stored?.access_token && stored.expires_at &&
+      new Date(stored.expires_at).getTime() - Date.now() > 120_000);
+    const headerProviderToken = req.headers.get('x-provider-token') || '';
 
-    if (!providerToken) {
-      const stillValid = stored?.access_token && stored.expires_at && new Date(stored.expires_at) > new Date();
-      if (stillValid) {
-        providerToken = stored.access_token!;
-      } else if (!stored?.refresh_token) {
-        return await authRequiredResponse('No Google credentials. Sign in with Google to refresh.');
-      } else {
-        const refreshAttempt = await refreshAndStoreProviderToken();
-        providerToken = refreshAttempt.token || '';
-        if (!providerToken) {
+    let providerToken = '';
+    if (storedFresh) {
+      providerToken = stored!.access_token!;
+    } else if (stored?.refresh_token) {
+      const refreshAttempt = await refreshAndStoreProviderToken();
+      providerToken = refreshAttempt.token || '';
+      if (!providerToken) {
+        if (headerProviderToken) {
+          providerToken = headerProviderToken;
+        } else {
           if (refreshAttempt.failure?.code === 'invalid_google_oauth_client' || refreshAttempt.failure?.code === 'missing_google_oauth_credentials') {
             return await calendarConfigErrorResponse(refreshAttempt.failure.error, refreshAttempt.failure.code);
           }
           return await authRequiredResponse(refreshAttempt.failure?.error);
         }
       }
+    } else if (headerProviderToken) {
+      providerToken = headerProviderToken;
+    } else {
+      return await authRequiredResponse('No Google credentials. Sign in with Google to refresh.');
     }
 
     console.log('Using timezone:', timezone);

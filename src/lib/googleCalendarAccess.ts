@@ -68,13 +68,23 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 });
 
 export const fetchCalendarEvents = async (timezone: string) => {
-  const { data } = await supabase.functions.invoke("google-calendar", {
-    body: { timezone },
-  });
+  const invoke = async () => {
+    const { data } = await supabase.functions.invoke("google-calendar", {
+      body: { timezone },
+    });
+    return data;
+  };
 
+  let data = await invoke();
+
+  // If the server says the saved Google token can't be refreshed, prompt the
+  // user to reconnect once and retry transparently.
   if (data?.needsAuth) {
-    await connectGoogleCalendar();
-    return [];
+    const reconnect = await connectGoogleCalendar();
+    if (reconnect.redirected) return [];
+    if (reconnect.accessToken) {
+      data = await invoke();
+    }
   }
 
   return data?.events ?? [];
