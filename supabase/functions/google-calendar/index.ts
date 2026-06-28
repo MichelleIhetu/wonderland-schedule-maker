@@ -325,6 +325,7 @@ serve(async (req) => {
     );
 
     const mergedItems: any[] = [];
+    const perCalendar: Array<{ id: string; summary: string; rawCount: number; error?: string }> = [];
     for (const calendar of calendarIds) {
       let response = await fetchCalendarEvents(calendar.id, providerToken);
 
@@ -346,14 +347,19 @@ serve(async (req) => {
             return await authRequiredResponse('Google Calendar permission is missing or expired. Please reconnect Calendar access.');
           }
         } else {
+          perCalendar.push({ id: calendar.id, summary: calendar.summary, rawCount: 0, error: `HTTP ${response.status}` });
           continue;
         }
       }
 
       const data = await response.json();
-      mergedItems.push(...(data.items || []).map((item: any) => ({ ...item, _calendarName: calendar.summary })));
+      const items = data.items || [];
+      perCalendar.push({ id: calendar.id, summary: calendar.summary, rawCount: items.length });
+      mergedItems.push(...items.map((item: any) => ({ ...item, _calendarName: calendar.summary })));
     }
     console.log('Fetched', mergedItems.length || 0, 'events across', calendarIds.length, 'calendars');
+    console.log('Per-calendar breakdown:', JSON.stringify(perCalendar));
+
 
     // Helper: format a date-time string to HH:MM in the user's timezone
     const toLocalHHMM = (dateTimeStr: string, tz: string): string => {
