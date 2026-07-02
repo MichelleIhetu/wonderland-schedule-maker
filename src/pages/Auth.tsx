@@ -93,25 +93,18 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      sessionStorage.setItem(POST_GOOGLE_AUTH_REDIRECT_KEY, returnTo);
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-        extraParams: {
-          prompt: "consent",
-          access_type: "offline",
-          include_granted_scopes: "true",
-          scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
-        },
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          scopes: 'openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+          redirectTo: window.location.origin + returnTo,
+        }
       });
-
-      if (result.redirected) return;
-
-      if (result.error) {
-        sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
-        toast.error(result.error.message || "Google sign-in failed");
-      } else {
-        navigateAfterAuth();
-      }
+      if (error) toast.error(error.message);
     } catch (err: any) {
       toast.error("Google sign-in failed");
     } finally {
