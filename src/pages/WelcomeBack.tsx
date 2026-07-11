@@ -475,7 +475,7 @@ const WelcomeBack = () => {
       </div>
 
       {/* Bunny mascot */}
-      <div className="absolute bottom-0 left-0 z-[5] pointer-events-none">
+      <div className="absolute bottom-4 left-8 z-[5] pointer-events-none">
         <img
           src={bunnyMascot}
           alt="TimeBunny mascot"
