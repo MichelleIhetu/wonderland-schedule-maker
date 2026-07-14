@@ -67,21 +67,23 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <TokenCapture />
-        <DevLabel />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/welcome-back" element={<WelcomeBack />} />
-          <Route path="/goals" element={<Goals />} />
-          <Route path="/moodboard" element={<Moodboard />} />
-          <Route path="/vibe-check" element={<VibeCheck />} />
-          <Route path="/pomodoro" element={<Pomodoro />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <ConditionalNav />
-      </BrowserRouter>
+      <DevLabelProvider>
+        <BrowserRouter>
+          <TokenCapture />
+          <DevLabel />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/welcome-back" element={<WelcomeBack />} />
+            <Route path="/goals" element={<Goals />} />
+            <Route path="/moodboard" element={<Moodboard />} />
+            <Route path="/vibe-check" element={<VibeCheck />} />
+            <Route path="/pomodoro" element={<Pomodoro />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <ConditionalNav />
+        </BrowserRouter>
+      </DevLabelProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
