@@ -458,7 +458,7 @@ const WelcomeBack = () => {
         </div>
 
         <button
-          onClick={() => runCalendarAnalysis(scope)}
+          onClick={() => setShowProviderChoice(true)}
           disabled={calendarAnalyzing}
           className="mt-6 flex items-center gap-3 px-8 py-4 rounded-full glass-pill text-lg transition-all hover:scale-105 disabled:opacity-60"
           style={{ color: "hsl(280 40% 40%)" }}
