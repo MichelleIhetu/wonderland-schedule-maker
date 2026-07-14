@@ -116,7 +116,10 @@ export function useGoals() {
     category: string;
     end_date?: string;
   }) => {
-    if (!user) return;
+    if (!user) {
+      toast.error("Please sign in to save goals");
+      return;
+    }
     const { error } = await supabase.from("goals").insert({
       user_id: user.id,
       title: goal.title,
@@ -127,7 +130,8 @@ export function useGoals() {
       end_date: goal.end_date || null,
     });
     if (error) {
-      toast.error("Failed to create goal");
+      console.error("Failed to create goal:", error);
+      toast.error(`Failed to create goal: ${error.message}`);
       return;
     }
     toast.success("Goal created! Start building that habit 🔥");
