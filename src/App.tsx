@@ -68,6 +68,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <TokenCapture />
+        <DevLabel />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
