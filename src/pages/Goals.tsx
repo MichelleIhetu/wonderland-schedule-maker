@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDevLabel } from "@/contexts/DevLabelContext";
 import SEO from "@/components/SEO";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Plus, Flame, Target, TrendingUp, Archive, Clock, Sparkles, Wand2, CheckCircle2, X } from "lucide-react";
