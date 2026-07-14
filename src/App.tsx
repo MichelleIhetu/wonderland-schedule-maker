@@ -13,6 +13,7 @@ import VibeCheck from "./pages/VibeCheck";
 import Pomodoro from "./pages/Pomodoro";
 import NotFound from "./pages/NotFound";
 import FloatingNav from "./components/FloatingNav";
+import DevLabel from "./components/DevLabel";
 import { supabase } from "@/integrations/supabase/client";
 import "@/lib/googleCalendarAccess";
 
