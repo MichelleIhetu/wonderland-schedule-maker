@@ -51,10 +51,11 @@ const WelcomeBack = () => {
   useEffect(() => {
     if (view === "landing") {
       setSubLabel(calendarAnalyzing ? "Landing — Calendar Analyzing" : "Landing — Calendar Sync");
-    } else if (view === "wizard") {
-      setSubLabel("Wizard — Cozy/Energy/Stress/Schedule");
     } else if (view === "schedule") {
       setSubLabel("Generated Schedule Review");
+    } else {
+      // WizardInterface will set its own granular scene label.
+      setSubLabel("");
     }
   }, [view, calendarAnalyzing, setSubLabel]);
 
