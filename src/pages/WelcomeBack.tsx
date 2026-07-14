@@ -84,7 +84,15 @@ const WelcomeBack = () => {
   useEffect(() => {
     if (authLoading) return;
     const autoScan = (location.state as any)?.autoScan === true;
-    if (sessionStorage.getItem(RESUME_CALENDAR_ANALYSIS_KEY) === "1") {
+    // Only treat sessionStorage resume flag as valid if the URL actually looks
+    // like a returned OAuth redirect. Otherwise the flag is stale from an
+    // aborted attempt — clear it so we don't loop with a false error toast.
+    const hash = window.location.hash || "";
+    const search = window.location.search || "";
+    const isOAuthReturn =
+      hash.includes("access_token=") || hash.includes("provider_token=") || /[?&]code=/.test(search);
+
+    if (sessionStorage.getItem(RESUME_CALENDAR_ANALYSIS_KEY) === "1" && isOAuthReturn) {
       sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
       setTimeout(() => {
         runCalendarAnalysis(scope);
@@ -94,6 +102,13 @@ const WelcomeBack = () => {
       setTimeout(() => {
         runCalendarAnalysis(scope);
       }, 200);
+    } else {
+      // Stale flags from a previous aborted OAuth — wipe so nothing auto-fires.
+      sessionStorage.removeItem(RESUME_CALENDAR_ANALYSIS_KEY);
+      if (!isOAuthReturn) {
+        sessionStorage.removeItem(CALENDAR_OAUTH_ATTEMPT_KEY);
+        sessionStorage.removeItem(POST_GOOGLE_AUTH_REDIRECT_KEY);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading]);
