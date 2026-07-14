@@ -10,119 +10,24 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
       cached_calendar_events: {
         Row: {
-          created_at: string
-          events: Json
-          fetched_at: string
-          id: string
-          updated_at: string
+          events: Json | null
+          fetched_at: string | null
           user_id: string
         }
         Insert: {
-          created_at?: string
-          events: Json
-          fetched_at?: string
-          id?: string
-          updated_at?: string
+          events?: Json | null
+          fetched_at?: string | null
           user_id: string
         }
         Update: {
-          created_at?: string
-          events?: Json
-          fetched_at?: string
-          id?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      goal_logs: {
-        Row: {
-          created_at: string
-          goal_id: string
-          hours_logged: number
-          id: string
-          log_date: string
-          notes: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          goal_id: string
-          hours_logged?: number
-          id?: string
-          log_date?: string
-          notes?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          goal_id?: string
-          hours_logged?: number
-          id?: string
-          log_date?: string
-          notes?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "goal_logs_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goals"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      goals: {
-        Row: {
-          category: string
-          created_at: string
-          description: string | null
-          end_date: string | null
-          goal_type: string
-          id: string
-          is_active: boolean
-          start_date: string
-          target_hours: number
-          target_unit: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          category?: string
-          created_at?: string
-          description?: string | null
-          end_date?: string | null
-          goal_type?: string
-          id?: string
-          is_active?: boolean
-          start_date?: string
-          target_hours?: number
-          target_unit?: string
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          description?: string | null
-          end_date?: string | null
-          goal_type?: string
-          id?: string
-          is_active?: boolean
-          start_date?: string
-          target_hours?: number
-          target_unit?: string
-          title?: string
-          updated_at?: string
+          events?: Json | null
+          fetched_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -130,114 +35,27 @@ export type Database = {
       google_oauth_tokens: {
         Row: {
           access_token: string | null
-          created_at: string
           expires_at: string | null
           refresh_token: string | null
           scope: string | null
-          updated_at: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
           access_token?: string | null
-          created_at?: string
           expires_at?: string | null
           refresh_token?: string | null
           scope?: string | null
-          updated_at?: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           access_token?: string | null
-          created_at?: string
           expires_at?: string | null
           refresh_token?: string | null
           scope?: string | null
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string
-        }
-        Relationships: []
-      }
-      moodboard_items: {
-        Row: {
-          board_name: string
-          created_at: string
-          id: string
-          image_url: string
-          source_url: string | null
-          title: string | null
-          user_id: string
-        }
-        Insert: {
-          board_name?: string
-          created_at?: string
-          id?: string
-          image_url: string
-          source_url?: string | null
-          title?: string | null
-          user_id: string
-        }
-        Update: {
-          board_name?: string
-          created_at?: string
-          id?: string
-          image_url?: string
-          source_url?: string | null
-          title?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          created_at: string
-          email: string | null
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          email?: string | null
-          id: string
-        }
-        Update: {
-          created_at?: string
-          email?: string | null
-          id?: string
-        }
-        Relationships: []
-      }
-      user_schedules: {
-        Row: {
-          created_at: string
-          id: string
-          journal_text: string | null
-          schedule_data: Json
-          schedule_date: string
-          settings: Json | null
-          updated_at: string
-          user_id: string
-          vibe_checks: Json
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          journal_text?: string | null
-          schedule_data: Json
-          schedule_date?: string
-          settings?: Json | null
-          updated_at?: string
-          user_id: string
-          vibe_checks?: Json
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          journal_text?: string | null
-          schedule_data?: Json
-          schedule_date?: string
-          settings?: Json | null
-          updated_at?: string
-          user_id?: string
-          vibe_checks?: Json
         }
         Relationships: []
       }
