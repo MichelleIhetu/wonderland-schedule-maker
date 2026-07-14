@@ -13,9 +13,6 @@ const routeLabels: Record<string, string> = {
 export default function DevLabel() {
   const { pathname } = useLocation();
 
-  // Only show in the Lovable editor/preview dev environment.
-  if (!import.meta.env.DEV) return null;
-
   const label = routeLabels[pathname] ?? "Unknown Route";
 
   return (
