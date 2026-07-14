@@ -52,7 +52,7 @@ const SCENE_CONFIG = {
   },
   cozy: {
     background: cozyBg,
-    bunnyPosition: "bottom-[16%] right-[-2%]",
+    bunnyPosition: "bottom-[16%] right-[0%]",
     bunnySize: "w-[28rem]",
     messages: [
       "Great! Now that I have a better understanding of what your day is like, let's get started!",
