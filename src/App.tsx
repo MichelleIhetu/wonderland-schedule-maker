@@ -13,6 +13,7 @@ import VibeCheck from "./pages/VibeCheck";
 import Pomodoro from "./pages/Pomodoro";
 import NotFound from "./pages/NotFound";
 import FloatingNav from "./components/FloatingNav";
+import DevLabel from "./components/DevLabel";
 import { supabase } from "@/integrations/supabase/client";
 import "@/lib/googleCalendarAccess";
 
@@ -67,6 +68,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <TokenCapture />
+        <DevLabel />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
