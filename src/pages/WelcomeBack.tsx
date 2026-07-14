@@ -44,6 +44,23 @@ const WelcomeBack = () => {
   const [analyzedTasks, setAnalyzedTasks] = useState<AnalyzedTask[] | null>(null);
   const [calendarImported, setCalendarImported] = useState(false);
   const [scope, setScope] = useState<"day" | "week" | "month">("month");
+  const [showProviderChoice, setShowProviderChoice] = useState(false);
+
+  const handleAppleSignIn = async () => {
+    setShowProviderChoice(false);
+    toast("Opening Apple sign-in…", { icon: "" });
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: { redirectTo: `${window.location.origin}/welcome-back` },
+    });
+    if (error) toast.error(error.message || "Could not start Apple sign-in");
+    else toast("Apple doesn't share calendar events — you can Skip to continue.", { icon: "ℹ️", duration: 6000 });
+  };
+
+  const handleGoogleChoice = () => {
+    setShowProviderChoice(false);
+    runCalendarAnalysis(scope);
+  };
 
   const { isLoading, sendMessage, generatedSchedule } = useChat(settings);
   const { saveSchedule } = useSchedulePersistence(user?.id);
