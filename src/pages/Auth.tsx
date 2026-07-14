@@ -6,6 +6,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { LogIn, UserPlus, Calendar, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useDevLabel } from "@/contexts/DevLabelContext";
 import landingBunny from "@/assets/landing-bunny.png";
 
 const WIZARD_SKIP_REQUEST_KEY = "timebunny_skip_to_wizard_requested";
@@ -23,6 +24,12 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const { setSubLabel } = useDevLabel();
+  useEffect(() => {
+    setSubLabel(isLogin ? "Auth — Sign In" : "Auth — Sign Up");
+    return () => setSubLabel("");
+  }, [isLogin, setSubLabel]);
+
 
   const params = new URLSearchParams(location.search);
   const returnToParam = params.get("returnTo");

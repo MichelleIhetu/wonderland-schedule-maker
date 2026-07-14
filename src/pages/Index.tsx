@@ -29,6 +29,7 @@ const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string
 };
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
+import { useDevLabel } from "@/contexts/DevLabelContext";
 
 const defaultSettings: UserSettings = {
   energyLevel: "motivated",
@@ -89,6 +90,14 @@ const Index = () => {
   const [analyzedTasks, setAnalyzedTasks] = useState<AnalyzedTask[] | null>(null);
 
   useClockTick(viewMode === "landing");
+
+  const { setSubLabel } = useDevLabel();
+  useEffect(() => {
+    if (viewMode === "landing") setSubLabel("Home — Landing / Start");
+    else if (viewMode === "schedule") setSubLabel("Home — Generated Schedule");
+    // wizard scenes set their own labels via WizardInterface
+    return () => setSubLabel("");
+  }, [viewMode, setSubLabel]);
 
   const { isLoading, sendMessage, generatedSchedule, setGeneratedSchedule } = useChat(settings);
   const { saveSchedule, loadTodaySchedule } = useSchedulePersistence(user?.id);
