@@ -8,6 +8,7 @@ import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
 import { getFormattedDate, getTimeOfDayGreeting, getDayName } from "@/lib/dayGreetings";
 import { useAuth } from "@/hooks/useAuth";
 import { useSchedulePersistence, saveScheduleSnapshot } from "@/hooks/useSchedulePersistence";
+import { useDevLabel } from "@/contexts/DevLabelContext";
 import { toast } from "sonner";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
