@@ -6,6 +6,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { LogIn, UserPlus, Calendar, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useDevLabel } from "@/contexts/DevLabelContext";
 import landingBunny from "@/assets/landing-bunny.png";
 
 const WIZARD_SKIP_REQUEST_KEY = "timebunny_skip_to_wizard_requested";
