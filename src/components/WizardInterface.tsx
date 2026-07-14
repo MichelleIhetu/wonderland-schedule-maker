@@ -1122,7 +1122,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                className={`absolute -top-16 z-30 w-72 sm:w-80 ${scene === "energy" ? "right-[20%]" : "right-[60%]"}`}
+                className={`absolute -top-16 z-30 ${scene === "energy" ? "w-56 right-[-20%] sm:w-72 sm:right-[20%] md:w-80" : "w-72 sm:w-80 right-[60%]"}`}
               >
                 <div
                   className="relative bg-white p-5 shadow-xl"
