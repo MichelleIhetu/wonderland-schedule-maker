@@ -471,22 +471,6 @@ const WelcomeBack = () => {
           Skip calendar →
         </button>
 
-        <button
-          onClick={async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            console.log('SESSION DEBUG:', {
-              hasSession: !!session,
-              hasProviderToken: !!session?.provider_token,
-              hasProviderRefreshToken: !!session?.provider_refresh_token,
-              userId: session?.user?.id,
-            });
-            toast('Session logged to console', { icon: '🐞' });
-          }}
-          className="mt-3 text-xs font-body underline opacity-60 hover:opacity-100"
-          style={{ color: "hsl(280 40% 40%)" }}
-        >
-          Debug Session
-        </button>
       </div>
 
       {/* Bunny mascot */}
