@@ -64,7 +64,7 @@ const SCENE_CONFIG = {
   },
   energy: {
     background: scheduleBg,
-    bunnyPosition: "bottom-[28%] right-[-4%]",
+    bunnyPosition: "bottom-[28%] right-[-8%]",
     bunnySize: "w-[28rem]",
     messages: [
       "Wow! You have a lot on your plate dear, what is your energy level?",
@@ -1122,7 +1122,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                className="absolute -top-16 right-[60%] w-72 sm:w-80 z-30"
+                className={`absolute -top-16 z-30 w-72 sm:w-80 ${scene === "energy" ? "right-[20%]" : "right-[60%]"}`}
               >
                 <div
                   className="relative bg-white p-5 shadow-xl"
