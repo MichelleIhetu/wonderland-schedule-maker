@@ -24,6 +24,12 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const { setSubLabel } = useDevLabel();
+  useEffect(() => {
+    setSubLabel(isLogin ? "Auth — Sign In" : "Auth — Sign Up");
+    return () => setSubLabel("");
+  }, [isLogin, setSubLabel]);
+
 
   const params = new URLSearchParams(location.search);
   const returnToParam = params.get("returnTo");
