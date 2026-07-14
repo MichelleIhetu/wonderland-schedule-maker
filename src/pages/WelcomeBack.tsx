@@ -460,16 +460,19 @@ const WelcomeBack = () => {
           </p>
         )}
 
-        <button
-          onClick={() => {
-            setCalendarAnalyzing(false);
-            setView("wizard");
-          }}
-          className="mt-3 text-sm font-body underline opacity-70 hover:opacity-100"
-          style={{ color: "hsl(280 40% 40%)" }}
-        >
-          Skip calendar →
-        </button>
+        {!calendarImported && (
+          <button
+            onClick={() => {
+              setCalendarAnalyzing(false);
+              setView("wizard");
+            }}
+            className="fixed bottom-4 right-4 z-50 flex items-center justify-center w-12 h-12 rounded-md text-xs font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+            style={{ background: "hsl(140 60% 45%)" }}
+            aria-label="Skip calendar and continue"
+          >
+            Skip
+          </button>
+        )}
 
       </div>
 
