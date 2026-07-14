@@ -91,6 +91,14 @@ const Index = () => {
 
   useClockTick(viewMode === "landing");
 
+  const { setSubLabel } = useDevLabel();
+  useEffect(() => {
+    if (viewMode === "landing") setSubLabel("Home — Landing / Start");
+    else if (viewMode === "schedule") setSubLabel("Home — Generated Schedule");
+    // wizard scenes set their own labels via WizardInterface
+    return () => setSubLabel("");
+  }, [viewMode, setSubLabel]);
+
   const { isLoading, sendMessage, generatedSchedule, setGeneratedSchedule } = useChat(settings);
   const { saveSchedule, loadTodaySchedule } = useSchedulePersistence(user?.id);
 
