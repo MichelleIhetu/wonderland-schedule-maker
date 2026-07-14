@@ -29,6 +29,7 @@ const requestGoogleCalendarAccessToken = async (): Promise<{ accessToken: string
 };
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubble from "@/assets/bunny-with-speech-bubble.png";
+import { useDevLabel } from "@/contexts/DevLabelContext";
 
 const defaultSettings: UserSettings = {
   energyLevel: "motivated",
