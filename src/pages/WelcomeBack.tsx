@@ -526,6 +526,72 @@ const WelcomeBack = () => {
         tasks={analyzedTasks ?? []}
         monthLabel={new Date().toLocaleDateString(undefined, { month: "long", year: "numeric" })}
       />
+
+      {/* Provider chooser modal */}
+      {showProviderChoice && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-6"
+          style={{ background: "rgba(30, 10, 40, 0.55)" }}
+          onClick={() => setShowProviderChoice(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl p-6 text-center"
+            style={{
+              background: "hsl(300 60% 96%)",
+              border: "3px solid hsl(280 50% 55%)",
+              boxShadow: "6px 6px 0 hsl(280 50% 40%)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2
+              className="pixel-title text-xl tracking-wider mb-2"
+              style={{ color: "hsl(280 50% 45%)" }}
+            >
+              CONNECT CALENDAR
+            </h2>
+            <p className="font-body text-sm mb-5" style={{ color: "hsl(280 40% 35%)" }}>
+              Choose how you'd like to sign in.
+            </p>
+
+            <button
+              onClick={handleGoogleChoice}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-full mb-3 font-body font-semibold transition-all hover:scale-[1.02]"
+              style={{
+                background: "white",
+                color: "hsl(280 40% 25%)",
+                border: "2px solid hsl(280 40% 60%)",
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              </svg>
+              Continue with Google
+            </button>
+
+            <button
+              onClick={handleAppleSignIn}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-full mb-4 font-body font-semibold transition-all hover:scale-[1.02]"
+              style={{ background: "black", color: "white" }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M16.365 1.43c0 1.14-.42 2.23-1.25 3.02-.83.83-2.2 1.47-3.32 1.38-.14-1.12.41-2.29 1.2-3.05.83-.82 2.26-1.44 3.37-1.35zM20.5 17.28c-.55 1.28-.82 1.85-1.53 2.98-.99 1.57-2.39 3.52-4.12 3.54-1.54.02-1.94-1-4.03-.99-2.09.01-2.53 1.01-4.07.99-1.73-.02-3.05-1.79-4.04-3.36C.03 16.24-.28 10.98 1.94 8.19c1.58-1.99 4.06-3.15 6.4-3.15 2.38 0 3.88 1.3 5.85 1.3 1.91 0 3.08-1.3 5.82-1.3 2.08 0 4.29 1.13 5.86 3.08-5.15 2.82-4.32 10.16-.37 12.16z"/>
+              </svg>
+              Continue with Apple
+            </button>
+
+            <button
+              onClick={() => setShowProviderChoice(false)}
+              className="text-sm font-body underline"
+              style={{ color: "hsl(280 40% 40%)" }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
