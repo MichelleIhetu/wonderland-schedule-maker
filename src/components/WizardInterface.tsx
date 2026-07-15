@@ -393,6 +393,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
           if (error) console.error("Failed to save journal entry:", error);
         });
     }
+    // Clear local draft once the entry is sent
+    try { localStorage.removeItem(draftKey); } catch {}
 
 
     // Check for distress in journal text — show encouragement first
