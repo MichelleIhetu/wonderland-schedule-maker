@@ -1195,7 +1195,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
       )}
 
       {/* Skip button — fixed bottom-right, cozy scene only, square green, jumps to energy */}
-      {scene === "cozy" && (
+      {scene === "cozy" && !requireJournal && (
         <button
           onClick={() => {
             setIsJournalFocused(false);
