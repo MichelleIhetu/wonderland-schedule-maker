@@ -368,7 +368,9 @@ const WelcomeBack = () => {
 
   const handleWizardComplete = (tasks: string) => {
     sendMessage(tasks);
-    setView("schedule");
+    // Stay in the wizard — WizardInterface transitions to its own "schedule" scene internally.
+    // Previously we setView("schedule") which had no render branch and fell through to the landing.
+    setView("wizard");
   };
 
   // ─── WIZARD VIEW (starts at cozy) ───
