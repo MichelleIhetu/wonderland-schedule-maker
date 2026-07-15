@@ -131,20 +131,29 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [isJournalFocused, setIsJournalFocused] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
 
-  // Load saved journal text once
+  // Local draft key so unsent text survives exits even before Supabase autosave fires
+  const draftKey = user ? `journal-draft-${user.id}` : "journal-draft-anon";
+
+  // Hydrate journal draft: prefer local draft, fallback to saved schedule
   useEffect(() => {
+    try {
+      const local = localStorage.getItem(draftKey);
+      if (local) setJournalText((cur) => cur || local);
+    } catch {}
     if (!user) return;
     loadTodaySchedule().then((r) => {
       if (r?.journalText) setJournalText((cur) => cur || r.journalText);
     });
   }, [user]);
 
-  // Debounced save of journal text
+  // Debounced save of journal text (localStorage immediately + Supabase after 800ms)
   useEffect(() => {
+    try { localStorage.setItem(draftKey, journalText); } catch {}
     if (!user) return;
     const t = setTimeout(() => { saveJournal(journalText); }, 800);
     return () => clearTimeout(t);
   }, [journalText, user]);
+
   const [activeTask, setActiveTask] = useState<ScheduleItem | null>(null);
   const [showUpNext, setShowUpNext] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(0);
