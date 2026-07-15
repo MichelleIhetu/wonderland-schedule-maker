@@ -130,6 +130,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
+  const [draftResumed, setDraftResumed] = useState(false);
 
   // Local draft key so unsent text survives exits even before Supabase autosave fires
   const draftKey = user ? `journal-draft-${user.id}` : "journal-draft-anon";
@@ -138,13 +139,32 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   useEffect(() => {
     try {
       const local = localStorage.getItem(draftKey);
-      if (local) setJournalText((cur) => cur || local);
+      if (local && local.trim()) {
+        setJournalText((cur) => cur || local);
+        setDraftResumed(true);
+      }
     } catch {}
     if (!user) return;
     loadTodaySchedule().then((r) => {
-      if (r?.journalText) setJournalText((cur) => cur || r.journalText);
+      if (r?.journalText) {
+        setJournalText((cur) => cur || r.journalText);
+        if (r.journalText.trim()) setDraftResumed(true);
+      }
     });
   }, [user]);
+
+  // Auto-open the journal panel when a draft is resumed so users see it immediately
+  useEffect(() => {
+    if (draftResumed && scene === "cozy") setIsJournalFocused(true);
+  }, [draftResumed, scene]);
+
+  // Dismiss the "resumed" indicator after a few seconds
+  useEffect(() => {
+    if (!draftResumed) return;
+    const t = setTimeout(() => setDraftResumed(false), 4000);
+    return () => clearTimeout(t);
+  }, [draftResumed]);
+
 
   // Debounced save of journal text (localStorage immediately + Supabase after 800ms)
   useEffect(() => {
@@ -576,6 +596,14 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     </button>
                   </div>
                   <p className="text-sm text-foreground mb-2 pr-16" style={{ fontFamily: "var(--font-body)" }}>📝 Write about your day...</p>
+                  {draftResumed && (
+                    <div
+                      className="mb-2 inline-block text-[0.7rem] px-2 py-1 rounded-md bg-primary/15 text-primary border border-primary/30"
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      ✨ Resumed your unsent draft
+                    </div>
+                  )}
 
                   <textarea
                     value={journalText}
