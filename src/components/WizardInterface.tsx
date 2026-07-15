@@ -72,7 +72,7 @@ const SCENE_CONFIG = {
   },
   stress: {
     background: scheduleBg,
-    bunnyPosition: "bottom-[28%] right-[-4%]",
+    bunnyPosition: "bottom-[28%] right-[-6%]",
     bunnySize: "w-[28rem]",
     messages: [
       "How is your stress level?",
