@@ -276,17 +276,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   })();
   const [startTime, setStartTime] = useState(nowStr);
 
-  const baseConfig = SCENE_CONFIG[scene];
-  const config = (requireJournal && scene === "cozy")
-    ? {
-        ...baseConfig,
-        messages: [
-          "I can't help you if I don't know what's going on — tell me about your day.",
-          "No calendar synced, so your journal is all I've got to build your schedule from.",
-          "Click the notepad and let it out — even a few lines helps 📝",
-        ],
-      }
-    : baseConfig;
+  const config = SCENE_CONFIG[scene];
+
 
   const updateSetting = <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => {
     onSettingsChange({ ...settings, [key]: value });
