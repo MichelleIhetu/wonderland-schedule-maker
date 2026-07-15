@@ -126,6 +126,52 @@ const JournalBookModal = ({ open, onClose }: JournalBookModalProps) => {
               </button>
             </div>
 
+            {/* Filters */}
+            <div className="px-5 py-3 border-b-2 border-primary/20 bg-background/40 space-y-2">
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search entries..."
+                  className="w-full pl-9 pr-3 py-2 rounded-lg border-2 border-primary/20 bg-background/70 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
+                  style={{ fontFamily: "var(--font-body)" }}
+                />
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <CalendarIcon className="w-3.5 h-3.5" /> From
+                </div>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="px-2 py-1 rounded-md border-2 border-primary/20 bg-background/70 text-xs text-foreground focus:outline-none focus:border-primary/50"
+                />
+                <span className="text-xs text-muted-foreground">To</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="px-2 py-1 rounded-md border-2 border-primary/20 bg-background/70 text-xs text-foreground focus:outline-none focus:border-primary/50"
+                />
+                {(search || startDate || endDate) && (
+                  <button
+                    onClick={clearFilters}
+                    className="ml-auto text-xs px-2 py-1 rounded-md border-2 border-primary/30 text-primary hover:bg-primary/10"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              {!loading && (
+                <div className="text-xs text-muted-foreground" style={{ fontFamily: "var(--font-body)" }}>
+                  Showing {filtered.length} of {entries.length} {entries.length === 1 ? "entry" : "entries"}
+                </div>
+              )}
+            </div>
+
             {/* Body */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
               {loading ? (
@@ -140,8 +186,15 @@ const JournalBookModal = ({ open, onClose }: JournalBookModalProps) => {
                     No entries yet. Write about your day and it'll be saved here.
                   </p>
                 </div>
+              ) : filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+                  <BookOpen className="w-10 h-10 mb-3 opacity-60" />
+                  <p style={{ fontFamily: "var(--font-body)" }}>
+                    No entries match your search or date range.
+                  </p>
+                </div>
               ) : (
-                entries.map((entry) => (
+                filtered.map((entry) => (
                   <div
                     key={entry.id}
                     className="rounded-xl border-2 border-primary/20 bg-background/60 p-4 shadow-sm"
@@ -162,6 +215,7 @@ const JournalBookModal = ({ open, onClose }: JournalBookModalProps) => {
                 ))
               )}
             </div>
+
           </motion.div>
         </motion.div>
       )}
