@@ -5,16 +5,19 @@ import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Ca
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
+import JournalBookModal from "./JournalBookModal";
 import { getFormattedDate, getTimeOfDayGreeting, getDayName } from "@/lib/dayGreetings";
 import { useAuth } from "@/hooks/useAuth";
 import { useSchedulePersistence, saveScheduleSnapshot } from "@/hooks/useSchedulePersistence";
 import { useDevLabel } from "@/contexts/DevLabelContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
 import scheduleBg from "@/assets/schedule-background.png";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubbleWelcome from "@/assets/speech-bubble-welcome.png";
+import journalBook from "@/assets/journal-book.png";
 
 interface TaskEntry {
   id: string;
