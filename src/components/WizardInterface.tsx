@@ -72,7 +72,7 @@ const SCENE_CONFIG = {
   },
   stress: {
     background: scheduleBg,
-    bunnyPosition: "bottom-[28%] right-[-6%]",
+    bunnyPosition: "bottom-[28%] right-[-8%]",
     bunnySize: "w-[28rem]",
     messages: [
       "How is your stress level?",
@@ -1122,7 +1122,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                className={`absolute -top-16 z-30 ${scene === "energy" ? "w-56 right-[-20%] sm:w-72 sm:right-[20%] md:w-80" : "w-72 sm:w-80 right-[60%]"}`}
+                className={`absolute -top-16 z-30 ${scene === "energy" || scene === "stress" ? "w-56 right-[-20%] sm:w-72 sm:right-[20%] md:w-80" : "w-72 sm:w-80 right-[60%]"}`}
               >
                 <div
                   className="relative bg-white p-5 shadow-xl"
@@ -1142,9 +1142,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 </div>
                 {/* Comic tail */}
                 <div className="relative h-12 w-full">
-                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className={`absolute top-0 w-4 h-4 bg-white border-2 rounded-full ${scene === "energy" ? "left-[30%] sm:right-[30%] sm:left-auto" : "right-[30%]"}`} style={{ borderColor: "hsl(280 40% 20%)" }} />
-                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className={`absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full ${scene === "energy" ? "left-[20%] sm:right-[20%] sm:left-auto" : "right-[20%]"}`} style={{ borderColor: "hsl(280 40% 20%)" }} />
-                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className={`absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full ${scene === "energy" ? "left-[12%] sm:right-[12%] sm:left-auto" : "right-[12%]"}`} style={{ borderColor: "hsl(280 40% 20%)" }} />
+                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className={`absolute top-0 w-4 h-4 bg-white border-2 rounded-full ${scene === "energy" || scene === "stress" ? "left-[30%] sm:right-[30%] sm:left-auto" : "right-[30%]"}`} style={{ borderColor: "hsl(280 40% 20%)" }} />
+                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className={`absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full ${scene === "energy" || scene === "stress" ? "left-[20%] sm:right-[20%] sm:left-auto" : "right-[20%]"}`} style={{ borderColor: "hsl(280 40% 20%)" }} />
+                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className={`absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full ${scene === "energy" || scene === "stress" ? "left-[12%] sm:right-[12%] sm:left-auto" : "right-[12%]"}`} style={{ borderColor: "hsl(280 40% 20%)" }} />
                 </div>
               </motion.div>
             )}
