@@ -404,7 +404,7 @@ const WelcomeBack = () => {
       />
 
       {/* Top bar */}
-      <div className="relative z-10 flex items-center justify-between pl-16 sm:pl-20 pr-4 sm:pr-8 py-4">
+      <div className="relative z-10 flex items-center justify-between px-4 sm:px-8 pt-12 sm:pt-14 pb-4">
         <Link
           to="/"
           state={{ fromLibraryBack: true }}
