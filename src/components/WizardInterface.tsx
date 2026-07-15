@@ -556,13 +556,25 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="relative w-full h-full bg-card/90 backdrop-blur-md rounded-xl border border-primary/20 shadow-xl p-4">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setIsJournalFocused(false); }}
-                    className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  <p className="text-xs text-muted-foreground mb-2" style={{ fontFamily: "var(--font-body)" }}>📝 Write about your day...</p>
+                  <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setIsBookOpen(true); }}
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label="Search past entries"
+                      title="Search past entries"
+                    >
+                      <Search className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setIsJournalFocused(false); }}
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label="Close journal"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-sm text-foreground mb-2 pr-16" style={{ fontFamily: "var(--font-body)" }}>📝 Write about your day...</p>
+
                   <textarea
                     value={journalText}
                     onChange={(e) => setJournalText(e.target.value)}
