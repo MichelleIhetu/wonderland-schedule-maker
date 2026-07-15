@@ -31,17 +31,21 @@ const JournalBookModal = ({ open, onClose }: JournalBookModalProps) => {
   const { user } = useAuth();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     if (!open || !user) return;
     let cancelled = false;
     setLoading(true);
+    // Load full history so users can browse & filter past entries
     supabase
       .from("journal_entries")
       .select("id, content, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(100)
+      .limit(1000)
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error) console.error("Failed to load journal entries", error);
@@ -52,6 +56,26 @@ const JournalBookModal = ({ open, onClose }: JournalBookModalProps) => {
       cancelled = true;
     };
   }, [open, user]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const start = startDate ? new Date(startDate + "T00:00:00").getTime() : null;
+    const end = endDate ? new Date(endDate + "T23:59:59").getTime() : null;
+    return entries.filter((e) => {
+      const t = new Date(e.created_at).getTime();
+      if (start !== null && t < start) return false;
+      if (end !== null && t > end) return false;
+      if (q && !e.content.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [entries, search, startDate, endDate]);
+
+  const clearFilters = () => {
+    setSearch("");
+    setStartDate("");
+    setEndDate("");
+  };
+
 
   return (
     <AnimatePresence>
