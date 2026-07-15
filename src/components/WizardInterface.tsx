@@ -5,16 +5,19 @@ import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Ca
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
+import JournalBookModal from "./JournalBookModal";
 import { getFormattedDate, getTimeOfDayGreeting, getDayName } from "@/lib/dayGreetings";
 import { useAuth } from "@/hooks/useAuth";
 import { useSchedulePersistence, saveScheduleSnapshot } from "@/hooks/useSchedulePersistence";
 import { useDevLabel } from "@/contexts/DevLabelContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import libraryBg from "@/assets/library-background.png";
 import cozyBg from "@/assets/cozy-background.png";
 import scheduleBg from "@/assets/schedule-background.png";
 import bunnyMascot from "@/assets/bunny-mascot.png";
 import speechBubbleWelcome from "@/assets/speech-bubble-welcome.png";
+import journalBook from "@/assets/journal-book.png";
 
 interface TaskEntry {
   id: string;
@@ -126,6 +129,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [bubbleClickCount, setBubbleClickCount] = useState(0);
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
+  const [isBookOpen, setIsBookOpen] = useState(false);
 
   // Load saved journal text once
   useEffect(() => {
@@ -370,6 +374,18 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
     setIsJournalFocused(false);
     setIsAutoAdvancePending(false);
 
+    // Save the journal entry with its timestamp to the user's book
+    const entryText = journalText.trim();
+    if (entryText && user) {
+      supabase
+        .from("journal_entries")
+        .insert({ user_id: user.id, content: entryText })
+        .then(({ error }) => {
+          if (error) console.error("Failed to save journal entry:", error);
+        });
+    }
+
+
     // Check for distress in journal text — show encouragement first
     if (detectDistress(journalText)) {
       const msg = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
@@ -491,6 +507,29 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
           transition={{ duration: 0.8 }}
         />
       </AnimatePresence>
+
+      {/* Journal book icon — cozy scene only, opens saved entries */}
+      {scene === "cozy" && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setIsBookOpen(true); }}
+          aria-label="Open my journal book"
+          title="My journal"
+          className="absolute top-4 left-4 z-[30] w-16 h-16 rounded-xl bg-card/80 backdrop-blur-sm border-2 border-primary/40 shadow-lg hover:scale-105 active:scale-95 transition-transform flex items-center justify-center"
+        >
+          <img
+            src={journalBook}
+            alt="Journal book"
+            width={48}
+            height={48}
+            loading="lazy"
+            className="w-12 h-12 [image-rendering:pixelated] drop-shadow"
+          />
+        </button>
+      )}
+
+      <JournalBookModal open={isBookOpen} onClose={() => setIsBookOpen(false)} />
+
 
       {/* Journal overlay — cozy scene only */}
       {scene === "cozy" && (
