@@ -129,6 +129,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [bubbleClickCount, setBubbleClickCount] = useState(0);
   const [journalText, setJournalText] = useState("");
   const [isJournalFocused, setIsJournalFocused] = useState(false);
+  const [isBookOpen, setIsBookOpen] = useState(false);
 
   // Load saved journal text once
   useEffect(() => {
