@@ -85,10 +85,10 @@ const SCENE_CONFIG = {
   },
   schedule: {
     background: scheduleBg,
-    bunnyPosition: "bottom-[28%] left-[-4%]",
+    bunnyPosition: "bottom-[28%] left-[20%] md:left-[15%]",
     bunnySize: "w-[28rem]",
     messages: [
-      `Here's your ${getDayName()} schedule! Tap on a task to get started!`,
+      `Here's your ${getDayName()} schedule! Tap a task to start!`,
     ],
   },
 } as const;
@@ -1220,7 +1220,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   scene === "energy" || scene === "stress"
                     ? "-top-8 w-64 right-[60%]"
                     : scene === "schedule"
-                    ? "-top-16 w-72 sm:w-80 left-[60%]"
+                    ? "-top-24 w-60 right-[100%]"
                     : "-top-16 w-72 sm:w-80 right-[60%]"
                 }`}
               >
@@ -1240,11 +1240,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     {isTyping && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
                   </p>
                 </div>
-                {/* Comic tail — point toward the bunny (left when schedule bunny is on the left) */}
+                {/* Comic tail — point toward the bunny (right when schedule bubble is left of bunny) */}
                 <div className="relative h-12 w-full">
-                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className={`absolute top-0 w-4 h-4 bg-white border-2 rounded-full ${scene === "schedule" ? "left-[30%]" : "right-[30%]"}`} style={{ borderColor: "hsl(280 40% 20%)" }} />
-                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className={`absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full ${scene === "schedule" ? "left-[20%]" : "right-[20%]"}`} style={{ borderColor: "hsl(280 40% 20%)" }} />
-                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className={`absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full ${scene === "schedule" ? "left-[12%]" : "right-[12%]"}`} style={{ borderColor: "hsl(280 40% 20%)" }} />
+                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full right-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full right-[20%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                  <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full right-[12%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                 </div>
               </motion.div>
             )}
