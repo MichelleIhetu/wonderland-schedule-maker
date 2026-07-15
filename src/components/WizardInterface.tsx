@@ -814,7 +814,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
 
       {/* Schedule display — schedule scene */}
       {scene === "schedule" && (
-        <div className="absolute inset-0 z-[15] flex items-center justify-start p-8">
+        <div className="absolute inset-0 z-[15] flex items-center justify-end p-8">
           <div className="max-w-md w-full max-h-[80vh] overflow-y-auto">
             {isLoading && generatedSchedule.length === 0 ? (
               <motion.div
