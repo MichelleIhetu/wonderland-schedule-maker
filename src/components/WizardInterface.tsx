@@ -1123,10 +1123,10 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                className={`absolute -top-16 z-30 ${
+                className={`absolute z-30 ${
                   scene === "energy" || scene === "stress"
-                    ? "w-64 right-[60%]"
-                    : "w-72 sm:w-80 right-[60%]"
+                    ? "-top-8 w-64 right-[60%]"
+                    : "-top-16 w-72 sm:w-80 right-[60%]"
                 }`}
               >
                 <div
