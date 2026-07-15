@@ -374,6 +374,18 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
     setIsJournalFocused(false);
     setIsAutoAdvancePending(false);
 
+    // Save the journal entry with its timestamp to the user's book
+    const entryText = journalText.trim();
+    if (entryText && user) {
+      supabase
+        .from("journal_entries")
+        .insert({ user_id: user.id, content: entryText })
+        .then(({ error }) => {
+          if (error) console.error("Failed to save journal entry:", error);
+        });
+    }
+
+
     // Check for distress in journal text — show encouragement first
     if (detectDistress(journalText)) {
       const msg = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
