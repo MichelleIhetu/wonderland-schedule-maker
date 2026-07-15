@@ -508,6 +508,29 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
         />
       </AnimatePresence>
 
+      {/* Journal book icon — cozy scene only, opens saved entries */}
+      {scene === "cozy" && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setIsBookOpen(true); }}
+          aria-label="Open my journal book"
+          title="My journal"
+          className="absolute top-4 left-4 z-[30] w-16 h-16 rounded-xl bg-card/80 backdrop-blur-sm border-2 border-primary/40 shadow-lg hover:scale-105 active:scale-95 transition-transform flex items-center justify-center"
+        >
+          <img
+            src={journalBook}
+            alt="Journal book"
+            width={48}
+            height={48}
+            loading="lazy"
+            className="w-12 h-12 [image-rendering:pixelated] drop-shadow"
+          />
+        </button>
+      )}
+
+      <JournalBookModal open={isBookOpen} onClose={() => setIsBookOpen(false)} />
+
+
       {/* Journal overlay — cozy scene only */}
       {scene === "cozy" && (
         <div
