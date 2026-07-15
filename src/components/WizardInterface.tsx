@@ -85,7 +85,7 @@ const SCENE_CONFIG = {
   },
   schedule: {
     background: scheduleBg,
-    bunnyPosition: "bottom-[28%] left-[-2%] lg:left-[15%]",
+    bunnyPosition: "bottom-[28%] right-[-2%] lg:right-[15%]",
     bunnySize: "w-[16rem] lg:w-[28rem]",
     messages: [
       `Here's your ${getDayName()} schedule! Tap a task to start!`,
@@ -814,7 +814,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
 
       {/* Schedule display — schedule scene */}
       {scene === "schedule" && (
-        <div className="absolute inset-0 z-[15] flex items-center justify-end p-8">
+        <div className="absolute inset-0 z-[15] flex items-center justify-start p-8">
           <div className="max-w-md w-full max-h-[80vh] overflow-y-auto">
             {isLoading && generatedSchedule.length === 0 ? (
               <motion.div
