@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper, ArrowRight, ArrowLeft } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper, ArrowRight, ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
@@ -131,20 +131,29 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [isJournalFocused, setIsJournalFocused] = useState(false);
   const [isBookOpen, setIsBookOpen] = useState(false);
 
-  // Load saved journal text once
+  // Local draft key so unsent text survives exits even before Supabase autosave fires
+  const draftKey = user ? `journal-draft-${user.id}` : "journal-draft-anon";
+
+  // Hydrate journal draft: prefer local draft, fallback to saved schedule
   useEffect(() => {
+    try {
+      const local = localStorage.getItem(draftKey);
+      if (local) setJournalText((cur) => cur || local);
+    } catch {}
     if (!user) return;
     loadTodaySchedule().then((r) => {
       if (r?.journalText) setJournalText((cur) => cur || r.journalText);
     });
   }, [user]);
 
-  // Debounced save of journal text
+  // Debounced save of journal text (localStorage immediately + Supabase after 800ms)
   useEffect(() => {
+    try { localStorage.setItem(draftKey, journalText); } catch {}
     if (!user) return;
     const t = setTimeout(() => { saveJournal(journalText); }, 800);
     return () => clearTimeout(t);
   }, [journalText, user]);
+
   const [activeTask, setActiveTask] = useState<ScheduleItem | null>(null);
   const [showUpNext, setShowUpNext] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -384,6 +393,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
           if (error) console.error("Failed to save journal entry:", error);
         });
     }
+    // Clear local draft once the entry is sent
+    try { localStorage.removeItem(draftKey); } catch {}
 
 
     // Check for distress in journal text — show encouragement first
@@ -547,13 +558,25 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="relative w-full h-full bg-card/90 backdrop-blur-md rounded-xl border border-primary/20 shadow-xl p-4">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setIsJournalFocused(false); }}
-                    className="absolute top-2 right-2 text-muted-foreground hover:text-foreground z-10"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  <p className="text-xs text-muted-foreground mb-2" style={{ fontFamily: "var(--font-body)" }}>📝 Write about your day...</p>
+                  <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setIsBookOpen(true); }}
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label="Search past entries"
+                      title="Search past entries"
+                    >
+                      <Search className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setIsJournalFocused(false); }}
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label="Close journal"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-sm text-foreground mb-2 pr-16" style={{ fontFamily: "var(--font-body)" }}>📝 Write about your day...</p>
+
                   <textarea
                     value={journalText}
                     onChange={(e) => setJournalText(e.target.value)}
