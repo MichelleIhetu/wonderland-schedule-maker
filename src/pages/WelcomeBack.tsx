@@ -391,6 +391,7 @@ const WelcomeBack = () => {
           initialScene="cozy"
           onBackFromInitial={() => setView("landing")}
           onStartFocus={() => navigate("/pomodoro", { state: { schedule: generatedSchedule } })}
+          requireJournal={!calendarImported}
         />
       </>
     );

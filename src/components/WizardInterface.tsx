@@ -34,6 +34,8 @@ interface WizardInterfaceProps {
   onBackFromInitial?: () => void;
   onStartFocus?: () => void;
   onUpdateSchedule?: () => void;
+  /** When true, cozy journal is mandatory: Skip is hidden and bunny insists on a journal entry. */
+  requireJournal?: boolean;
 }
 
 // ─── SCENE DEFINITIONS ───
@@ -90,7 +92,7 @@ const SCENE_CONFIG = {
 
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
-const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library", onBackFromInitial, onStartFocus, onUpdateSchedule }: WizardInterfaceProps) => {
+const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library", onBackFromInitial, onStartFocus, onUpdateSchedule, requireJournal = false }: WizardInterfaceProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { saveJournal, loadTodaySchedule } = useSchedulePersistence(user?.id);
@@ -274,7 +276,17 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   })();
   const [startTime, setStartTime] = useState(nowStr);
 
-  const config = SCENE_CONFIG[scene];
+  const baseConfig = SCENE_CONFIG[scene];
+  const config = (requireJournal && scene === "cozy")
+    ? {
+        ...baseConfig,
+        messages: [
+          "I can't help you if I don't know what's going on — tell me about your day.",
+          "No calendar synced, so your journal is all I've got to build your schedule from.",
+          "Click the notepad and let it out — even a few lines helps 📝",
+        ],
+      }
+    : baseConfig;
 
   const updateSetting = <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => {
     onSettingsChange({ ...settings, [key]: value });
@@ -1183,7 +1195,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
       )}
 
       {/* Skip button — fixed bottom-right, cozy scene only, square green, jumps to energy */}
-      {scene === "cozy" && (
+      {scene === "cozy" && !requireJournal && (
         <button
           onClick={() => {
             setIsJournalFocused(false);
