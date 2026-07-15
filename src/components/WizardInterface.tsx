@@ -596,6 +596,14 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     </button>
                   </div>
                   <p className="text-sm text-foreground mb-2 pr-16" style={{ fontFamily: "var(--font-body)" }}>📝 Write about your day...</p>
+                  {draftResumed && (
+                    <div
+                      className="mb-2 inline-block text-[0.7rem] px-2 py-1 rounded-md bg-primary/15 text-primary border border-primary/30"
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      ✨ Resumed your unsent draft
+                    </div>
+                  )}
 
                   <textarea
                     value={journalText}
