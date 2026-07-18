@@ -1243,7 +1243,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   </p>
                 </div>
                 {/* Comic tail — point toward the bunny */}
-                <div className={`relative w-full ${scene === "stress" ? "h-32" : "h-12"}`}>
+                <div className={`relative w-full ${scene === "stress" ? "h-32" : scene === "energy" ? "h-16" : "h-12"}`}>
                   {scene === "schedule" ? (
                     <>
                       <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full right-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
@@ -1255,6 +1255,12 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                       <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[40%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                       <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-12 w-2.5 h-2.5 bg-white border-2 rounded-full left-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                       <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-24 w-1.5 h-1.5 bg-white border-2 rounded-full left-[20%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                    </>
+                  ) : scene === "energy" ? (
+                    <>
+                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[20%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-6 w-2.5 h-2.5 bg-white border-2 rounded-full left-[35%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-12 w-1.5 h-1.5 bg-white border-2 rounded-full left-[50%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                     </>
                   ) : (
                     <>
