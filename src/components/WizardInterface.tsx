@@ -1230,7 +1230,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   className="relative bg-white p-5 shadow-xl"
                   style={{
                     borderRadius: "50%",
-                    minHeight: "5.5rem",
+                    minHeight: scene === "stress" ? "4rem" : "5.5rem",
                     border: "3px solid hsl(280 40% 20%)",
                     outline: "2px solid hsl(280 40% 20%)",
                     outlineOffset: "3px",
