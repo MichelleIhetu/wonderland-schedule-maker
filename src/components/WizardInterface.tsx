@@ -1217,7 +1217,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
                 className={`absolute z-30 ${
-                  scene === "energy" || scene === "stress"
+                  scene === "stress"
+                    ? "-top-8 w-64 right-[15%]"
+                    : scene === "energy"
                     ? "-top-8 w-64 right-[60%]"
                     : scene === "schedule"
                     ? "-top-24 w-60 right-[40%] lg:right-[60%]"
