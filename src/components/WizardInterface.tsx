@@ -1218,7 +1218,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 exit={{ opacity: 0, scale: 0.8, y: 10 }}
                 className={`absolute z-30 ${
                   scene === "stress"
-                    ? "-top-8 w-64 right-[15%]"
+                    ? "-top-28 w-56 right-[100%]"
                     : scene === "energy"
                     ? "-top-8 w-64 right-[60%]"
                     : scene === "schedule"
@@ -1230,7 +1230,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   className="relative bg-white p-5 shadow-xl"
                   style={{
                     borderRadius: "50%",
-                    minHeight: "5.5rem",
+                    minHeight: scene === "stress" ? "4rem" : "5.5rem",
                     border: "3px solid hsl(280 40% 20%)",
                     outline: "2px solid hsl(280 40% 20%)",
                     outlineOffset: "3px",
@@ -1242,13 +1242,19 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     {isTyping && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
                   </p>
                 </div>
-                {/* Comic tail — point toward the bunny (right when schedule bubble is to the left of bunny) */}
-                <div className="relative h-12 w-full">
+                {/* Comic tail — point toward the bunny */}
+                <div className={`relative w-full ${scene === "stress" ? "h-20" : "h-12"}`}>
                   {scene === "schedule" ? (
                     <>
                       <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full right-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                       <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full right-[20%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                       <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full right-[12%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                    </>
+                  ) : scene === "stress" ? (
+                    <>
+                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full right-[10%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full right-[-10%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full right-[-30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                     </>
                   ) : (
                     <>
