@@ -132,6 +132,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [draftResumed, setDraftResumed] = useState(false);
   const [trailScale, setTrailScale] = useState(1);
+  const trailDragControls = useDragControls();
 
   // Local draft key so unsent text survives exits even before Supabase autosave fires
   const draftKey = user ? `journal-draft-${user.id}` : "journal-draft-anon";
