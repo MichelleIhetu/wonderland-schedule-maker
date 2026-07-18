@@ -1252,9 +1252,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     </>
                   ) : scene === "stress" ? (
                     <>
-                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[40%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-12 w-2.5 h-2.5 bg-white border-2 rounded-full left-[120%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-24 w-1.5 h-1.5 bg-white border-2 rounded-full left-[220%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[20%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-12 w-2.5 h-2.5 bg-white border-2 rounded-full left-[60%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                      <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-24 w-1.5 h-1.5 bg-white border-2 rounded-full left-[110%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                     </>
                   ) : scene === "energy" ? (
                     <>
