@@ -86,8 +86,8 @@ const SCENE_CONFIG = {
   },
   schedule: {
     background: scheduleBg,
-    bunnyPosition: "bottom-4 left-4",
-    bunnySize: "w-32 sm:w-40",
+    bunnyPosition: "bottom-[26%] right-[-9%] lg:right-[7%]",
+    bunnySize: "w-[30rem] lg:w-[52rem]",
     messages: [
       "Here is your schedule",
     ],
@@ -1355,7 +1355,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     : scene === "energy"
                     ? "-top-8 w-64 right-[60%]"
                     : scene === "schedule"
-                    ? "-top-24 w-44 left-[20%]"
+                    ? "-top-16 w-48 right-[12%]"
                     : "-top-16 w-72 sm:w-80 right-[60%]"
                 }`}
               >
