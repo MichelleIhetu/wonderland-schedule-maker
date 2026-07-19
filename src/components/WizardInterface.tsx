@@ -58,8 +58,8 @@ const SCENE_CONFIG = {
   },
   cozy: {
     background: cozyBg,
-    bunnyPosition: "bottom-[10%] right-[-14%]",
-    bunnySize: "w-[44rem]",
+    bunnyPosition: "bottom-[16%] right-[-10%]",
+    bunnySize: "w-[28rem]",
     messages: [
       "Great! Now that I have a better understanding of what your day is like, let's get started!",
       "Life can get messy and chaotic with responsibilities, school, work etc. It's hard to keep track of everything",
@@ -85,8 +85,8 @@ const SCENE_CONFIG = {
   },
   schedule: {
     background: scheduleBg,
-    bunnyPosition: "bottom-[28%] right-[-2%] lg:right-[15%]",
-    bunnySize: "w-[16rem] lg:w-[28rem]",
+    bunnyPosition: "bottom-[26%] right-[-2%] lg:right-[15%]",
+    bunnySize: "w-[22rem] lg:w-[44rem]",
     messages: [
       `Here's your ${getDayName()} schedule! Tap a task to start!`,
     ],
