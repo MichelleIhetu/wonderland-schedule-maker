@@ -1237,6 +1237,12 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                         <div className="absolute top-6 w-2.5 h-2.5 bg-white border-2 rounded-full left-[65%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                         <div className="absolute top-10 w-1.5 h-1.5 bg-white border-2 rounded-full left-[90%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                       </>
+                    ) : scene === "stress" ? (
+                      <>
+                        <div className="absolute top-2 w-4 h-4 bg-white border-2 rounded-full left-[60%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                        <div className="absolute top-6 w-2.5 h-2.5 bg-white border-2 rounded-full left-[90%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                        <div className="absolute top-10 w-1.5 h-1.5 bg-white border-2 rounded-full left-[120%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                      </>
                     ) : (
                       <>
                         <div className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
