@@ -131,11 +131,6 @@ const Moodboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [activeTab, setActiveTab] = useState("browse");
-  const { setSubLabel } = useDevLabel();
-  useEffect(() => {
-    setSubLabel(`Moodboard — ${activeTab === "browse" ? "Browse Aesthetics" : activeTab === "search" ? "Pinterest Search" : "Saved Board"}`);
-    return () => setSubLabel("");
-  }, [activeTab, setSubLabel]);
 
 
   // Pinterest search state

@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
 import { useSchedulePersistence } from "@/hooks/useSchedulePersistence";
-import { useDevLabel } from "@/contexts/DevLabelContext";
 import { UserSettings } from "@/types/schedule";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";

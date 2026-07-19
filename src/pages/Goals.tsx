@@ -332,11 +332,6 @@ export default function Goals() {
   const { loadTodaySchedule } = useSchedulePersistence(user?.id);
   const [suggestions, setSuggestions] = useState<GoalSuggestion[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const { setSubLabel } = useDevLabel();
-  useEffect(() => {
-    setSubLabel("Goals — Long Term Habits");
-    return () => setSubLabel("");
-  }, [setSubLabel]);
 
 
   const totalStreak = goals.reduce((max, g) => Math.max(max, g.streak), 0);
