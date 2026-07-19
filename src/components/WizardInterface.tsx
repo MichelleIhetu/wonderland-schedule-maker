@@ -429,6 +429,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
         setTimeout(() => {
           setIsAutoAdvancePending(false);
           setBubbleClickCount(prev => prev + 1);
+          typeMessage("Now, let's take care of you. What is your energy level?");
         }, 3000);
       });
       return;
@@ -436,6 +437,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
 
     // No distress — normal flow
     setScene("energy");
+    setBubbleClickCount(1);
+    setShowSpeechBubble(true);
+    typeMessage("How is your energy level?");
   };
 
   // Called after energy level is selected
@@ -1193,7 +1197,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
       <div className={`absolute z-20 transition-all duration-700 ${config.bunnyPosition}`}>
         <div className="relative cursor-pointer" onClick={handleBunnyClick}>
           <AnimatePresence>
-            {showSpeechBubble && scene !== "energy" && (
+            {showSpeechBubble && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1201,6 +1205,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 className={`absolute z-30 ${
                   scene === "stress"
                     ? "-top-8 w-56 right-[61%]"
+                    : scene === "energy"
+                    ? "-top-8 w-64 right-[60%]"
                     : scene === "schedule"
                     ? "-top-24 w-60 right-[40%] lg:right-[60%]"
                     : "-top-16 w-72 sm:w-80 right-[60%]"
