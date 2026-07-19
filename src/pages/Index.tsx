@@ -704,7 +704,7 @@ const Index = () => {
           </div>
 
           {/* Nav links - at the bottom of the page */}
-          <div className="flex flex-wrap items-center justify-start gap-8 pb-8 sm:pb-12 mt-6 px-4 sm:px-8">
+          <div className="flex flex-wrap items-center justify-center gap-8 pb-8 sm:pb-12 mt-6 px-4 sm:px-8 max-w-2xl mx-auto">
             <Link
               to="/goals"
               className="flex items-center gap-2 px-7 py-3.5 rounded-full glass-pill text-lg transition-all hover:scale-105"
