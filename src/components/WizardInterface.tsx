@@ -300,10 +300,16 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
 
   // Auto-show/replace bunny message on schedule scene
   useEffect(() => {
-    if (scene === "schedule" && generatedSchedule.length > 0) {
-      setShowSpeechBubble(true);
+    if (scene === "schedule") {
+      // Immediately clear the previous scene's bubble (e.g. stress question)
+      setTypedText("");
       setBubbleClickCount(1);
-      typeMessage("Here is your schedule");
+      if (generatedSchedule.length > 0) {
+        setShowSpeechBubble(true);
+        typeMessage("Here is your schedule");
+      } else {
+        setShowSpeechBubble(false);
+      }
     }
   }, [scene, generatedSchedule.length]);
   const nowStr = (() => {
