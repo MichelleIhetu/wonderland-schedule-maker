@@ -295,12 +295,12 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  // Auto-show bunny message when schedule arrives
+  // Auto-show/replace bunny message on schedule scene
   useEffect(() => {
-    if (scene === "schedule" && generatedSchedule.length > 0 && !showSpeechBubble) {
+    if (scene === "schedule" && generatedSchedule.length > 0) {
       setShowSpeechBubble(true);
       setBubbleClickCount(1);
-      typeMessage("Here's your schedule! Tap on a task to get started!");
+      typeMessage("Here is your schedule");
     }
   }, [scene, generatedSchedule.length]);
   const nowStr = (() => {
