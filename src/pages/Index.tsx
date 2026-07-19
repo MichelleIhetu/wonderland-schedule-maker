@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import SEO from "@/components/SEO";
 import { useClockTick } from "@/hooks/useClockTick";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ImageIcon, Clock, LogOut, Target, ArrowLeft, ArrowRight, Calendar } from "lucide-react";
+import { ImageIcon, LogOut, Target, ArrowLeft, ArrowRight, Calendar } from "lucide-react";
 import { getFormattedDate } from "@/lib/dayGreetings";
 import { toast } from "sonner";
 import SpiderWebBackground from "@/components/SpiderWebBackground";
@@ -305,9 +305,6 @@ const Index = () => {
   const handleClearSchedule = () => {
     setGeneratedSchedule([]);
     setViewMode("wizard");
-  };
-  const handleStartPomodoro = () => {
-    navigate("/pomodoro", { state: { schedule: generatedSchedule } });
   };
   const handleBackToSchedule = () => {
     setViewMode("schedule");
@@ -707,18 +704,7 @@ const Index = () => {
           </div>
 
           {/* Nav links - at the bottom of the page */}
-          <div className="flex flex-wrap items-center justify-center gap-8 pb-8 sm:pb-12 mt-6">
-            {generatedSchedule.length > 0 && (
-              <button
-                onClick={handleStartPomodoro}
-                className="flex items-center gap-2 px-6 py-3 rounded-full glass-pill text-base transition-all hover:scale-105"
-                style={{ color: "hsl(330 80% 45%)" }}
-              >
-                <Clock className="w-5 h-5" />
-                <span className="font-body font-semibold">Pomodoro Timer</span>
-                <span>⏱️</span>
-              </button>
-            )}
+          <div className="flex flex-wrap items-center justify-start gap-8 pb-8 sm:pb-12 mt-6 px-4 sm:px-8">
             <Link
               to="/goals"
               className="flex items-center gap-2 px-7 py-3.5 rounded-full glass-pill text-lg transition-all hover:scale-105"
