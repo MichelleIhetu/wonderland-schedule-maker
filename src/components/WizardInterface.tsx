@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper, ArrowRight, ArrowLeft, Search } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper, ArrowRight, ArrowLeft, Search, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
@@ -98,7 +98,7 @@ type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library", onBackFromInitial, onStartFocus, onUpdateSchedule, requireJournal = false }: WizardInterfaceProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { saveJournal, loadTodaySchedule } = useSchedulePersistence(user?.id);
+  const { saveJournal, loadTodaySchedule, saveSchedule } = useSchedulePersistence(user?.id);
   const { setSubLabel } = useDevLabel();
   // ─── SCENE STATE (single source of truth) ───
   const [scene, setScene] = useState<Scene>(initialScene);
@@ -440,6 +440,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
     setBubbleClickCount(1);
     setShowSpeechBubble(true);
     typeMessage("How is your energy level?");
+  };
+
+  const handleSaveSchedule = async () => {
+    if (generatedSchedule.length === 0) {
+      toast.info("There's no schedule to save yet.");
+      return;
+    }
+    await saveSchedule(generatedSchedule, settings);
+    toast.success("Schedule saved! You can find it in your journal book.");
   };
 
   // Called after energy level is selected
@@ -1150,6 +1159,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                       Pomodoro Timer →
                     </button>
                   )}
+                  <button
+                    onClick={handleSaveSchedule}
+                    className="px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95 shadow-md text-white font-semibold text-sm flex items-center gap-2"
+                    style={{ background: "hsl(210 90% 55%)", fontFamily: "var(--font-body)" }}
+                    aria-label="Save generated schedule"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save Schedule
+                  </button>
                 </div>
                 {[...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time)).map((item, index) => (
                   <motion.button
