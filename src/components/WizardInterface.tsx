@@ -306,15 +306,10 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
     if (scene === "schedule") {
       // Immediately clear the previous scene's bubble (e.g. stress question)
       setTypedText("");
-      setBubbleClickCount(1);
-      if (generatedSchedule.length > 0) {
-        setShowSpeechBubble(true);
-        typeMessage("Here is your schedule");
-      } else {
-        setShowSpeechBubble(false);
-      }
+      setBubbleClickCount(0);
+      setShowSpeechBubble(false);
     }
-  }, [scene, generatedSchedule.length]);
+  }, [scene]);
   const nowStr = (() => {
     const n = new Date();
     return `${n.getHours().toString().padStart(2, "0")}:${n.getMinutes().toString().padStart(2, "0")}`;
