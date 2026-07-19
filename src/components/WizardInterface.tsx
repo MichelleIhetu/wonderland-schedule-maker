@@ -1208,7 +1208,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     : scene === "energy"
                     ? "-top-8 w-64 right-[60%]"
                     : scene === "schedule"
-                    ? "-top-24 w-60 right-[40%] lg:right-[60%]"
+                    ? "-top-24 w-56 right-[5%]"
                     : "-top-16 w-72 sm:w-80 right-[60%]"
                 }`}
               >
