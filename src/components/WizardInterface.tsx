@@ -1159,6 +1159,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                       Pomodoro Timer →
                     </button>
                   )}
+                  <button
+                    onClick={handleSaveSchedule}
+                    className="px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95 shadow-md text-white font-semibold text-sm flex items-center gap-2"
+                    style={{ background: "hsl(210 90% 55%)", fontFamily: "var(--font-body)" }}
+                    aria-label="Save generated schedule"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save Schedule
+                  </button>
                 </div>
                 {[...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time)).map((item, index) => (
                   <motion.button
