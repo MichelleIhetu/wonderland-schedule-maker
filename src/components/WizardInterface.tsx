@@ -1193,7 +1193,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
       <div className={`absolute z-20 transition-all duration-700 ${config.bunnyPosition}`}>
         <div className="relative cursor-pointer" onClick={handleBunnyClick}>
           <AnimatePresence>
-            {showSpeechBubble && (
+            {showSpeechBubble && scene !== "energy" && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
