@@ -37,6 +37,7 @@ interface WizardInterfaceProps {
   onBackFromInitial?: () => void;
   onStartFocus?: () => void;
   onUpdateSchedule?: () => void;
+  onScheduleChange?: (items: ScheduleItem[]) => void;
   /** When true, cozy journal is mandatory: Skip is hidden and bunny insists on a journal entry. */
   requireJournal?: boolean;
 }
