@@ -176,9 +176,25 @@ export default function FloatingNav() {
                 </button>
               );
             })}
+            <button
+              onClick={() => {
+                setJournalOpen(true);
+                setOpen(false);
+              }}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: "hsl(30 60% 92%)",
+                color: "hsl(25 45% 25%)",
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Journal</span>
+            </button>
           </nav>
         )}
       </div>
+      <JournalBookModal open={journalOpen} onClose={() => setJournalOpen(false)} />
     </div>
   );
 }
