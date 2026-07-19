@@ -51,6 +51,7 @@ const SCENE_CONFIG = {
     background: libraryBg,
     bunnyPosition: "bottom-[0%] right-[-1%]",
     bunnySize: "w-[22rem]",
+    hideBubble: false,
     messages: [
       `${getTimeOfDayGreeting()}! It's ${getFormattedDate()} 🗓️`,
       "Hi there, my name is TimeBunny! Welcome to my home!",
@@ -61,6 +62,7 @@ const SCENE_CONFIG = {
     background: cozyBg,
     bunnyPosition: "bottom-[16%] right-[-10%]",
     bunnySize: "w-[28rem]",
+    hideBubble: false,
     messages: [
       "Great! Now that I have a better understanding of what your day is like, let's get started!",
       "Life can get messy and chaotic with responsibilities, school, work etc. It's hard to keep track of everything",
@@ -72,6 +74,7 @@ const SCENE_CONFIG = {
     background: scheduleBg,
     bunnyPosition: "bottom-[28%] right-[-8%]",
     bunnySize: "w-[28rem]",
+    hideBubble: false,
     messages: [
       "Wow! You have a lot on your plate dear, what is your energy level?",
     ],
@@ -80,17 +83,17 @@ const SCENE_CONFIG = {
     background: scheduleBg,
     bunnyPosition: "bottom-[28%] right-[-8%]",
     bunnySize: "w-[28rem]",
+    hideBubble: false,
     messages: [
       "How is your stress level?",
     ],
   },
   schedule: {
     background: scheduleBg,
-    bunnyPosition: "bottom-[26%] right-[-9%] lg:right-[7%]",
-    bunnySize: "w-[30rem] lg:w-[52rem]",
-    messages: [
-      "Here is your schedule",
-    ],
+    bunnyPosition: "bottom-[26%] right-[-7%] lg:right-[9%]",
+    bunnySize: "w-[26rem] lg:w-[44rem]",
+    hideBubble: true,
+    messages: [],
   },
 } as const;
 
