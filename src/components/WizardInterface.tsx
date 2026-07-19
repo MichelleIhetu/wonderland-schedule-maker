@@ -1223,23 +1223,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     boxShadow: "4px 4px 0px hsl(280 40% 20%)",
                   }}
                 >
-                  {/* Manual Dismiss button */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowSpeechBubble(false);
-                      setTypedText("");
-                      setBubbleClickCount(0);
-                      setIsAutoAdvancePending(false);
-                    }}
-                    className="absolute -top-1 -right-1 z-40 w-6 h-6 rounded-full bg-white border-2 border-purple-400 flex items-center justify-center shadow-sm hover:scale-110 active:scale-95 transition-transform"
-                    aria-label="Dismiss speech bubble"
-                    title="Dismiss"
-                  >
-                    <X className="w-3 h-3 text-purple-600" />
-                  </button>
-
                   <p className="text-sm text-center leading-relaxed" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
                     {typedText}
                     {isTyping && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
@@ -1250,9 +1233,9 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                   <div className="absolute inset-0 z-10">
                     {scene === "energy" ? (
                       <>
-                        <div className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                        <div className="absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full left-[55%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                        <div className="absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full left-[80%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                        <div className="absolute top-2 w-4 h-4 bg-white border-2 rounded-full left-[40%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                        <div className="absolute top-6 w-2.5 h-2.5 bg-white border-2 rounded-full left-[65%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                        <div className="absolute top-10 w-1.5 h-1.5 bg-white border-2 rounded-full left-[90%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
                       </>
                     ) : (
                       <>
