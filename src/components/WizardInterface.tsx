@@ -1245,68 +1245,13 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     {isTyping && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />}
                   </p>
                 </div>
-                {/* Comic tail — point toward the bunny */}
-                <div className={`relative w-full ${scene === "stress" ? "h-32" : scene === "energy" ? "h-24" : "h-12"}`}>
-                  <motion.div
-                    drag
-                    dragControls={trailDragControls}
-                    dragListener={false}
-                    dragMomentum={false}
-                    onWheel={(e) => {
-                      e.preventDefault();
-                      setTrailScale(prev => Math.min(2.5, Math.max(0.4, prev + e.deltaY * -0.002)));
-                    }}
-                    style={{ scale: trailScale }}
-                    className="absolute inset-0 z-10 border-2 border-dashed border-purple-400/50 rounded-lg"
-                    title="Drag to move, scroll to scale"
-                  >
-                    {/* Drag handle */}
-                    <div
-                      onPointerDown={(e) => trailDragControls.start(e)}
-                      className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 px-2 py-1 rounded-full bg-white border-2 border-purple-400 cursor-grab active:cursor-grabbing shadow-sm hover:scale-110 transition-transform"
-                      title="Drag to move"
-                    >
-                      <Move className="w-3 h-3 text-purple-600" />
-                    </div>
-
-                    {scene === "schedule" ? (
-                      <>
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full right-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full right-[20%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full right-[12%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                      </>
-                    ) : scene === "stress" ? (
-                      <>
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-4 w-4 h-4 bg-white border-2 rounded-full left-[80%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-[4.5rem] w-2.5 h-2.5 bg-white border-2 rounded-full left-[105%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-32 w-1.5 h-1.5 bg-white border-2 rounded-full left-[130%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                      </>
-                    ) : scene === "energy" ? (
-                      <>
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full right-[40%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-8 w-2.5 h-2.5 bg-white border-2 rounded-full right-[15%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-16 w-1.5 h-1.5 bg-white border-2 rounded-full right-[-30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                      </>
-                    ) : (
-                      <>
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0 }} className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }} className="absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full left-[20%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                        <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }} className="absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full left-[12%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                      </>
-                    )}
-
-                    {/* Scale handle */}
-                    <motion.div
-                      drag
-                      dragMomentum={false}
-                      dragConstraints={{ left: -40, right: 40, top: -40, bottom: 40 }}
-                      onDrag={(e, info) => {
-                        setTrailScale(prev => Math.min(2.5, Math.max(0.4, prev + info.delta.y / 100)));
-                      }}
-                      className="absolute -bottom-2 -right-2 w-5 h-5 bg-purple-500 rounded-full border-2 border-white cursor-nwse-resize z-20 shadow-sm hover:scale-110 transition-transform"
-                      title="Drag to scale"
-                    />
-                  </motion.div>
+                {/* Comic tail — point toward the bunny (static) */}
+                <div className="relative w-full h-12">
+                  <div className="absolute inset-0 z-10">
+                    <div className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                    <div className="absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full left-[20%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                    <div className="absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full left-[12%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                  </div>
                 </div>
               </motion.div>
             )}
