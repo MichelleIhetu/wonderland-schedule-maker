@@ -1248,9 +1248,19 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 {/* Comic tail — point toward the bunny (static) */}
                 <div className="relative w-full h-12">
                   <div className="absolute inset-0 z-10">
-                    <div className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                    <div className="absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full left-[20%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
-                    <div className="absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full left-[12%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                    {scene === "energy" ? (
+                      <>
+                        <div className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[10%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                        <div className="absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full left-[35%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                        <div className="absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full left-[60%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                      </>
+                    ) : (
+                      <>
+                        <div className="absolute top-0 w-4 h-4 bg-white border-2 rounded-full left-[30%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                        <div className="absolute top-4 w-2.5 h-2.5 bg-white border-2 rounded-full left-[20%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                        <div className="absolute top-8 w-1.5 h-1.5 bg-white border-2 rounded-full left-[12%]" style={{ borderColor: "hsl(280 40% 20%)" }} />
+                      </>
+                    )}
                   </div>
                 </div>
               </motion.div>
