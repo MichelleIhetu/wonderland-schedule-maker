@@ -442,6 +442,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
     typeMessage("How is your energy level?");
   };
 
+  const handleSaveSchedule = async () => {
+    if (generatedSchedule.length === 0) {
+      toast.info("There's no schedule to save yet.");
+      return;
+    }
+    await saveSchedule(generatedSchedule, settings);
+    toast.success("Schedule saved! You can find it in your journal book.");
+  };
+
   // Called after energy level is selected
   const submitSchedule = () => {
     const breakText = breakFrequency === "minimal" ? "Include minimal short breaks" 
