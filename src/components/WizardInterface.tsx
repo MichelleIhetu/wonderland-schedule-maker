@@ -85,8 +85,8 @@ const SCENE_CONFIG = {
   },
   schedule: {
     background: scheduleBg,
-    bunnyPosition: "bottom-[26%] right-[-2%] lg:right-[15%]",
-    bunnySize: "w-[22rem] lg:w-[44rem]",
+    bunnyPosition: "bottom-[26%] right-[-4%] lg:right-[12%]",
+    bunnySize: "w-[30rem] lg:w-[52rem]",
     messages: [
       `Here's your ${getDayName()} schedule! Tap a task to start!`,
     ],
