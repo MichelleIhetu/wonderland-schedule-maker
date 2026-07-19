@@ -9,7 +9,6 @@ import JournalBookModal from "./JournalBookModal";
 import { getFormattedDate, getTimeOfDayGreeting, getDayName } from "@/lib/dayGreetings";
 import { useAuth } from "@/hooks/useAuth";
 import { useSchedulePersistence, saveScheduleSnapshot } from "@/hooks/useSchedulePersistence";
-import { useDevLabel } from "@/contexts/DevLabelContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import libraryBg from "@/assets/library-background.png";
@@ -103,20 +102,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   const navigate = useNavigate();
   const { user } = useAuth();
   const { saveJournal, loadTodaySchedule, saveSchedule } = useSchedulePersistence(user?.id);
-  const { setSubLabel } = useDevLabel();
   // ─── SCENE STATE (single source of truth) ───
   const [scene, setScene] = useState<Scene>(initialScene);
-
-  useEffect(() => {
-    const sceneNames: Record<Scene, string> = {
-      library: "Library / Import Calendar",
-      cozy: "Cozy Journal",
-      energy: "Energy Selection",
-      stress: "Stress Selection",
-      schedule: "Schedule Display",
-    };
-    setSubLabel(`Wizard — ${sceneNames[scene]}`);
-  }, [scene, setSubLabel]);
 
   const [step, setStep] = useState<WizardStep>("tasks");
   const [breakFrequency, setBreakFrequency] = useState<"minimal" | "moderate" | "frequent">("moderate");

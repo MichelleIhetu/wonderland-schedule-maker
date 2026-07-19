@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useDevLabel } from "@/contexts/DevLabelContext";
 import SEO from "@/components/SEO";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -56,18 +55,6 @@ const VibeCheck = () => {
   const [needBreak, setNeedBreak] = useState(false);
   const [adjustSchedule, setAdjustSchedule] = useState<VibeCheckResult["adjustSchedule"] | null>(null);
   const [notes, setNotes] = useState("");
-  const { setSubLabel } = useDevLabel();
-  useEffect(() => {
-    const labels: Record<Step, string> = {
-      mood: "Vibe Check — Mood",
-      energy: "Vibe Check — Energy",
-      break: "Vibe Check — Break Prompt",
-      adjust: "Vibe Check — Schedule Adjust",
-      done: "Vibe Check — Summary",
-    };
-    setSubLabel(labels[step]);
-    return () => setSubLabel("");
-  }, [step, setSubLabel]);
 
 
   const currentIndex = stepOrder.indexOf(step);

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useDevLabel } from "@/contexts/DevLabelContext";
 import SEO from "@/components/SEO";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Heart, Bookmark, Search, Sparkles, ExternalLink, Link2, X, Check, Loader2, Plus, Trash2, FolderHeart } from "lucide-react";
@@ -131,11 +130,6 @@ const Moodboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [activeTab, setActiveTab] = useState("browse");
-  const { setSubLabel } = useDevLabel();
-  useEffect(() => {
-    setSubLabel(`Moodboard — ${activeTab === "browse" ? "Browse Aesthetics" : activeTab === "search" ? "Pinterest Search" : "Saved Board"}`);
-    return () => setSubLabel("");
-  }, [activeTab, setSubLabel]);
 
 
   // Pinterest search state
