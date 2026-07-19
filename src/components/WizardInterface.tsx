@@ -424,14 +424,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
       setBubbleClickCount(1);
       setShowSpeechBubble(true);
       typeMessage(msg, () => {
-        // After encouragement finishes typing, wait then advance to stress
+        // After encouragement finishes typing, wait then show energy question
         setIsAutoAdvancePending(true);
         setTimeout(() => {
           setIsAutoAdvancePending(false);
           setBubbleClickCount(prev => prev + 1);
-          setScene("stress");
-          setShowSpeechBubble(true);
-          typeMessage("How is your stress level?");
         }, 3000);
       });
       return;
