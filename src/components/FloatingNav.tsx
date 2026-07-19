@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Target, ImageIcon, Sparkles, Clock, Home, Menu, X, Calendar } from "lucide-react";
+import { Target, ImageIcon, Sparkles, Clock, Home, Menu, X, Calendar, BookOpen } from "lucide-react";
+import JournalBookModal from "./JournalBookModal";
 
 type NavItem = {
   label: string;
@@ -50,6 +51,7 @@ export default function FloatingNav() {
   const navigate = useNavigate();
   const { pathname, state } = useLocation();
   const [open, setOpen] = useState(false);
+  const [journalOpen, setJournalOpen] = useState(false);
   const [pos, setPos] = useState<{ x: number; y: number }>(() =>
     typeof window === "undefined" ? { x: 16, y: 16 } : loadPos(),
   );
@@ -174,9 +176,25 @@ export default function FloatingNav() {
                 </button>
               );
             })}
+            <button
+              onClick={() => {
+                setJournalOpen(true);
+                setOpen(false);
+              }}
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: "hsl(30 60% 92%)",
+                color: "hsl(25 45% 25%)",
+                fontFamily: "var(--font-body)",
+              }}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Journal</span>
+            </button>
           </nav>
         )}
       </div>
+      <JournalBookModal open={journalOpen} onClose={() => setJournalOpen(false)} />
     </div>
   );
 }
