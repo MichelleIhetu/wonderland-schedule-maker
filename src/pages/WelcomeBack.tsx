@@ -38,7 +38,6 @@ const WelcomeBack = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut, loading: authLoading } = useAuth();
-  const { setSubLabel } = useDevLabel();
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [view, setView] = useState<View>("landing");
   const [calendarAnalyzing, setCalendarAnalyzing] = useState(false);
@@ -47,16 +46,6 @@ const WelcomeBack = () => {
   const [scope, setScope] = useState<"day" | "week" | "month">("month");
   const [showProviderChoice, setShowProviderChoice] = useState(false);
 
-  useEffect(() => {
-    if (view === "landing") {
-      setSubLabel(calendarAnalyzing ? "Landing — Calendar Analyzing" : "Landing — Calendar Sync");
-    } else if (view === "schedule") {
-      setSubLabel("Generated Schedule Review");
-    } else {
-      // WizardInterface will set its own granular scene label.
-      setSubLabel("");
-    }
-  }, [view, calendarAnalyzing, setSubLabel]);
 
   const handleAppleSignIn = async () => {
     setShowProviderChoice(false);
