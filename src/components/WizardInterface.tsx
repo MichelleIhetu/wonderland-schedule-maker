@@ -424,12 +424,14 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
       setBubbleClickCount(1);
       setShowSpeechBubble(true);
       typeMessage(msg, () => {
-        // After encouragement finishes typing, wait then show energy question
+        // After encouragement finishes typing, wait then advance to stress
         setIsAutoAdvancePending(true);
         setTimeout(() => {
           setIsAutoAdvancePending(false);
           setBubbleClickCount(prev => prev + 1);
-          typeMessage("Now, let's take care of you. What is your energy level?");
+          setScene("stress");
+          setShowSpeechBubble(true);
+          typeMessage("How is your stress level?");
         }, 3000);
       });
       return;
@@ -437,9 +439,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
 
     // No distress — normal flow
     setScene("energy");
-    setBubbleClickCount(1);
-    setShowSpeechBubble(true);
-    typeMessage("How is your energy level?");
   };
 
   // Called after energy level is selected
