@@ -1149,16 +1149,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
               </motion.div>
             ) : (
               <div className="flex flex-col gap-3">
-                <div className="self-end flex gap-2">
-                  {onStartFocus && (
-                    <button
-                      onClick={onStartFocus}
-                      className="px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95 shadow-md text-white font-semibold text-sm"
-                      style={{ background: "hsl(150 60% 45%)", fontFamily: "var(--font-body)" }}
-                    >
-                      Pomodoro Timer →
-                    </button>
-                  )}
+                <div className="flex justify-between w-full gap-2">
                   <button
                     onClick={handleSaveSchedule}
                     className="px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95 shadow-md text-white font-semibold text-sm flex items-center gap-2"
@@ -1168,6 +1159,15 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     <Save className="w-4 h-4" />
                     Save Schedule
                   </button>
+                  {onStartFocus && (
+                    <button
+                      onClick={onStartFocus}
+                      className="px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95 shadow-md text-white font-semibold text-sm"
+                      style={{ background: "hsl(150 60% 45%)", fontFamily: "var(--font-body)" }}
+                    >
+                      Pomodoro Timer →
+                    </button>
+                  )}
                 </div>
                 {[...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time)).map((item, index) => (
                   <motion.button
