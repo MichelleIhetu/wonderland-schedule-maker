@@ -788,8 +788,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     setShowSpeechBubble(true);
                     typeMessage(msg, () => {
                       setTimeout(() => {
-                        setShowSpeechBubble(false);
-                        setTypedText("");
                         submitSchedule();
                         setScene("schedule");
                       }, 2500);
@@ -797,8 +795,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                     return;
                   }
 
-                  setShowSpeechBubble(false);
-                  setTypedText("");
                   submitSchedule();
                   setScene("schedule");
                 }}
