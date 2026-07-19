@@ -176,6 +176,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   }, [journalText, user]);
 
   const [activeTask, setActiveTask] = useState<ScheduleItem | null>(null);
+  const [editingSchedule, setEditingSchedule] = useState(false);
+  const [draftSchedule, setDraftSchedule] = useState<ScheduleItem[]>([]);
   const [showUpNext, setShowUpNext] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
