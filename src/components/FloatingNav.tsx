@@ -51,6 +51,7 @@ export default function FloatingNav() {
   const navigate = useNavigate();
   const { pathname, state } = useLocation();
   const [open, setOpen] = useState(false);
+  const [journalOpen, setJournalOpen] = useState(false);
   const [pos, setPos] = useState<{ x: number; y: number }>(() =>
     typeof window === "undefined" ? { x: 16, y: 16 } : loadPos(),
   );
