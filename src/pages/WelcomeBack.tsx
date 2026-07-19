@@ -75,7 +75,7 @@ const WelcomeBack = () => {
     runCalendarAnalysis(scope);
   };
 
-  const { isLoading, sendMessage, generatedSchedule } = useChat(settings);
+  const { isLoading, sendMessage, generatedSchedule, setGeneratedSchedule } = useChat(settings);
   const { saveSchedule } = useSchedulePersistence(user?.id);
 
   // Auth returns should always land on the Welcome Back screen, not an in-progress wizard scene.
@@ -391,6 +391,7 @@ const WelcomeBack = () => {
           initialScene="cozy"
           onBackFromInitial={() => setView("landing")}
           onStartFocus={() => navigate("/pomodoro", { state: { schedule: generatedSchedule } })}
+          onScheduleChange={(items) => setGeneratedSchedule(items)}
           requireJournal={!calendarImported}
         />
       </>

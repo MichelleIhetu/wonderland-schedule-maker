@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper, ArrowRight, ArrowLeft, Search, Save } from "lucide-react";
+import { Sparkles, Moon, Sun, Coffee, Battery, BatteryLow, Heart, Zap, Clock, Calendar, X, PlayCircle, Plus, AlertTriangle, Trash2, Loader2, CheckCircle2, PartyPopper, ArrowRight, ArrowLeft, Search, Save, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserSettings, EnergyLevel, StressLevel, ScheduleItem } from "@/types/schedule";
 import CalendarImportModal, { CalendarEvent } from "./CalendarImportModal";
@@ -37,6 +37,7 @@ interface WizardInterfaceProps {
   onBackFromInitial?: () => void;
   onStartFocus?: () => void;
   onUpdateSchedule?: () => void;
+  onScheduleChange?: (items: ScheduleItem[]) => void;
   /** When true, cozy journal is mandatory: Skip is hidden and bunny insists on a journal entry. */
   requireJournal?: boolean;
 }
@@ -95,7 +96,7 @@ const SCENE_CONFIG = {
 
 type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 
-const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library", onBackFromInitial, onStartFocus, onUpdateSchedule, requireJournal = false }: WizardInterfaceProps) => {
+const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library", onBackFromInitial, onStartFocus, onUpdateSchedule, onScheduleChange, requireJournal = false }: WizardInterfaceProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { saveJournal, loadTodaySchedule, saveSchedule } = useSchedulePersistence(user?.id);
@@ -175,6 +176,8 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   }, [journalText, user]);
 
   const [activeTask, setActiveTask] = useState<ScheduleItem | null>(null);
+  const [editingSchedule, setEditingSchedule] = useState(false);
+  const [draftSchedule, setDraftSchedule] = useState<ScheduleItem[]>([]);
   const [showUpNext, setShowUpNext] = useState(true);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
@@ -1207,6 +1210,126 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Yellow manual edit button (bottom-right) */}
+          {!activeTask && generatedSchedule.length > 0 && (
+            <button
+              onClick={() => {
+                setDraftSchedule([...generatedSchedule].sort((a, b) => a.time.localeCompare(b.time)));
+                setEditingSchedule(true);
+              }}
+              className="fixed bottom-6 right-6 z-40 px-5 py-3 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2 font-semibold text-sm"
+              style={{
+                background: "hsl(48 100% 60%)",
+                color: "hsl(30 60% 20%)",
+                border: "3px solid hsl(30 60% 25%)",
+                fontFamily: "var(--font-body)",
+              }}
+              aria-label="Edit schedule manually"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Manual schedule editor modal */}
+      {editingSchedule && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setEditingSchedule(false)}
+        >
+          <div
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col"
+            style={{ border: "4px solid hsl(280 40% 20%)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-5 border-b-2" style={{ borderColor: "hsl(280 30% 85%)" }}>
+              <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-body)", color: "hsl(280 40% 25%)" }}>
+                Edit Schedule
+              </h2>
+              <button onClick={() => setEditingSchedule(false)} aria-label="Close editor">
+                <X className="w-5 h-5" style={{ color: "hsl(280 40% 25%)" }} />
+              </button>
+            </div>
+
+            <div className="p-5 overflow-y-auto flex-1 space-y-3">
+              {draftSchedule.map((item, idx) => (
+                <div key={item.id} className="flex items-center gap-2 p-3 rounded-xl" style={{ background: "hsl(280 30% 96%)", border: "2px solid hsl(280 30% 85%)" }}>
+                  <input
+                    type="time"
+                    value={item.time}
+                    onChange={(e) => {
+                      const next = [...draftSchedule];
+                      next[idx] = { ...next[idx], time: e.target.value };
+                      setDraftSchedule(next);
+                    }}
+                    className="px-2 py-1 rounded border text-sm"
+                    style={{ borderColor: "hsl(280 30% 75%)", fontFamily: "var(--font-body)" }}
+                  />
+                  <input
+                    type="text"
+                    value={item.title}
+                    onChange={(e) => {
+                      const next = [...draftSchedule];
+                      next[idx] = { ...next[idx], title: e.target.value };
+                      setDraftSchedule(next);
+                    }}
+                    className="flex-1 px-2 py-1 rounded border text-sm"
+                    style={{ borderColor: "hsl(280 30% 75%)", fontFamily: "var(--font-body)" }}
+                  />
+                  <button
+                    onClick={() => setDraftSchedule(draftSchedule.filter((_, i) => i !== idx))}
+                    aria-label="Delete task"
+                    className="p-2 rounded-lg hover:bg-red-100"
+                  >
+                    <Trash2 className="w-4 h-4" style={{ color: "hsl(0 60% 50%)" }} />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                onClick={() =>
+                  setDraftSchedule([
+                    ...draftSchedule,
+                    {
+                      id: `manual-${Date.now()}`,
+                      title: "New task",
+                      time: "12:00",
+                      suit: "hearts",
+                    },
+                  ])
+                }
+                className="w-full py-2 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm"
+                style={{ background: "hsl(150 60% 90%)", color: "hsl(150 60% 25%)", border: "2px dashed hsl(150 40% 55%)", fontFamily: "var(--font-body)" }}
+              >
+                <Plus className="w-4 h-4" /> Add task
+              </button>
+            </div>
+
+            <div className="p-5 border-t-2 flex justify-end gap-2" style={{ borderColor: "hsl(280 30% 85%)" }}>
+              <button
+                onClick={() => setEditingSchedule(false)}
+                className="px-4 py-2 rounded-full text-sm font-semibold"
+                style={{ background: "hsl(280 15% 90%)", color: "hsl(280 40% 25%)", fontFamily: "var(--font-body)" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const sorted = [...draftSchedule].sort((a, b) => a.time.localeCompare(b.time));
+                  onScheduleChange?.(sorted);
+                  setEditingSchedule(false);
+                  toast.success("Schedule updated");
+                }}
+                className="px-4 py-2 rounded-full text-sm font-semibold text-white flex items-center gap-2"
+                style={{ background: "hsl(210 90% 55%)", fontFamily: "var(--font-body)" }}
+              >
+                <Save className="w-4 h-4" /> Save
+              </button>
+            </div>
           </div>
         </div>
       )}

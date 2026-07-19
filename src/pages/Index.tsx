@@ -793,6 +793,7 @@ const Index = () => {
         isLoading={isLoading}
         generatedSchedule={generatedSchedule}
         initialScene={viewMode === "schedule" ? "schedule" : "library"}
+        onScheduleChange={(items) => setGeneratedSchedule(items)}
         onUpdateSchedule={() => {
           setGeneratedSchedule([]);
           setViewMode("wizard");
