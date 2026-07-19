@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Target, ImageIcon, Sparkles, Clock, Home, Menu, X, Calendar } from "lucide-react";
+import { Target, ImageIcon, Sparkles, Clock, Home, Menu, X, Calendar, BookOpen } from "lucide-react";
+import JournalBookModal from "./JournalBookModal";
 
 type NavItem = {
   label: string;
