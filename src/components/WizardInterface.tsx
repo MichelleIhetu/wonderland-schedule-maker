@@ -1360,18 +1360,6 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
         </button>
       )}
 
-      {/* Update button — fixed bottom-right on schedule scene, regenerates schedule */}
-      {scene === "schedule" && onUpdateSchedule && (
-        <button
-          onClick={onUpdateSchedule}
-          className="fixed bottom-4 right-4 z-50 flex items-center justify-center gap-1 px-4 py-2 rounded-full text-xs font-semibold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
-          style={{ background: "hsl(280 70% 50%)", fontFamily: "var(--font-body)" }}
-          aria-label="Update schedule"
-          title="Rebuild your schedule"
-        >
-          🔄 Update Schedule
-        </button>
-      )}
 
 
       {/* Back button — fixed top-left, navigates to previous scene */}
