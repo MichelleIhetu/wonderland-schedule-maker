@@ -506,6 +506,11 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
   // ─── BUNNY CLICK HANDLER ───
   const handleBunnyClick = () => {
     if (isTyping || isAutoAdvancePending) return;
+    if (config.hideBubble) {
+      setShowSpeechBubble(false);
+      setTypedText("");
+      return;
+    }
 
     const messages = config.messages;
     const maxMessages = messages.length;
@@ -525,6 +530,7 @@ const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, ge
     setShowSpeechBubble(true);
 
     const fullText = messages[msgIndex];
+    if (!fullText) return;
     typeMessage(fullText, () => {
       // Auto-advance in cozy scene: "Life can get messy..." → 2s → "Here is a safe space..."
       if (scene === "cozy" && fullText === SCENE_CONFIG.cozy.messages[1]) {
