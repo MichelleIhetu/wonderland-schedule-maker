@@ -98,7 +98,7 @@ type WizardStep = "greeting" | "mood" | "stress" | "sleep" | "breaks" | "tasks";
 const WizardInterface = ({ settings, onSettingsChange, onComplete, isLoading, generatedSchedule, initialScene = "library", onBackFromInitial, onStartFocus, onUpdateSchedule, requireJournal = false }: WizardInterfaceProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { saveJournal, loadTodaySchedule } = useSchedulePersistence(user?.id);
+  const { saveJournal, loadTodaySchedule, saveSchedule } = useSchedulePersistence(user?.id);
   const { setSubLabel } = useDevLabel();
   // ─── SCENE STATE (single source of truth) ───
   const [scene, setScene] = useState<Scene>(initialScene);
